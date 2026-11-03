@@ -27,6 +27,9 @@ and fix it, and saves it or copies it back to the clipboard. It is written in C+
   shrink and adjust many files at once.
 - **Languages** – English, Czech, German, Spanish and Japanese built in.
 
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/891096d0-8e26-4cf3-82f6-af04a726b2a0" />
+
+
 ## Install
 
 Download `rolidan_<version>+bundled1_amd64.deb` from [Releases](../../releases) and run:
