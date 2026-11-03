@@ -1,0 +1,28 @@
+[Desktop Entry]
+Type=Application
+Name=Rolidan
+GenericName=Image Editor
+GenericName[cs]=Editor obrázků
+GenericName[de]=Bildbearbeitung
+GenericName[es]=Editor de imágenes
+GenericName[ja]=画像エディター
+Comment=Paste, annotate and save images quickly
+Comment[cs]=Rychle vložit, anotovat a uložit obrázek
+Comment[de]=Bilder schnell einfügen, beschriften und speichern
+Comment[es]=Pega, anota y guarda imágenes rápidamente
+Comment[ja]=画像を素早く貼り付け、注釈を付けて保存
+Exec=rolidan %F
+Icon=rolidan
+Terminal=false
+Categories=Graphics;2DGraphics;RasterGraphics;Qt;
+MimeType=application/x-rolidan-project;image/png;image/jpeg;image/webp;image/bmp;image/gif;image/x-icon;image/tiff;
+StartupWMClass=rolidan
+Actions=paste;
+
+[Desktop Action paste]
+Name=New from Clipboard
+Name[cs]=Nový ze schránky
+Name[de]=Neu aus Zwischenablage
+Name[es]=Nuevo desde el portapapeles
+Name[ja]=クリップボードから新規作成
+Exec=rolidan --paste

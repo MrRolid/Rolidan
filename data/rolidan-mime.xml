@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/x-rolidan-project">
+    <comment>Rolidan project</comment>
+    <comment xml:lang="cs">Projekt Rolidan</comment>
+    <comment xml:lang="de">Rolidan-Projekt</comment>
+    <comment xml:lang="es">Proyecto de Rolidan</comment>
+    <comment xml:lang="ja">Rolidan プロジェクト</comment>
+    <sub-class-of type="application/zip"/>
+    <generic-icon name="image-x-generic"/>
+    <glob pattern="*.rolidan"/>
+  </mime-type>
+</mime-info>
