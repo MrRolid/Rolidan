@@ -2,17 +2,29 @@
 // paste workflow (B1/B2), copy/cut shortcuts (B3), tools (D6), transforms (C4).
 #include "application.h"
 #include "canvas.h"
+#include "exiffixture.h"
+#include "imageinfo.h"
+#include "shortcuts.h"
+#include "thumbnails.h"
+#include <QListView>
 #include "clipboard.h"
 #include "document.h"
 #include "i18n.h"
 #include "mainwindow.h"
 #include "tools.h"
+#include "printing.h"
+#include "filters.h"
+#include "capture.h"
+
+#include <QPageLayout>
+#include <QPrinter>
 #include "toast.h"
 #include "propertypanel.h"
 #include "tooldefaults.h"
 #include "sizedialogs.h"
 #include "project.h"
 #include "recovery.h"
+#include "settings.h"
 
 #include <QClipboard>
 #include <QDir>
@@ -32,7 +44,10 @@
 #include "notespanel.h"
 #include <QPlainTextEdit>
 #include "filterdialog.h"
+#include <QMenu>
 #include <QMenuBar>
+#include <QPushButton>
+#include <QWheelEvent>
 #include "batch.h"
 #include <QSignalSpy>
 #include <QTest>
@@ -117,7 +132,7 @@ class TstGui : public QObject
     }
     void tool(Qt::Key k)
     {
-        key(QKeySequence(k));
+        key(QKeySequence(Qt::SHIFT | k)); // Shift + letter always selects a tool
     }
     QTextEdit *editor() { return w->canvas()->textTool()->editor(); }
     QImage result() { return docops::composite(w->document()->state()).convertToFormat(QImage::Format_ARGB32); }
@@ -349,7 +364,7 @@ private slots:
         key(QKeySequence(Qt::CTRL | Qt::Key_V));
         putImage(solid(20, 20, Qt::red));
         key(QKeySequence(Qt::CTRL | Qt::Key_V)); // at 140..160, 90..110
-        key(QKeySequence(Qt::Key_C));
+        key(QKeySequence(Qt::Key_Y));
         QCOMPARE(w->canvas()->toolId(), ToolId::Crop);
         drag(QPointF(100, 50), QPointF(250, 150));
         auto *crop = static_cast<CropTool *>(w->canvas()->tool());
@@ -365,7 +380,7 @@ private slots:
     {
         putImage(solid(300, 200, Qt::white));
         key(QKeySequence(Qt::CTRL | Qt::Key_V));
-        key(QKeySequence(Qt::Key_C));
+        key(QKeySequence(Qt::Key_Y));
         drag(QPointF(10, 10), QPointF(100, 100));
         QTest::keyClick(w->canvas(), Qt::Key_Escape);
         QTest::keyClick(w->canvas(), Qt::Key_Return);
@@ -378,14 +393,14 @@ private slots:
         key(QKeySequence(Qt::CTRL | Qt::Key_V));
         putImage(solid(20, 10, Qt::red));
         key(QKeySequence(Qt::CTRL | Qt::Key_V));
-        key(QKeySequence(Qt::CTRL | Qt::Key_R));
+        key(QKeySequence(Qt::Key_R));
         Document *d = w->document();
         QCOMPARE(d->size(), QSize(200, 300));
         const QImage comp = docops::composite(d->state());
         const QRectF b = d->state().objects.first()->boundingRect();
         QCOMPARE(b.size(), QSizeF(10, 20));
         QCOMPARE(px(comp, int(b.center().x()), int(b.center().y())), qRgba(255, 0, 0, 255));
-        key(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_R));
+        key(QKeySequence(Qt::Key_L));
         QCOMPARE(d->size(), QSize(300, 200));
         QCOMPARE(d->state().objects.first()->boundingRect(), QRectF(140, 95, 20, 10));
         shot(QStringLiteral("07-rotated"));
@@ -402,6 +417,101 @@ private slots:
         QCOMPARE(b.topLeft(), QPointF(180, 190));
         QCOMPARE(b.width() / b.height(), 2.0);
         QCOMPARE(b.width(), 80.0);
+    }
+
+    void rotateObjectWithMouse()
+    {
+        putImage(solid(400, 400, Qt::white));
+        key(QKeySequence(Qt::CTRL | Qt::Key_V));
+        putImage(solid(40, 20, Qt::red));
+        key(QKeySequence(Qt::CTRL | Qt::Key_V)); // 180..220, 190..210, selected
+        Canvas *c = w->canvas();
+        const auto handle = ObjectDrag::rotateHandlePos(c, *w->document()->state().objects.first());
+        QVERIFY(handle);
+        const QPoint from = handle->toPoint();
+        // From straight up to up-right: 45° clockwise, Shift snaps to 15° steps.
+        const QPoint to = widgetPos(QPointF(243, 160));
+        QTest::mousePress(c, Qt::LeftButton, Qt::ShiftModifier, from);
+        for (const QPoint &pt : {(from + to) / 2, to}) { // QTest::mouseMove sends no modifiers
+            QMouseEvent move(QEvent::MouseMove, QPointF(pt), c->mapToGlobal(QPointF(pt)), Qt::NoButton,
+                             Qt::LeftButton, Qt::ShiftModifier);
+            QCoreApplication::sendEvent(c, &move);
+        }
+        shot(QStringLiteral("35-rotate-object"));
+        QTest::mouseRelease(c, Qt::LeftButton, Qt::ShiftModifier, to);
+        ObjectPtr o = w->document()->state().objects.first();
+        QVERIFY(std::abs(o->rotation() - 45.0) < 1e-6);
+        QVERIFY(std::abs(o->boundingRect().center().x() - 200) < 1e-6);
+        QCOMPARE(o->frameRect().size().toSize(), QSize(40, 20));
+        // Resizing a rotated object keeps its angle and its proportions.
+        const QPointF br = o->handlePoints()[2];
+        const QPointF dir = br - o->boundingRect().center();
+        drag(br, br + dir * 0.5);
+        o = w->document()->state().objects.first();
+        QVERIFY(std::abs(o->rotation() - 45.0) < 1e-6);
+        const QSizeF f = o->frameRect().size();
+        QVERIFY(std::abs(f.width() / f.height() - 2.0) < 0.05);
+        QVERIFY(std::abs(f.width() - 50) < 1.0); // the corner moved by a quarter of the diagonal
+        // Each drag is one undo step.
+        key(QKeySequence(Qt::CTRL | Qt::Key_Z));
+        key(QKeySequence(Qt::CTRL | Qt::Key_Z));
+        QCOMPARE(w->document()->state().objects.first()->rotation(), 0.0);
+    }
+
+    void screenCaptureOpensForEditing()
+    {
+        QAction *capture = w->findChild<QAction *>(QStringLiteral("file.capture"));
+        QVERIFY(capture);
+        QCOMPARE(capture->shortcut(), QKeySequence(Qt::Key_C));
+        // Toolbar: the button with its menu and the delay next to it.
+        auto *button = w->findChild<QToolButton *>(QStringLiteral("captureButton"));
+        QVERIFY(button && button->menu());
+        auto *delay = w->findChild<QSpinBox *>(QStringLiteral("captureDelay"));
+        QVERIFY(delay);
+        delay->setValue(3);
+        QCOMPARE(CaptureOptions::load().delaySeconds, 3);
+        delay->setValue(0);
+        QImage shot(800, 500, QImage::Format_ARGB32_Premultiplied);
+        shot.fill(Qt::darkCyan);
+        // An empty window takes the screenshot as its image; without the portal
+        // the area is chosen afterwards with the crop tool.
+        w->showCapture(shot, true);
+        QCOMPARE(w->document()->state().base.size(), QSize(800, 500));
+        QVERIFY(w->document()->filePath().isEmpty());
+        QCOMPARE(w->canvas()->toolId(), ToolId::Crop);
+        // With an image open, the screenshot is inserted like Ctrl+V.
+        w->showCapture(shot, false);
+        QCOMPARE(w->document()->state().objects.size(), 1);
+        QSettings().remove(QStringLiteral("capture"));
+    }
+
+    void printToPdf()
+    {
+        newDoc(600, 300, Qt::blue);
+        QVERIFY(w->findChild<QAction *>(QStringLiteral("file.print"))->isEnabled());
+        QCOMPARE(w->findChild<QAction *>(QStringLiteral("file.print"))->shortcut(), QKeySequence(QKeySequence::Print));
+        QTemporaryDir dir;
+        QPrinter printer(QPrinter::HighResolution);
+        printer.setOutputFormat(QPrinter::PdfFormat);
+        printer.setOutputFileName(dir.filePath(QStringLiteral("out.pdf")));
+        const DocState &s = w->document()->state();
+        PrintDialog dlg(QImage(), s.base, &printer);
+        PrintLayout l;
+        l.size = PrintLayout::Size::Actual;
+        l.dpi = 150;
+        l.orientation = PrintLayout::Orientation::Auto;
+        dlg.setPrintLayout(l);
+        QCOMPARE(dlg.printLayout().dpi, 150.0);
+        QCOMPARE(printer.pageLayout().orientation(), QPageLayout::Landscape); // wide image
+        dlg.show();
+        QVERIFY(QTest::qWaitForWindowExposed(&dlg));
+        if (!shotDir.isEmpty())
+            dlg.grab().save(shotDir + QStringLiteral("/36-print.png"));
+        dlg.printNow();
+        QFile pdf(dir.filePath(QStringLiteral("out.pdf")));
+        QVERIFY(pdf.open(QIODevice::ReadOnly));
+        QVERIFY(pdf.readAll().startsWith("%PDF"));
+        QSettings().remove(QStringLiteral("print"));
     }
 
     void zoomShortcuts()
@@ -442,6 +552,54 @@ private slots:
         for (const auto &l : i18n::available())
             found |= l.code == QLatin1String("pl") && !l.builtIn;
         QVERIFY(found);
+    }
+
+    void menuAcceleratorsAreUniqueInEveryLanguage()
+    {
+        auto accel = [](const QString &text) -> QChar {
+            for (qsizetype i = 0; i + 1 < text.size(); ++i) {
+                if (text[i] != QLatin1Char('&'))
+                    continue;
+                if (text[i + 1] == QLatin1Char('&')) {
+                    ++i;
+                    continue;
+                }
+                return text[i + 1].toLower();
+            }
+            return {};
+        };
+        QStringList problems;
+        std::function<void(const QString &, const QList<QAction *> &, const QString &)> check;
+        check = [&](const QString &lang, const QList<QAction *> &actions, const QString &where) {
+            QHash<QChar, QString> seen;
+            for (QAction *act : actions) {
+                if (act->isSeparator() || !act->isVisible())
+                    continue;
+                const QChar c = accel(act->text());
+                if (!c.isNull()) {
+                    if (seen.contains(c))
+                        problems << QStringLiteral("%1 %2: '%3' and '%4'").arg(lang, where, seen[c], act->text());
+                    seen[c] = act->text();
+                }
+                if (act->menu())
+                    check(lang, act->menu()->actions(), where + QLatin1Char('/') + act->text());
+            }
+        };
+        QStringList langs{QStringLiteral("en")};
+        langs += i18n::kBuiltIn;
+        for (const QString &lang : langs) {
+            QTranslator tr;
+            if (lang != QLatin1String("en")) {
+                QVERIFY(tr.load(QStringLiteral(":/i18n/rolidan_%1.qm").arg(lang)));
+                QCoreApplication::installTranslator(&tr);
+            }
+            MainWindow *mw = Application::instance()->newWindow();
+            check(lang, mw->menuBar()->actions(), QStringLiteral("menu bar"));
+            mw->close();
+            QCoreApplication::removeTranslator(&tr);
+            QCoreApplication::processEvents();
+        }
+        QVERIFY2(problems.isEmpty(), qPrintable(problems.join(QLatin1Char('\n'))));
     }
 
     void keepsServingClipboardAfterLastWindowCloses()
@@ -715,7 +873,7 @@ private slots:
         const QList<QPointF> before = centers();
         auto near = [](QPointF a, QPointF b) { return QLineF(a, b).length() < 1.5; };
 
-        key(QKeySequence(Qt::CTRL | Qt::Key_R)); // rotate right: (x, y) -> (h - y, x)
+        key(QKeySequence(Qt::Key_R)); // rotate right: (x, y) -> (h - y, x)
         QCOMPARE(d->size(), QSize(300, 400));
         QList<QPointF> after = centers();
         for (int i = 0; i < before.size(); ++i)
@@ -1004,14 +1162,48 @@ private slots:
     void resizeAndCanvasDialogs()
     {
         newDoc(200, 100, Qt::white);
-        ResizeDialog rd(QSize(200, 100));
-        rd.percentSpin()->setValue(50);
+        QSettings().remove(QStringLiteral("resize"));
+        ResizeDialog rd(QSize(200, 100), 0, QSize(1920, 1080));
+        rd.widthPercent()->setValue(50);
         QCOMPARE(rd.newSize(), QSize(100, 50));
+        QCOMPARE(rd.heightPercent()->value(), 50.0); // aspect kept
         rd.widthSpin()->setValue(300);
-        QCOMPARE(rd.heightSpin()->value(), 150); // aspect kept
+        QCOMPARE(rd.heightSpin()->value(), 150.0);
+        QCOMPARE(rd.widthPercent()->value(), 150.0);
         rd.keepAspect()->setChecked(false);
         rd.heightSpin()->setValue(40);
         QCOMPARE(rd.newSize(), QSize(300, 40));
+        // Percent of width and height separately.
+        rd.widthPercent()->setValue(25);
+        rd.heightPercent()->setValue(200);
+        QCOMPARE(rd.newSize(), QSize(50, 200));
+        // Units: 96 dpi, 2.54 cm = 96 px.
+        rd.unitCombo()->setCurrentIndex(ResizeDialog::Centimeters);
+        rd.widthSpin()->setValue(2.54);
+        QCOMPARE(rd.newSize().width(), 96);
+        rd.unitCombo()->setCurrentIndex(ResizeDialog::Pixels);
+        // Presets: fit inside 1920 × 1080 with the aspect ratio kept, half, screen.
+        rd.keepAspect()->setChecked(true);
+        rd.applyPreset(rd.presetCombo()->findText(QStringLiteral("1920 × 1080 (Full HD)")));
+        QCOMPARE(rd.newSize(), QSize(1920, 960));
+        rd.applyPreset(rd.presetCombo()->findData(int(ResizeDialog::Half)));
+        QCOMPARE(rd.newSize(), QSize(100, 50)); // half of the original, like IrfanView
+        QCOMPARE(rd.widthPercent()->value(), 50.0);
+        rd.applyPreset(rd.presetCombo()->findData(int(ResizeDialog::FitScreen)));
+        QCOMPARE(rd.newSize(), QSize(1920, 960));
+        rd.applyPreset(rd.presetCombo()->findData(int(ResizeDialog::ScreenSize)));
+        QCOMPARE(rd.newSize(), QSize(1920, 1080));
+        QCOMPARE(rd.newDpi(), 0.0);
+        QCOMPARE(rd.filterCombo()->count(), 7); // like IrfanView
+        rd.filterCombo()->setCurrentIndex(rd.filterCombo()->findData(int(filters::Resample::Bell)));
+        QCOMPARE(rd.filter(), int(filters::Resample::Bell));
+        rd.dpiSpin()->setValue(300);
+        QCOMPARE(rd.newDpi(), 300.0);
+        if (!shotDir.isEmpty()) {
+            rd.show();
+            QVERIFY(QTest::qWaitForWindowExposed(&rd));
+            rd.grab().save(shotDir + QStringLiteral("/37-resize.png"));
+        }
 
         CanvasSizeDialog cd(QSize(200, 100));
         cd.widthSpin()->setValue(300);
@@ -1415,6 +1607,385 @@ private slots:
         key(QKeySequence(Qt::Key_PageUp));
         QCOMPARE(QFileInfo(w->document()->originPath()).fileName(), QStringLiteral("img1.png"));
         w->document()->reset(QImage());
+    }
+
+    // ---------------- viewer (Etapa 5)
+
+    QStringList makeFolder(const QTemporaryDir &dir, int count)
+    {
+        QStringList out;
+        for (int i = 1; i <= count; ++i) {
+            QImage img(30 + i, 20, QImage::Format_RGB32);
+            img.fill(QColor(40 * i, 90, 160));
+            out << dir.filePath(QStringLiteral("p%1.png").arg(i));
+            img.save(out.last());
+        }
+        return out;
+    }
+    QString shownName() { return QFileInfo(w->document()->originPath()).fileName(); }
+
+    void recentFilesMenu()
+    {
+        QTemporaryDir dir;
+        const QStringList files = makeFolder(dir, 2);
+        settings::clearRecentFiles();
+        QVERIFY(w->openFile(files[0]));
+        QVERIFY(w->openFile(files[1]));
+        QCOMPARE(settings::recentFiles().first(), files[1]);
+        QMenu *recent = nullptr;
+        for (QMenu *m : w->findChildren<QMenu *>())
+            if (m->title().contains(QStringLiteral("Recent")))
+                recent = m;
+        QVERIFY(recent);
+        emit recent->aboutToShow();
+        QStringList texts;
+        for (QAction *act : recent->actions())
+            texts << act->text();
+        QVERIFY(texts.value(0).endsWith(QStringLiteral("p2.png")));
+        QVERIFY(texts.value(1).endsWith(QStringLiteral("p1.png")));
+        settings::clearRecentFiles();
+    }
+
+    void browsingWrapsAndWheelBrowses()
+    {
+        QTemporaryDir dir;
+        makeFolder(dir, 3);
+        QVERIFY(w->openFile(dir.filePath(QStringLiteral("p3.png"))));
+        QVERIFY(w->browse(1, true));
+        QCOMPARE(shownName(), QStringLiteral("p1.png"));
+        QVERIFY(w->browse(-1, true));
+        QCOMPARE(shownName(), QStringLiteral("p3.png"));
+        settings::setWheelAction(settings::Wheel::Browse);
+        auto wheel = [&](int delta) {
+            const QPointF pos(w->canvas()->width() / 2.0, w->canvas()->height() / 2.0);
+            QWheelEvent ev(pos, w->canvas()->mapToGlobal(pos), {}, QPoint(0, delta), Qt::NoButton, Qt::NoModifier,
+                           Qt::NoScrollPhase, false);
+            QCoreApplication::sendEvent(w->canvas(), &ev);
+        };
+        wheel(120); // up = previous
+        QCOMPARE(shownName(), QStringLiteral("p2.png"));
+        wheel(-60);
+        QCOMPARE(shownName(), QStringLiteral("p2.png")); // half a notch: nothing yet
+        wheel(-60);
+        QCOMPARE(shownName(), QStringLiteral("p3.png"));
+        settings::setWheelAction(settings::Wheel::Scroll);
+    }
+
+    void fullScreenAndSlideshow()
+    {
+        QTemporaryDir dir;
+        makeFolder(dir, 3);
+        QVERIFY(w->openFile(dir.filePath(QStringLiteral("p1.png"))));
+        key(QKeySequence(Qt::Key_F11));
+        QVERIFY(w->isFullScreenMode());
+        QVERIFY(!w->menuBar()->isVisible());
+        QTest::keyClick(w->canvas(), Qt::Key_Escape); // nothing to cancel: leaves full screen
+        QVERIFY(!w->isFullScreenMode());
+        QVERIFY(w->menuBar()->isVisible());
+
+        settings::setSlideshowSeconds(0.5);
+        settings::setSlideshowLoop(true);
+        key(QKeySequence(Qt::Key_F5));
+        QVERIFY(w->isSlideshowRunning());
+        QVERIFY(w->isFullScreenMode());
+        QTRY_COMPARE_WITH_TIMEOUT(shownName(), QStringLiteral("p2.png"), 3000);
+        QTest::keyClick(w->canvas(), Qt::Key_Space);
+        QVERIFY(w->isSlideshowPaused());
+        QTest::qWait(800);
+        QCOMPARE(shownName(), QStringLiteral("p2.png")); // paused
+        QTest::keyClick(w->canvas(), Qt::Key_Right);
+        QCOMPARE(shownName(), QStringLiteral("p3.png"));
+        QTest::keyClick(w->canvas(), Qt::Key_Right); // loops
+        QCOMPARE(shownName(), QStringLiteral("p1.png"));
+        QTest::keyClick(w->canvas(), Qt::Key_Left);
+        QCOMPARE(shownName(), QStringLiteral("p3.png"));
+        shot(QStringLiteral("30-slideshow"));
+        QTest::keyClick(w->canvas(), Qt::Key_Escape);
+        QVERIFY(!w->isSlideshowRunning());
+        QVERIFY(!w->isFullScreenMode());
+
+        // Editing ends a slideshow.
+        key(QKeySequence(Qt::Key_F5));
+        QVERIFY(w->isSlideshowRunning());
+        key(QKeySequence(Qt::Key_R));
+        QVERIFY(!w->isSlideshowRunning());
+        settings::setSlideshowSeconds(4);
+    }
+
+    void renameCopyMoveFiles()
+    {
+        QTemporaryDir dir, other;
+        makeFolder(dir, 3);
+        settings::clearRecentFiles();
+        QVERIFY(w->openFile(dir.filePath(QStringLiteral("p2.png"))));
+        QVERIFY(w->renameCurrentFile(QStringLiteral("holiday.png")));
+        QVERIFY(QFileInfo::exists(dir.filePath(QStringLiteral("holiday.png"))));
+        QVERIFY(!QFileInfo::exists(dir.filePath(QStringLiteral("p2.png"))));
+        QCOMPARE(QFileInfo(w->currentFile()).fileName(), QStringLiteral("holiday.png"));
+        QVERIFY(w->windowTitle().contains(QStringLiteral("holiday.png")));
+        QCOMPARE(QFileInfo(settings::recentFiles().value(0)).fileName(), QStringLiteral("holiday.png"));
+        QVERIFY(!w->renameCurrentFile(QStringLiteral("a/b.png")));
+
+        QVERIFY(w->copyOrMoveCurrentFile(other.path(), false, false));
+        QVERIFY(QFileInfo::exists(other.filePath(QStringLiteral("holiday.png"))));
+        QVERIFY(w->copyOrMoveCurrentFile(other.path(), false, false)); // exists: keeps both
+        QVERIFY(QFileInfo::exists(other.filePath(QStringLiteral("holiday (2).png"))));
+        QVERIFY(QFileInfo::exists(dir.filePath(QStringLiteral("holiday.png"))));
+
+        // Move: the file leaves the folder, the next image is shown.
+        QVERIFY(w->openFile(dir.filePath(QStringLiteral("p1.png"))));
+        QVERIFY(w->copyOrMoveCurrentFile(other.path(), true, false));
+        QVERIFY(QFileInfo::exists(other.filePath(QStringLiteral("p1.png"))));
+        QVERIFY(!QFileInfo::exists(dir.filePath(QStringLiteral("p1.png"))));
+        QCOMPARE(shownName(), QStringLiteral("p3.png")); // natural order: holiday, p1, p3
+        settings::clearRecentFiles();
+    }
+
+    void trashShowsNextImage()
+    {
+        // Inside the test-mode data directory, so the file lands in its trash.
+        const QString base = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
+        QDir(base).mkpath(QStringLiteral("trash-test"));
+        QTemporaryDir dir(base + QStringLiteral("/trash-test/XXXXXX"));
+        const QStringList files = makeFolder(dir, 2);
+        QVERIFY(w->openFile(files[0]));
+        if (!w->trashCurrentFile(false))
+            QSKIP("no trash available here");
+        QVERIFY(!QFileInfo::exists(files[0]));
+        QCOMPARE(shownName(), QStringLiteral("p2.png"));
+        QVERIFY(w->trashCurrentFile(false));
+        QVERIFY(w->document()->isEmpty()); // the folder is empty now
+        QDir(base + QStringLiteral("/Trash")).removeRecursively();
+        QDir(base + QStringLiteral("/trash-test")).removeRecursively();
+    }
+
+    void fullScreenBrowsingAndFit()
+    {
+        QTemporaryDir dir;
+        makeFolder(dir, 3); // small images: 31..33 × 20 px
+        settings::setFullScreenEnlarge(false);
+        QVERIFY(w->openFile(dir.filePath(QStringLiteral("p1.png"))));
+        QTest::keyClick(w->canvas(), Qt::Key_Return);
+        QVERIFY(w->isFullScreenMode());
+        QTRY_VERIFY(w->canvas()->isAutoFit());
+        QCOMPARE(w->canvas()->zoom(), 1.0); // small image: actual size
+        // Arrows browse, no automatic advance.
+        QTest::keyClick(w->canvas(), Qt::Key_Right);
+        QCOMPARE(shownName(), QStringLiteral("p2.png"));
+        QTest::keyClick(w->canvas(), Qt::Key_Down);
+        QCOMPARE(shownName(), QStringLiteral("p3.png"));
+        QTest::keyClick(w->canvas(), Qt::Key_Left);
+        QCOMPARE(shownName(), QStringLiteral("p2.png"));
+        QTest::qWait(600);
+        QCOMPARE(shownName(), QStringLiteral("p2.png"));
+        QVERIFY(!w->isSlideshowRunning());
+        // Z: enlarge small images to the screen, remembered.
+        key(QKeySequence(Qt::Key_Z));
+        QVERIFY(settings::fullScreenEnlarge());
+        QVERIFY(w->canvas()->zoom() > 5.0);
+        QTest::keyClick(w->canvas(), Qt::Key_Right);
+        QVERIFY(w->canvas()->zoom() > 5.0); // also for the next image
+        shot(QStringLiteral("33-fullscreen-enlarged"));
+        key(QKeySequence(Qt::Key_Z));
+        QVERIFY(!settings::fullScreenEnlarge());
+        QCOMPARE(w->canvas()->zoom(), 1.0);
+        // The pointer hides after a moment without movement.
+        QTRY_COMPARE_WITH_TIMEOUT(w->canvas()->cursor().shape(), Qt::BlankCursor, 3000);
+        QTest::mouseMove(w->canvas(), QPoint(40, 40));
+        QVERIFY(w->canvas()->cursor().shape() != Qt::BlankCursor);
+        QTest::keyClick(w->canvas(), Qt::Key_Escape);
+        QVERIFY(!w->isFullScreenMode());
+        // Outside full screen the arrows do not browse; small images are not enlarged.
+        QTest::keyClick(w->canvas(), Qt::Key_Right);
+        QCOMPARE(shownName(), QStringLiteral("p3.png"));
+        // Double-click on the image toggles full screen.
+        const QPoint center = widgetPos(QPointF(15, 10));
+        QTest::mouseDClick(w->canvas(), Qt::LeftButton, {}, center);
+        QVERIFY(w->isFullScreenMode());
+        QTest::mouseDClick(w->canvas(), Qt::LeftButton, {}, widgetPos(QPointF(15, 10)));
+        QVERIFY(!w->isFullScreenMode());
+    }
+
+    void thumbnailPanel()
+    {
+        QTemporaryDir dir;
+        const QStringList files = makeFolder(dir, 3);
+        // A project gets a thumbnail of its composite.
+        QVERIFY(project::save(DocState{solid(300, 150, Qt::green), {}, {}}, dir.filePath(QStringLiteral("p4.rolidan")),
+                              nullptr));
+        QVERIFY(w->openFile(files[0]));
+        ThumbnailPanel *panel = w->thumbnails();
+        key(QKeySequence(Qt::CTRL | Qt::Key_T));
+        QVERIFY(panel->isVisible());
+        ThumbnailModel *m = panel->model();
+        QCOMPARE(m->rowCount(), 4);
+        for (int i = 0; i < m->rowCount(); ++i)
+            m->data(m->index(i), Qt::DecorationRole); // what painting the view does
+        QTRY_COMPARE_WITH_TIMEOUT(m->loadedCount(), 4, 5000);
+        QCOMPARE(panel->view()->currentIndex().row(), 0);
+        const QImage t = ThumbnailModel::makeThumbnail(dir.filePath(QStringLiteral("p4.rolidan")), 96);
+        QCOMPARE(t.size(), QSize(96, 48));
+        // A click shows that image; browsing moves the highlight.
+        const QRect r = panel->view()->visualRect(m->index(1));
+        QTest::mouseClick(panel->view()->viewport(), Qt::LeftButton, {}, r.center());
+        QCOMPARE(shownName(), QStringLiteral("p2.png"));
+        key(QKeySequence(Qt::Key_PageDown));
+        QCOMPARE(panel->view()->currentIndex().row(), 2);
+        shot(QStringLiteral("34-thumbnails"));
+        // A renamed file appears under its new name.
+        QVERIFY(w->renameCurrentFile(QStringLiteral("zz.png")));
+        QTRY_VERIFY_WITH_TIMEOUT(m->files().contains(dir.filePath(QStringLiteral("zz.png"))), 3000);
+        QTRY_COMPARE(panel->view()->currentIndex().data(Qt::UserRole).toString(), dir.filePath(QStringLiteral("zz.png")));
+        key(QKeySequence(Qt::CTRL | Qt::Key_T));
+        QVERIFY(!panel->isVisible());
+        QSettings().remove(QStringLiteral("viewer/thumbnails"));
+    }
+
+    void fitFollowsWindowSizeUntilZoomed()
+    {
+        putImage(solid(2000, 1000, Qt::white));
+        key(QKeySequence(Qt::CTRL | Qt::Key_V));
+        QVERIFY(w->canvas()->isAutoFit());
+        const double z = w->canvas()->zoom();
+        w->resize(1400, 900);
+        QTRY_VERIFY(w->canvas()->zoom() > z); // bigger window: refitted
+        key(QKeySequence(Qt::CTRL | Qt::Key_1));
+        QVERIFY(!w->canvas()->isAutoFit());
+        w->resize(900, 600);
+        QTest::qWait(50);
+        QCOMPARE(w->canvas()->zoom(), 1.0); // the user's zoom stays
+    }
+
+    void viewerKeysLikeIrfanView()
+    {
+        putImage(solid(300, 200, Qt::white));
+        key(QKeySequence(Qt::CTRL | Qt::Key_V));
+        Document *d = w->document();
+        key(QKeySequence(Qt::Key_R));
+        QCOMPARE(d->size(), QSize(200, 300));
+        key(QKeySequence(Qt::Key_L));
+        QCOMPARE(d->size(), QSize(300, 200));
+        key(QKeySequence(Qt::Key_Greater));
+        QCOMPARE(d->size(), QSize(200, 300));
+        key(QKeySequence(Qt::Key_Less));
+        QCOMPARE(d->size(), QSize(300, 200));
+        const int undoBefore = d->history().index();
+        key(QKeySequence(Qt::Key_H));
+        key(QKeySequence(Qt::Key_V));
+        QCOMPARE(d->history().index(), undoBefore + 2);
+        QVERIFY(d->history().undoText().contains(QStringLiteral("vertically")));
+        // F, Enter and F11 toggle full screen.
+        key(QKeySequence(Qt::Key_F));
+        QVERIFY(w->isFullScreenMode());
+        QTest::keyClick(w->canvas(), Qt::Key_Return);
+        QVERIFY(!w->isFullScreenMode());
+        QTest::keyClick(w->canvas(), Qt::Key_Enter);
+        QVERIFY(w->isFullScreenMode());
+        key(QKeySequence(Qt::Key_F11));
+        QVERIFY(!w->isFullScreenMode());
+        // Enter still confirms a crop first.
+        key(QKeySequence(Qt::Key_Y));
+        QCOMPARE(w->canvas()->toolId(), ToolId::Crop);
+        drag(QPointF(10, 10), QPointF(110, 60));
+        QTest::keyClick(w->canvas(), Qt::Key_Return);
+        QCOMPARE(d->size(), QSize(100, 50));
+        QVERIFY(!w->isFullScreenMode());
+        // Tools with letters used by the viewer: Shift + letter.
+        for (auto [k, id] : {std::pair{Qt::Key_R, ToolId::Rect}, {Qt::Key_L, ToolId::Line},
+                             {Qt::Key_H, ToolId::Highlighter}, {Qt::Key_F, ToolId::Bucket},
+                             {Qt::Key_V, ToolId::Pointer}, {Qt::Key_T, ToolId::Text}}) {
+            key(QKeySequence(Qt::SHIFT | k));
+            QCOMPARE(w->canvas()->toolId(), id);
+        }
+        key(QKeySequence(Qt::Key_T)); // plain letters still work where free
+        QCOMPARE(w->canvas()->toolId(), ToolId::Text);
+        QAction *resize = nullptr;
+        for (QAction *act : w->actions())
+            if (act->objectName() == QLatin1String("image.resize"))
+                resize = act;
+        QVERIFY(resize);
+        QVERIFY(resize->shortcuts().contains(QKeySequence(Qt::CTRL | Qt::Key_R)));
+    }
+
+    void customKeyboardShortcuts()
+    {
+        QSettings().remove(QStringLiteral("shortcuts"));
+        {
+            ShortcutsDialog dlg(w->customizableActions(), w);
+            QVERIFY(dlg.conflicts().isEmpty()); // the defaults never clash
+            dlg.setKeys(QStringLiteral("image.flipHorizontally"), 0, QKeySequence(Qt::Key_R)); // R is rotate
+            QVERIFY(!dlg.conflicts().isEmpty());
+            dlg.setKeys(QStringLiteral("image.flipHorizontally"), 0, QKeySequence(Qt::Key_X));
+            dlg.setKeys(QStringLiteral("image.flipHorizontally"), 1, QKeySequence());
+            dlg.setKeys(QStringLiteral("tool.rect"), 1, QKeySequence(Qt::Key_D));
+            QVERIFY(dlg.conflicts().isEmpty());
+            if (!shotDir.isEmpty()) {
+                dlg.show();
+                QVERIFY(QTest::qWaitForWindowExposed(&dlg));
+                dlg.grab().save(shotDir + QStringLiteral("/32-shortcuts.png"));
+            }
+            dlg.accept();
+        }
+        w->activateWindow(); // a shown dialog took the focus
+        QVERIFY(QTest::qWaitForWindowActive(w));
+        putImage(solid(300, 200, Qt::white));
+        key(QKeySequence(Qt::CTRL | Qt::Key_V));
+        const int before = w->document()->history().index();
+        key(QKeySequence(Qt::Key_H)); // no longer bound
+        QCOMPARE(w->document()->history().index(), before);
+        QAction *flipH = nullptr;
+        for (QAction *act : w->actions())
+            if (act->objectName() == QLatin1String("image.flipHorizontally"))
+                flipH = act;
+        QCOMPARE(flipH->shortcuts(), QList<QKeySequence>{QKeySequence(Qt::Key_X)});
+        key(QKeySequence(Qt::Key_X));
+        QCOMPARE(w->document()->history().index(), before + 1);
+        key(QKeySequence(Qt::Key_D));
+        QCOMPARE(w->canvas()->toolId(), ToolId::Rect);
+        // A new window gets the customized keys, and the tooltip shows them.
+        MainWindow *w2 = Application::instance()->newWindow();
+        QAction *rect = nullptr;
+        for (QAction *act : w2->actions())
+            if (act->objectName() == QLatin1String("tool.rect"))
+                rect = act;
+        QVERIFY(rect);
+        QCOMPARE(rect->shortcuts().value(1), QKeySequence(Qt::Key_D));
+        QVERIFY(rect->toolTip().contains(QStringLiteral("D")));
+        w2->close();
+        QSettings().remove(QStringLiteral("shortcuts"));
+        shortcuts::reload(w->customizableActions());
+        QVERIFY(!shortcuts::current(rect).contains(QKeySequence(Qt::Key_D)));
+    }
+
+    void imageInfoShowsExif()
+    {
+        QTemporaryDir dir;
+        const QString path = dir.filePath(QStringLiteral("photo.jpg"));
+        QFile f(path);
+        QVERIFY(f.open(QIODevice::WriteOnly));
+        f.write(fixture::jpegWithExif());
+        f.close();
+        QVERIFY(w->openFile(path));
+        ImageInfoDialog dlg(w->currentFile(), w->document()->state().base, w);
+        const QString t = dlg.text();
+        QVERIFY2(t.contains(QStringLiteral("Canon EOS R6")), qPrintable(t));
+        QVERIFY(t.contains(QStringLiteral("1/250 s")));
+        QVERIFY2(t.contains(QStringLiteral("f/2.8")) || t.contains(QStringLiteral("f/2,8")), qPrintable(t));
+        QVERIFY(t.contains(QStringLiteral("Transparency: no")));
+        QVERIFY(t.contains(QStringLiteral("64 × 48 px")));
+        QVERIFY(t.contains(QStringLiteral("JPEG")));
+        QVERIFY(t.contains(QStringLiteral("50.087500° N")));
+        QVERIFY(dlg.mapUrl().contains(QStringLiteral("mlat=50.087500")));
+        QVERIFY(dlg.findChild<QPushButton *>(QStringLiteral("showOnMap")));
+        if (!shotDir.isEmpty()) {
+            dlg.show();
+            QVERIFY(QTest::qWaitForWindowExposed(&dlg));
+            dlg.grab().save(shotDir + QStringLiteral("/31-image-info.png"));
+        }
+        // A pasted image: no file, still basic information.
+        ImageInfoDialog pasted(QString(), solid(10, 5, Qt::red), w);
+        QVERIFY(pasted.text().contains(QStringLiteral("10 × 5 px")));
+        QVERIFY(pasted.mapUrl().isEmpty());
     }
 
     void batchDialogRuns()

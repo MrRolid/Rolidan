@@ -2,7 +2,12 @@
 // decoding (B1), loading (B7), saving (F) and history (G1). Run headless:
 // QT_QPA_PLATFORM=offscreen.
 #include "annotation.h"
+#include "printing.h"
+#include "capture.h"
 #include "clipboard.h"
+#include "exif.h"
+#include "exiffixture.h"
+#include "settings.h"
 #include "document.h"
 #include "batch.h"
 #include "filters.h"
@@ -505,6 +510,96 @@ private slots:
         QVERIFY(imageio::encode(img, o).size() > low);
     }
 
+    void resampleFilters()
+    {
+        // A sharp black/white edge: Lanczos keeps it crisper than bilinear.
+        QImage edge(100, 10, QImage::Format_ARGB32_Premultiplied);
+        edge.fill(Qt::white);
+        for (int y = 0; y < 10; ++y)
+            for (int x = 50; x < 100; ++x)
+                edge.setPixel(x, y, qRgb(0, 0, 0));
+        auto ramp = [](const QImage &img) { // pixels between 10 % and 90 % gray
+            int n = 0;
+            for (int x = 0; x < img.width(); ++x) {
+                const int g = qGray(img.pixel(x, 2));
+                n += g > 25 && g < 230;
+            }
+            return n;
+        };
+        const QSize up(400, 40);
+        const QImage lanczos = filters::resample(edge, up, filters::Resample::Lanczos);
+        const QImage bilinear = filters::resample(edge, up, filters::Resample::Bilinear);
+        QCOMPARE(lanczos.size(), up);
+        QVERIFY(ramp(lanczos) < ramp(bilinear));
+        // Softer filters spread the edge more: B-spline > Bell, Hermite has no overshoot.
+        const QImage bell = filters::resample(edge, up, filters::Resample::Bell);
+        const QImage bspline = filters::resample(edge, up, filters::Resample::BSpline);
+        QVERIFY(ramp(bspline) >= ramp(bell));
+        const QImage hermite = filters::resample(edge, up, filters::Resample::Hermite);
+        for (int x = 0; x < hermite.width(); ++x) {
+            const int g = qGray(hermite.pixel(x, 2));
+            QVERIFY(g == 255 || g == 0 || (x > 150 && x < 250)); // flat areas stay exact
+        }
+        // Nearest neighbor doubles pixels exactly.
+        QImage px(2, 1, QImage::Format_ARGB32_Premultiplied);
+        px.setPixel(0, 0, qRgb(255, 0, 0));
+        px.setPixel(1, 0, qRgb(0, 0, 255));
+        const QImage n = filters::resample(px, QSize(4, 2), filters::Resample::Nearest);
+        QCOMPARE(n.pixel(1, 1), qRgb(255, 0, 0));
+        QCOMPARE(n.pixel(2, 0), qRgb(0, 0, 255));
+        // Flat color and transparency survive every filter; shrinking averages.
+        QImage flat(90, 60, QImage::Format_ARGB32_Premultiplied);
+        flat.fill(QColor(10, 200, 30, 128));
+        for (int f = 0; f <= 6; ++f) {
+            const QImage r = filters::resample(flat, QSize(31, 17), filters::Resample(f)).convertToFormat(QImage::Format_ARGB32);
+            const QRgb p = r.pixel(15, 8);
+            QVERIFY2(std::abs(qAlpha(p) - 128) <= 1 && std::abs(qGreen(p) - 200) <= 3, qPrintable(QString::number(f)));
+        }
+        // Resolution: kept, or set without resampling.
+        QImage dpi(50, 50, QImage::Format_ARGB32_Premultiplied);
+        dpi.fill(Qt::white);
+        dpi.setDotsPerMeterX(11811); // 300 dpi
+        dpi.setDotsPerMeterY(11811);
+        const DocState s{dpi, {}, {}};
+        QCOMPARE(docops::resizeImage(s, QSize(25, 25), 0, true).base.dotsPerMeterX(), 11811);
+        const DocState only = docops::resizeImage(s, QSize(50, 50), 0, false, 150);
+        QCOMPARE(only.base.size(), QSize(50, 50));
+        QCOMPARE(only.base.dotsPerMeterX(), int(std::lround(150 / 0.0254)));
+    }
+
+    void extendedFormatsRoundTrip()
+    {
+        QImage img(40, 30, QImage::Format_ARGB32_Premultiplied);
+        img.fill(QColor(200, 30, 30, 128));
+        QTemporaryDir dir;
+        const QList<QByteArray> writable = QImageWriter::supportedImageFormats();
+        QList<QByteArray> offered;
+        for (const auto &f : imageio::exportFormats())
+            offered << f.format;
+        QVERIFY(offered.contains("tiff")); // qt6-image-formats-plugins
+        for (const QByteArray fmt : {"tiff", "avif", "heif", "jxl", "qoi"}) {
+            QCOMPARE(offered.contains(fmt), writable.contains(fmt));
+            if (!offered.contains(fmt))
+                continue; // KImageFormats not installed
+            imageio::SaveOptions o;
+            o.format = fmt;
+            o.quality = 100;
+            const QString path = dir.filePath(QStringLiteral("x.") + QString::fromLatin1(fmt));
+            QString error;
+            QVERIFY2(imageio::save(img, path, o, &error), qPrintable(error));
+            const imageio::LoadResult r = imageio::loadFile(path);
+            QVERIFY2(r.ok(), fmt.constData());
+            QCOMPARE(r.image.size(), img.size());
+            QVERIFY2(r.image.hasAlphaChannel(), fmt.constData());
+        }
+        // LZW makes a flat TIFF much smaller.
+        imageio::SaveOptions t;
+        t.format = "tiff";
+        const qsizetype lzw = imageio::encode(img, t).size();
+        t.tiffLzw = false;
+        QVERIFY(lzw > 0 && lzw < imageio::encode(img, t).size());
+    }
+
     void failedSaveKeepsExistingFile()
     {
         QTemporaryDir dir;
@@ -620,6 +715,173 @@ private slots:
         QVERIFY(zip::read(data, &entries));
         QCOMPARE(entries.first().name, QStringLiteral("document.json"));
         QVERIFY(entries.first().data.contains("\"format\": \"rolidan\""));
+    }
+
+    void readsExifFromJpegPngWebpAndTiff()
+    {
+        for (bool le : {true, false}) {
+            const exif::Info e = exif::readTiff(fixture::sampleTiff(le));
+            QVERIFY(e.valid);
+            QCOMPARE(e.make, QStringLiteral("Canon"));
+            QCOMPARE(e.model, QStringLiteral("Canon EOS R6"));
+            QCOMPARE(e.lens, QStringLiteral("RF 35mm F1.8"));
+            QCOMPARE(e.artist, QStringLiteral("Jana Novakova"));
+            QCOMPARE(e.dateTaken, QStringLiteral("2024:05:01 12:30:45"));
+            QCOMPARE(e.iso, 200);
+            QVERIFY(qAbs(e.exposure - 1.0 / 250) < 1e-9);
+            QVERIFY(qAbs(e.fNumber - 2.8) < 1e-9);
+            QCOMPARE(e.focalLength, 35.0);
+            QCOMPARE(e.flash, 16);
+            QCOMPARE(e.orientation, 1);
+            QVERIFY(e.hasGps);
+            QVERIFY(qAbs(e.latitude - (50 + 5 / 60.0 + 15 / 3600.0)) < 1e-6);
+            QVERIFY(qAbs(e.longitude - (14 + 25 / 60.0 + 17.04 / 3600.0)) < 1e-6);
+            QVERIFY(e.hasAltitude);
+            QCOMPARE(e.altitude, 235.0);
+        }
+        QCOMPARE(exif::formatExposure(1.0 / 250), QStringLiteral("1/250 s"));
+        QCOMPARE(exif::formatExposure(2.5), QStringLiteral("2.5 s"));
+
+        // Containers: JPEG APP1, PNG eXIf, WebP EXIF chunk.
+        const QByteArray jpeg = fixture::jpegWithExif();
+        QCOMPARE(exif::read(jpeg).model, QStringLiteral("Canon EOS R6"));
+        QImage decoded;
+        QVERIFY(decoded.loadFromData(jpeg)); // still a valid JPEG
+        const QByteArray tiff = fixture::sampleTiff();
+        QByteArray png("\x89PNG\r\n\x1a\n", 8);
+        auto chunk = [](const QByteArray &type, const QByteArray &data) {
+            QByteArray c(4, 0);
+            qToBigEndian(quint32(data.size()), c.data());
+            return c + type + data + QByteArray(4, 0); // CRC is not checked by the reader
+        };
+        png += chunk("IHDR", QByteArray(13, 1)) + chunk("eXIf", tiff) + chunk("IDAT", "x") + chunk("IEND", {});
+        QCOMPARE(exif::read(png).iso, 200);
+        QByteArray webpBody = QByteArray("WEBP") + "VP8X" + QByteArray("\x0a\0\0\0", 4) + QByteArray(10, 0);
+        QByteArray len(4, 0);
+        qToLittleEndian(quint32(tiff.size()), len.data());
+        webpBody += QByteArray("EXIF") + len + tiff + (tiff.size() & 1 ? QByteArray(1, 0) : QByteArray());
+        QByteArray riffLen(4, 0);
+        qToLittleEndian(quint32(webpBody.size()), riffLen.data());
+        QCOMPARE(exif::read(QByteArray("RIFF") + riffLen + webpBody).make, QStringLiteral("Canon"));
+
+        // No EXIF, garbage and truncated data never crash.
+        QImage plain(8, 8, QImage::Format_RGB32);
+        plain.fill(Qt::red);
+        QByteArray plainJpeg;
+        QBuffer b(&plainJpeg);
+        b.open(QIODevice::WriteOnly);
+        plain.save(&b, "JPEG");
+        QVERIFY(!exif::read(plainJpeg).valid);
+        QVERIFY(!exif::read("garbage").valid);
+        for (int cut = 0; cut < jpeg.size(); cut += 7)
+            exif::read(jpeg.left(cut));
+        QByteArray corrupt = tiff;
+        for (int i = 8; i < corrupt.size(); i += 5)
+            corrupt[i] = char(0xFF);
+        exif::readTiff(corrupt);
+    }
+
+    void recentFilesList()
+    {
+        QTemporaryDir dir;
+        settings::clearRecentFiles();
+        QStringList paths;
+        for (int i = 0; i < settings::kMaxRecent + 3; ++i) {
+            paths << dir.filePath(QStringLiteral("r%1.png").arg(i));
+            QVERIFY(solid(4, 4, Qt::red).save(paths.last()));
+            settings::addRecentFile(paths.last());
+        }
+        settings::addRecentFile(paths[5]); // again: moves to the top, no duplicate
+        QStringList r = settings::recentFiles();
+        QCOMPARE(r.size(), settings::kMaxRecent);
+        QCOMPARE(r.first(), paths[5]);
+        QCOMPARE(r.count(paths[5]), 1);
+        QFile::remove(paths.last()); // vanished files are skipped
+        r = settings::recentFiles();
+        QVERIFY(!r.contains(paths.last()));
+        settings::removeRecentFile(paths[5]);
+        QVERIFY(!settings::recentFiles().contains(paths[5]));
+        settings::clearRecentFiles();
+        QVERIFY(settings::recentFiles().isEmpty());
+    }
+
+    void screenshotPortalResponse()
+    {
+        QCOMPARE(ScreenCapture::requestPath(QStringLiteral(":1.42"), QStringLiteral("rolidan7")),
+                 QStringLiteral("/org/freedesktop/portal/desktop/request/1_42/rolidan7"));
+        QTemporaryDir dir;
+        const QString file = dir.filePath(QStringLiteral("Screenshot.png"));
+        QImage shot(64, 32, QImage::Format_RGB32);
+        shot.fill(Qt::green);
+        QVERIFY(shot.save(file));
+        QString error;
+        const QImage img = ScreenCapture::imageFromResponse(
+            0, {{QStringLiteral("uri"), QUrl::fromLocalFile(file).toString()}}, &error);
+        QCOMPARE(img.size(), QSize(64, 32));
+        QVERIFY(error.isEmpty());
+        // Cancelled: no image and no error message; other codes are errors.
+        QVERIFY(ScreenCapture::imageFromResponse(1, {}, &error).isNull());
+        QVERIFY(error.isEmpty());
+        QVERIFY(ScreenCapture::imageFromResponse(2, {}, &error).isNull());
+        QVERIFY(!error.isEmpty());
+    }
+
+    void printPlacement()
+    {
+        const QRectF page(0, 0, 2000, 1000); // device pixels at 200 dpi
+        PrintLayout l;
+        // Fit: as large as the page allows, centered.
+        QCOMPARE(printing::targetRect(QSizeF(400, 100), page, 200, l), QRectF(0, 250, 2000, 500));
+        // Actual size: 300 px at 100 dpi = 3 inches = 600 device pixels.
+        l.size = PrintLayout::Size::Actual;
+        l.dpi = 100;
+        QCOMPARE(printing::targetRect(QSizeF(300, 100), page, 200, l).size(), QSizeF(600, 200));
+        l.center = false;
+        QCOMPARE(printing::targetRect(QSizeF(300, 100), page, 200, l).topLeft(), QPointF(0, 0));
+        l.size = PrintLayout::Size::Scale;
+        l.percent = 50;
+        QCOMPARE(printing::targetRect(QSizeF(300, 100), page, 200, l).size(), QSizeF(300, 100));
+        // Resolution stored in the image; 96 dpi means "not set".
+        QImage img(10, 10, QImage::Format_RGB32);
+        img.setDotsPerMeterX(int(std::lround(300 / 0.0254)));
+        QVERIFY(std::abs(printing::imageDpi(img) - 300) < 0.1);
+        img.setDotsPerMeterX(int(std::lround(96 / 0.0254)));
+        QCOMPARE(printing::imageDpi(img), 0.0);
+    }
+
+    void rotatedShapes()
+    {
+        ShapeObject sh;
+        sh.rect = QRectF(100, 100, 100, 40);
+        sh.style = ShapeObject::Style::Cover;
+        sh.rotate(30, QPointF(150, 120));
+        QVERIFY(std::abs(sh.rotation() - 30.0) < 1e-6);
+        QCOMPARE(sh.frameRect().size().toSize(), QSize(100, 40));
+        // Hit test follows the rotated box: the far corner of the old box is outside.
+        QVERIFY(sh.contains(QPointF(150, 120)));
+        QVERIFY(!sh.contains(QPointF(101, 101)));
+        QVERIFY(sh.contains(QTransform(sh.transform).map(QPointF(195, 135))));
+        // Another 60°: upright again with swapped sides, no leftover transform.
+        sh.rotate(60, QPointF(150, 120));
+        QVERIFY(sh.transform.isIdentity());
+        QCOMPARE(sh.rect.toRect(), QRect(130, 70, 40, 100));
+        // Survives the clipboard format, mirroring and moving.
+        sh.rotate(20, QPointF(150, 120));
+        const ObjectList back = deserializeObjects(serializeObjects({std::make_shared<ShapeObject>(sh)}));
+        QCOMPARE(back.size(), 1);
+        QVERIFY(std::abs(back.first()->rotation() - 20.0) < 1e-6);
+        auto m = back.first()->clone();
+        m->applyDocumentTransform(QTransform::fromScale(-1, 1) * QTransform::fromTranslate(400, 0),
+                                  DocTransformKind::Mirror);
+        QVERIFY(std::abs(m->rotation() + 20.0) < 1e-6);
+        QVERIFY(std::abs(m->boundingRect().center().x() - 250) < 1e-6);
+        QVERIFY(m->transform.determinant() > 0);
+        // Point geometry rotates its points.
+        StrokeObject st;
+        st.points = QPolygonF{QPointF(0, 0), QPointF(10, 0)};
+        st.rotate(90, QPointF(0, 0));
+        QVERIFY(QLineF(st.points[1], QPointF(0, 10)).length() < 1e-9);
+        QCOMPARE(st.rotation(), 0.0);
     }
 
     void textSpansFormatPartsOfText()
@@ -745,6 +1007,15 @@ private slots:
         QVERIFY(qRed(cyan) < qGreen(cyan) && qRed(cyan) < qBlue(cyan));
         QVERIFY(qRed(argb(filters::brightnessContrast(red, 50, 0)).pixel(0, 0)) > 200);
         QVERIFY(qGreen(argb(filters::brightnessContrast(red, 50, 0)).pixel(0, 0)) > 30);
+        // Gamma brightens the midtones, keeps black and white.
+        QImage ramp(3, 1, QImage::Format_ARGB32);
+        ramp.setPixel(0, 0, qRgb(0, 0, 0));
+        ramp.setPixel(1, 0, qRgb(128, 128, 128));
+        ramp.setPixel(2, 0, qRgb(255, 255, 255));
+        const QImage gm = argb(filters::brightnessContrast(ramp, 0, 0, 2.0));
+        QCOMPARE(qRed(gm.pixel(0, 0)), 0);
+        QVERIFY(qRed(gm.pixel(1, 0)) > 170);
+        QCOMPARE(qRed(gm.pixel(2, 0)), 255);
         const QRgb warm = argb(filters::temperature(solid(2, 2, QColor(128, 128, 128)), 100, 0)).pixel(0, 0);
         QVERIFY(qRed(warm) > qBlue(warm));
         const QRgb g = argb(filters::grayscale(red)).pixel(0, 0);
