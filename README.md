@@ -41,6 +41,9 @@ and fix it, and saves it or copies it back to the clipboard. It is written in C+
 - **Batch conversion** – convert, shrink and adjust many files at once.
 - **Languages** – English, Czech, German, Spanish and Japanese built in.
 
+- <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/d50ca789-aad1-4249-aa7b-fb9d19eda421" />
+
+
 ## Install
 
 Download a file from [Releases](../../releases). All of them include Qt and run on
