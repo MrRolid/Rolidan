@@ -513,6 +513,14 @@ or drop a file here</source>
         <source>calculating…</source>
         <translation>計算中…</translation>
     </message>
+    <message>
+        <source>LZW compression (lossless, smaller file)</source>
+        <translation>LZW 圧縮（可逆、ファイルが小さくなる）</translation>
+    </message>
+    <message>
+        <source>Higher quality means fewer artifacts and a larger file; 100 is lossless</source>
+        <translation>品質が高いほどノイズが減りファイルが大きくなります。100 は可逆</translation>
+    </message>
 </context>
 <context>
     <name>FilterDialog</name>
@@ -551,6 +559,221 @@ or drop a file here</source>
     <message>
         <source>calculating…</source>
         <translation>計算中…</translation>
+    </message>
+</context>
+<context>
+    <name>ImageInfoDialog</name>
+    <message>
+        <source>Image Information</source>
+        <translation>画像の情報</translation>
+    </message>
+    <message>
+        <source>File</source>
+        <translation>ファイル</translation>
+    </message>
+    <message>
+        <source>Name:</source>
+        <translation>名前:</translation>
+    </message>
+    <message>
+        <source>Folder:</source>
+        <translation>フォルダー:</translation>
+    </message>
+    <message>
+        <source>File size:</source>
+        <translation>ファイルサイズ:</translation>
+    </message>
+    <message>
+        <source>Modified:</source>
+        <translation>更新日時:</translation>
+    </message>
+    <message>
+        <source>the file no longer exists</source>
+        <translation>ファイルは存在しません</translation>
+    </message>
+    <message>
+        <source>Format:</source>
+        <translation>形式:</translation>
+    </message>
+    <message>
+        <source>Rolidan project</source>
+        <translation>Rolidan プロジェクト</translation>
+    </message>
+    <message>
+        <source>Size in file:</source>
+        <translation>ファイル内のサイズ:</translation>
+    </message>
+    <message>
+        <source>%1 × %2 px</source>
+        <translation>%1 × %2 px</translation>
+    </message>
+    <message>
+        <source>Image</source>
+        <translation>画像</translation>
+    </message>
+    <message>
+        <source>Size:</source>
+        <translation>サイズ:</translation>
+    </message>
+    <message>
+        <source>no image</source>
+        <translation>画像なし</translation>
+    </message>
+    <message>
+        <source>Megapixels:</source>
+        <translation>メガピクセル:</translation>
+    </message>
+    <message>
+        <source>Resolution:</source>
+        <translation>解像度:</translation>
+    </message>
+    <message>
+        <source>%1 dpi</source>
+        <translation>%1 dpi</translation>
+    </message>
+    <message>
+        <source>Transparency:</source>
+        <translation>透明部分:</translation>
+    </message>
+    <message>
+        <source>yes</source>
+        <translation>あり</translation>
+    </message>
+    <message>
+        <source>no</source>
+        <translation>なし</translation>
+    </message>
+    <message>
+        <source>Colors:</source>
+        <translation>色:</translation>
+    </message>
+    <message>
+        <source>grayscale</source>
+        <translation>グレースケール</translation>
+    </message>
+    <message>
+        <source>Camera</source>
+        <translation>カメラ</translation>
+    </message>
+    <message>
+        <source>Camera:</source>
+        <translation>カメラ:</translation>
+    </message>
+    <message>
+        <source>Lens:</source>
+        <translation>レンズ:</translation>
+    </message>
+    <message>
+        <source>Taken:</source>
+        <translation>撮影日時:</translation>
+    </message>
+    <message>
+        <source>Exposure:</source>
+        <translation>露出時間:</translation>
+    </message>
+    <message>
+        <source>Aperture:</source>
+        <translation>絞り:</translation>
+    </message>
+    <message>
+        <source>ISO:</source>
+        <translation>ISO:</translation>
+    </message>
+    <message>
+        <source>%1 mm</source>
+        <translation>%1 mm</translation>
+    </message>
+    <message>
+        <source>(%1 mm in 35 mm format)</source>
+        <translation>（35 mm 換算 %1 mm）</translation>
+    </message>
+    <message>
+        <source>Focal length:</source>
+        <translation>焦点距離:</translation>
+    </message>
+    <message>
+        <source>Exposure bias:</source>
+        <translation>露出補正:</translation>
+    </message>
+    <message>
+        <source>%1 EV</source>
+        <translation>%1 EV</translation>
+    </message>
+    <message>
+        <source>Flash:</source>
+        <translation>フラッシュ:</translation>
+    </message>
+    <message>
+        <source>fired</source>
+        <translation>発光</translation>
+    </message>
+    <message>
+        <source>did not fire</source>
+        <translation>発光なし</translation>
+    </message>
+    <message>
+        <source>Details</source>
+        <translation>詳細</translation>
+    </message>
+    <message>
+        <source>Description:</source>
+        <translation>説明:</translation>
+    </message>
+    <message>
+        <source>Author:</source>
+        <translation>作成者:</translation>
+    </message>
+    <message>
+        <source>Copyright:</source>
+        <translation>著作権:</translation>
+    </message>
+    <message>
+        <source>Software:</source>
+        <translation>ソフトウェア:</translation>
+    </message>
+    <message>
+        <source>Location</source>
+        <translation>位置情報</translation>
+    </message>
+    <message>
+        <source>Latitude:</source>
+        <translation>緯度:</translation>
+    </message>
+    <message>
+        <source>Longitude:</source>
+        <translation>経度:</translation>
+    </message>
+    <message>
+        <source>Altitude:</source>
+        <translation>高度:</translation>
+    </message>
+    <message>
+        <source>%1 m</source>
+        <translation>%1 m</translation>
+    </message>
+    <message>
+        <source>The photo contains its location. Rolidan does not copy metadata into exported images, but the original file still has it.</source>
+        <translation>この写真には撮影場所が含まれています。Rolidan はエクスポートする画像にメタデータをコピーしませんが、元のファイルには残っています。</translation>
+    </message>
+    <message>
+        <source>EXIF:</source>
+        <translation>EXIF:</translation>
+    </message>
+    <message>
+        <source>none</source>
+        <translation>なし</translation>
+    </message>
+    <message>
+        <source>Copy as Text</source>
+        <translation>テキストとしてコピー</translation>
+    </message>
+    <message>
+        <source>Show on Map</source>
+        <translation>地図で表示</translation>
+    </message>
+    <message>
+        <source>Opens OpenStreetMap in the web browser</source>
+        <translation>Web ブラウザーで OpenStreetMap を開きます</translation>
     </message>
 </context>
 <context>
@@ -614,10 +837,6 @@ or drop a file here</source>
     <message>
         <source>Copy with Annotations</source>
         <translation>注釈ごとコピー</translation>
-    </message>
-    <message>
-        <source>Copy &amp;Result</source>
-        <translation>結果をコピー(&amp;R)</translation>
     </message>
     <message>
         <source>Copy the whole resulting image (Ctrl+Alt+C)</source>
@@ -960,10 +1179,6 @@ or drop a file here</source>
         <translation>墨消し</translation>
     </message>
     <message>
-        <source>Opaque cover for sensitive data (K)</source>
-        <translation>機密情報を不透明に隠す (K)</translation>
-    </message>
-    <message>
         <source>Color Picker</source>
         <translation>スポイト</translation>
     </message>
@@ -984,10 +1199,6 @@ or drop a file here</source>
         <translation>最背面へ(&amp;K)</translation>
     </message>
     <message>
-        <source>D&amp;uplicate</source>
-        <translation>複製(&amp;U)</translation>
-    </message>
-    <message>
         <source>&amp;Merge Selected into Image</source>
         <translation>選択を画像に統合(&amp;M)</translation>
     </message>
@@ -998,10 +1209,6 @@ or drop a file here</source>
     <message>
         <source>&amp;Arrange</source>
         <translation>配置(&amp;A)</translation>
-    </message>
-    <message>
-        <source>Click to select an object, drag to move it, drag a corner to resize (Shift: free aspect ratio). Double-click a text to edit it. Arrow keys move by 1 px, with Shift by 10 px.</source>
-        <translation>クリックでオブジェクトを選択、ドラッグで移動、角のドラッグでサイズ変更（Shift: 縦横比を固定しない）。テキストはダブルクリックで編集。矢印キーで 1 px、Shift 併用で 10 px 移動します。</translation>
     </message>
     <message>
         <source>Click to pick a color from the image; it is used by the previous tool.</source>
@@ -1028,16 +1235,8 @@ or drop a file here</source>
         <translation>コピースタンプ</translation>
     </message>
     <message>
-        <source>Clone stamp (S): Ctrl+click or right-click sets the source</source>
-        <translation>コピースタンプ (S): Ctrl+クリックまたは右クリックでコピー元を設定</translation>
-    </message>
-    <message>
         <source>Eraser</source>
         <translation>消しゴム</translation>
-    </message>
-    <message>
-        <source>Pixel eraser (E): erases the image to transparency, not annotations</source>
-        <translation>ピクセル消しゴム (E): 画像を透明に消します（注釈は消しません）</translation>
     </message>
     <message>
         <source>Blur Brush</source>
@@ -1046,10 +1245,6 @@ or drop a file here</source>
     <message>
         <source>Resi&amp;ze Image…</source>
         <translation>画像のサイズ変更(&amp;Z)…</translation>
-    </message>
-    <message>
-        <source>Canvas Si&amp;ze…</source>
-        <translation>キャンバスサイズ(&amp;N)…</translation>
     </message>
     <message>
         <source>&amp;Blur Selection</source>
@@ -1116,32 +1311,16 @@ or drop a file here</source>
         <translation>番号マーカー</translation>
     </message>
     <message>
-        <source>Numbered marker (N): each click adds the next number</source>
-        <translation>番号マーカー (N): クリックごとに次の番号を追加</translation>
-    </message>
-    <message>
         <source>Polyline</source>
         <translation>折れ線</translation>
-    </message>
-    <message>
-        <source>Polyline (P): click to add points, double-click or Enter to finish</source>
-        <translation>折れ線 (P): クリックで点を追加、ダブルクリックまたは Enter で完了</translation>
     </message>
     <message>
         <source>Polygon</source>
         <translation>多角形</translation>
     </message>
     <message>
-        <source>Polygon (G): click to add points, click the first point or press Enter to close</source>
-        <translation>多角形 (G): クリックで点を追加、最初の点をクリックするか Enter で閉じる</translation>
-    </message>
-    <message>
         <source>Bubble</source>
         <translation>吹き出し</translation>
-    </message>
-    <message>
-        <source>Speech bubble (Q): press where the tail points, drag to place the bubble</source>
-        <translation>吹き出し (Q): しっぽの先を押し、ドラッグして吹き出しを配置</translation>
     </message>
     <message>
         <source>Annotations stay editable only until the window is closed — save as project (Ctrl+Alt+S) to keep them</source>
@@ -1196,10 +1375,6 @@ or drop a file here</source>
         <translation>メモ</translation>
     </message>
     <message>
-        <source>Text notes about the image, Markdown (Ctrl+Alt+N)</source>
-        <translation>画像についてのテキストメモ、Markdown (Ctrl+Alt+N)</translation>
-    </message>
-    <message>
         <source>Notes are kept only in a project (Ctrl+Alt+S) or exported as .md</source>
         <translation>メモはプロジェクト (Ctrl+Alt+S) か .md へのエクスポートでのみ保持されます</translation>
     </message>
@@ -1212,24 +1387,12 @@ or drop a file here</source>
         <translation>モザイクブラシ</translation>
     </message>
     <message>
-        <source>Pixelate brush (J): mosaic where you paint</source>
-        <translation>モザイクブラシ (J): 塗った所にモザイク</translation>
-    </message>
-    <message>
         <source>Paint Bucket</source>
         <translation>塗りつぶし</translation>
     </message>
     <message>
-        <source>Paint bucket (F): fills an area of similar color in the image</source>
-        <translation>塗りつぶし (F): 似た色の領域を塗りつぶします</translation>
-    </message>
-    <message>
         <source>Straighten</source>
         <translation>傾き補正</translation>
-    </message>
-    <message>
-        <source>Straighten (W): drag along a line that should be level or upright</source>
-        <translation>傾き補正 (W): 水平または垂直であるべき線に沿ってドラッグ</translation>
     </message>
     <message>
         <source>Add Noise…</source>
@@ -1258,10 +1421,6 @@ or drop a file here</source>
     <message>
         <source>Convert, shrink or adjust many images at once</source>
         <translation>多数の画像を一度に変換・縮小・補正</translation>
-    </message>
-    <message>
-        <source>&amp;Next Image in Folder</source>
-        <translation>フォルダー内の次の画像(&amp;N)</translation>
     </message>
     <message>
         <source>Pre&amp;vious Image in Folder</source>
@@ -1294,6 +1453,344 @@ or drop a file here</source>
     <message>
         <source>&lt;p&gt;Free software under the GNU General Public License version 3 (GPL-3.0). It comes with ABSOLUTELY NO WARRANTY.&lt;/p&gt;&lt;p&gt;Built with Qt %1 (LGPL-3.0), libjpeg-turbo and libwebp (BSD).&lt;/p&gt;</source>
         <translation>&lt;p&gt;GNU 一般公衆利用許諾書バージョン 3（GPL-3.0）に基づくフリーソフトウェアです。一切の保証はありません。&lt;/p&gt;&lt;p&gt;Qt %1（LGPL-3.0）、libjpeg-turbo、libwebp（BSD）を使用しています。&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>No recent files</source>
+        <translation>最近使ったファイルはありません</translation>
+    </message>
+    <message>
+        <source>Open Recent</source>
+        <translation>最近使ったファイル</translation>
+    </message>
+    <message>
+        <source>The file no longer exists:
+%1</source>
+        <translation>ファイルは存在しません:
+%1</translation>
+    </message>
+    <message>
+        <source>Full screen · F11 or Esc to leave</source>
+        <translation>全画面表示 · F11 または Esc で終了</translation>
+    </message>
+    <message>
+        <source>Open an image from a folder with more images to start a slideshow</source>
+        <translation>スライドショーを開始するには、複数の画像があるフォルダーから画像を開いてください</translation>
+    </message>
+    <message>
+        <source>Slideshow · Space pauses, arrows browse, Esc ends</source>
+        <translation>スライドショー · Space で一時停止、矢印キーで移動、Esc で終了</translation>
+    </message>
+    <message>
+        <source>Slideshow paused · Space continues</source>
+        <translation>スライドショー一時停止中 · Space で再開</translation>
+    </message>
+    <message>
+        <source>Slideshow continues</source>
+        <translation>スライドショーを再開しました</translation>
+    </message>
+    <message>
+        <source>End of slideshow</source>
+        <translation>スライドショーが終了しました</translation>
+    </message>
+    <message>
+        <source>Rename</source>
+        <translation>名前の変更</translation>
+    </message>
+    <message>
+        <source>A file named “%1” already exists.</source>
+        <translation>「%1」という名前のファイルは既に存在します。</translation>
+    </message>
+    <message>
+        <source>Could not rename the file.</source>
+        <translation>ファイル名を変更できませんでした。</translation>
+    </message>
+    <message>
+        <source>New name:</source>
+        <translation>新しい名前:</translation>
+    </message>
+    <message>
+        <source>Move to Trash</source>
+        <translation>ゴミ箱に移動</translation>
+    </message>
+    <message>
+        <source>Move “%1” to the trash?</source>
+        <translation>「%1」をゴミ箱に移動しますか?</translation>
+    </message>
+    <message>
+        <source>Unsaved changes in this window will be lost.</source>
+        <translation>このウィンドウの未保存の変更は失われます。</translation>
+    </message>
+    <message>
+        <source>Don’t ask again</source>
+        <translation>次回から確認しない</translation>
+    </message>
+    <message>
+        <source>Could not move the file to the trash. It may be on a drive without a trash folder, or you lack permission.</source>
+        <translation>ファイルをゴミ箱に移動できませんでした。ゴミ箱のないドライブにあるか、権限がない可能性があります。</translation>
+    </message>
+    <message>
+        <source>Moved to the trash: %1</source>
+        <translation>ゴミ箱に移動しました: %1</translation>
+    </message>
+    <message>
+        <source>Move to Folder</source>
+        <translation>フォルダーへ移動</translation>
+    </message>
+    <message>
+        <source>Copy to Folder</source>
+        <translation>フォルダーへコピー</translation>
+    </message>
+    <message>
+        <source>The file is already in this folder.</source>
+        <translation>ファイルは既にこのフォルダーにあります。</translation>
+    </message>
+    <message>
+        <source>“%1” already exists in the target folder.</source>
+        <translation>「%1」は移動先のフォルダーに既に存在します。</translation>
+    </message>
+    <message>
+        <source>Keep Both</source>
+        <translation>両方残す</translation>
+    </message>
+    <message>
+        <source>Replace</source>
+        <translation>置き換え</translation>
+    </message>
+    <message>
+        <source>Could not replace the existing file.</source>
+        <translation>既存のファイルを置き換えられませんでした。</translation>
+    </message>
+    <message>
+        <source>Could not copy the file.</source>
+        <translation>ファイルをコピーできませんでした。</translation>
+    </message>
+    <message>
+        <source>Copied to %1</source>
+        <translation>%1 にコピーしました</translation>
+    </message>
+    <message>
+        <source>Could not move the file.</source>
+        <translation>ファイルを移動できませんでした。</translation>
+    </message>
+    <message>
+        <source>Moved to %1</source>
+        <translation>%1 に移動しました</translation>
+    </message>
+    <message>
+        <source>Move “%1” to Folder</source>
+        <translation>「%1」をフォルダーへ移動</translation>
+    </message>
+    <message>
+        <source>Copy “%1” to Folder</source>
+        <translation>「%1」をフォルダーへコピー</translation>
+    </message>
+    <message>
+        <source>&amp;Slideshow</source>
+        <translation>スライドショー(&amp;S)</translation>
+    </message>
+    <message>
+        <source>Show the images of the folder one after another in full screen (F5)</source>
+        <translation>フォルダー内の画像を全画面で順番に表示します (F5)</translation>
+    </message>
+    <message>
+        <source>&amp;Move File to Folder…</source>
+        <translation>ファイルをフォルダーへ移動(&amp;M)…</translation>
+    </message>
+    <message>
+        <source>&amp;Clear List</source>
+        <translation>一覧を消去(&amp;C)</translation>
+    </message>
+    <message>
+        <source>Open &amp;Recent</source>
+        <translation>最近使ったファイル(&amp;R)</translation>
+    </message>
+    <message>
+        <source>Slideshow ended because the image was edited</source>
+        <translation>画像が編集されたため、スライドショーを終了しました</translation>
+    </message>
+    <message>
+        <source>Copy Re&amp;sult</source>
+        <translation>結果をコピー(&amp;S)</translation>
+    </message>
+    <message>
+        <source>Dup&amp;licate</source>
+        <translation>複製(&amp;L)</translation>
+    </message>
+    <message>
+        <source>Ca&amp;nvas Size…</source>
+        <translation>キャンバスサイズ(&amp;N)…</translation>
+    </message>
+    <message>
+        <source>F&amp;ull Screen</source>
+        <translation>全画面表示(&amp;U)</translation>
+    </message>
+    <message>
+        <source>Image In&amp;formation…</source>
+        <translation>画像の情報(&amp;F)…</translation>
+    </message>
+    <message>
+        <source>R&amp;ename File…</source>
+        <translation>ファイル名の変更(&amp;E)…</translation>
+    </message>
+    <message>
+        <source>Move File to Tras&amp;h…</source>
+        <translation>ファイルをゴミ箱に移動(&amp;H)…</translation>
+    </message>
+    <message>
+        <source>Cop&amp;y File to Folder…</source>
+        <translation>ファイルをフォルダーへコピー(&amp;Y)…</translation>
+    </message>
+    <message>
+        <source>Show in File Mana&amp;ger</source>
+        <translation>ファイルマネージャーで表示(&amp;G)</translation>
+    </message>
+    <message>
+        <source>Text notes about the image, Markdown</source>
+        <translation>画像についてのテキストメモ (Markdown)</translation>
+    </message>
+    <message>
+        <source>Opaque cover for sensitive data</source>
+        <translation>機密情報を不透明に隠す</translation>
+    </message>
+    <message>
+        <source>Each click adds the next number</source>
+        <translation>クリックするたびに次の番号を追加</translation>
+    </message>
+    <message>
+        <source>Click to add points, double-click or Enter to finish</source>
+        <translation>クリックで点を追加、ダブルクリックまたは Enter で終了</translation>
+    </message>
+    <message>
+        <source>Click to add points, click the first point or press Enter to close</source>
+        <translation>クリックで点を追加、最初の点をクリックするか Enter で閉じる</translation>
+    </message>
+    <message>
+        <source>Press where the tail points, drag to place the bubble</source>
+        <translation>しっぽの先を押し、ドラッグして吹き出しを配置</translation>
+    </message>
+    <message>
+        <source>Ctrl+click or right-click sets the source</source>
+        <translation>Ctrl+クリックまたは右クリックでコピー元を設定</translation>
+    </message>
+    <message>
+        <source>Erases the image to transparency, not annotations</source>
+        <translation>画像を透明に消去します (注釈は消しません)</translation>
+    </message>
+    <message>
+        <source>Mosaic where you paint</source>
+        <translation>塗った場所をモザイクに</translation>
+    </message>
+    <message>
+        <source>Fills an area of similar color in the image</source>
+        <translation>画像内の似た色の範囲を塗りつぶす</translation>
+    </message>
+    <message>
+        <source>Drag along a line that should be level or upright</source>
+        <translation>水平または垂直にしたい線に沿ってドラッグ</translation>
+    </message>
+    <message>
+        <source>&amp;Keyboard Shortcuts…</source>
+        <translation>キーボードショートカット(&amp;K)…</translation>
+    </message>
+    <message>
+        <source>Full screen: small images are enlarged to fit the screen</source>
+        <translation>全画面: 小さい画像を画面に合わせて拡大します</translation>
+    </message>
+    <message>
+        <source>Full screen: small images are shown at actual size</source>
+        <translation>全画面: 小さい画像は実際のサイズで表示します</translation>
+    </message>
+    <message>
+        <source>&amp;Thumbnails</source>
+        <translation>サムネイル(&amp;T)</translation>
+    </message>
+    <message>
+        <source>Thumbnails</source>
+        <translation>サムネイル</translation>
+    </message>
+    <message>
+        <source>Thumbnails of the images in the folder</source>
+        <translation>フォルダー内の画像のサムネイル</translation>
+    </message>
+    <message>
+        <source>&amp;Enlarge Small Images in Full Screen</source>
+        <translation>全画面で小さい画像を拡大(&amp;E)</translation>
+    </message>
+    <message>
+        <source>In full screen, fit every image to the screen, small ones too (Z)</source>
+        <translation>全画面ではすべての画像を画面に合わせる (小さい画像も) (Z)</translation>
+    </message>
+    <message>
+        <source>Pri&amp;nt…</source>
+        <translation>印刷(&amp;U)…</translation>
+    </message>
+    <message>
+        <source>Print the image: fit to page or actual size, with a preview</source>
+        <translation>画像を印刷: ページに合わせる／実寸、プレビュー付き</translation>
+    </message>
+    <message>
+        <source>Ne&amp;xt Image in Folder</source>
+        <translation>フォルダー内の次の画像(&amp;N)</translation>
+    </message>
+    <message>
+        <source>Click to select an object, drag to move it, drag a corner to resize (Shift: free aspect ratio), drag the round handle to rotate (Shift: 15° steps). Double-click a text to edit it. Arrow keys move by 1 px, with Shift by 10 px.</source>
+        <translation>クリックでオブジェクトを選択、ドラッグで移動、角をドラッグでサイズ変更（Shift: 縦横比を固定しない）、丸いハンドルをドラッグで回転（Shift: 15° 刻み）。テキストはダブルクリックで編集。矢印キーで 1 px、Shift で 10 px 移動。</translation>
+    </message>
+    <message>
+        <source>Capture Screen</source>
+        <translation>画面のキャプチャ</translation>
+    </message>
+    <message>
+        <source>Drag to choose the area, Enter crops</source>
+        <translation>ドラッグで範囲を選び、Enter で切り抜き</translation>
+    </message>
+    <message>
+        <source>Capt&amp;ure Screen</source>
+        <translation>画面をキャプチャ(&amp;W)</translation>
+    </message>
+    <message>
+        <source>Screenshot: Rolidan steps aside, takes the screenshot and comes back with it. The arrow chooses whole screen or area, the field next to it the delay.</source>
+        <translation>スクリーンショット: Rolidan が一旦隠れて撮影し、画像を持って戻ります。矢印で画面全体／範囲、隣の欄で遅延を選びます。</translation>
+    </message>
+    <message>
+        <source>&amp;Whole screen</source>
+        <translation>画面全体(&amp;W)</translation>
+    </message>
+    <message>
+        <source>&amp;Area or window</source>
+        <translation>範囲またはウィンドウ(&amp;A)</translation>
+    </message>
+    <message>
+        <source>The whole screen is captured, then the crop tool lets you choose the area</source>
+        <translation>画面全体をキャプチャし、切り抜きツールで範囲を選びます</translation>
+    </message>
+    <message>
+        <source>The desktop lets you choose an area or a window</source>
+        <translation>デスクトップの画面で範囲またはウィンドウを選びます</translation>
+    </message>
+    <message>
+        <source>&amp;Minimize Rolidan while capturing</source>
+        <translation>キャプチャ中は Rolidan を最小化(&amp;M)</translation>
+    </message>
+    <message>
+        <source> s</source>
+        <translation> 秒</translation>
+    </message>
+    <message>
+        <source>Now</source>
+        <translation>即時</translation>
+    </message>
+    <message>
+        <source>Delay before the screenshot is taken</source>
+        <translation>撮影までの遅延</translation>
+    </message>
+    <message>
+        <source>Screenshot</source>
+        <translation>スクリーンショット</translation>
+    </message>
+    <message>
+        <source>Change resolution</source>
+        <translation>解像度の変更</translation>
     </message>
 </context>
 <context>
@@ -1389,12 +1886,91 @@ Import a .md file with the button above or drop it on the window.</source>
         <source>Resize</source>
         <translation>サイズ変更</translation>
     </message>
+    <message>
+        <source>Rotate</source>
+        <translation>回転</translation>
+    </message>
 </context>
 <context>
     <name>PolyTool</name>
     <message>
         <source>Draw</source>
         <translation>描画</translation>
+    </message>
+</context>
+<context>
+    <name>PrintDialog</name>
+    <message>
+        <source>Print</source>
+        <translation>印刷</translation>
+    </message>
+    <message>
+        <source>Size</source>
+        <translation>サイズ</translation>
+    </message>
+    <message>
+        <source>&amp;Fit to page</source>
+        <translation>ページに合わせる(&amp;F)</translation>
+    </message>
+    <message>
+        <source>&amp;Actual size at</source>
+        <translation>実寸(&amp;A):</translation>
+    </message>
+    <message>
+        <source>&amp;Scale</source>
+        <translation>拡大縮小(&amp;S)</translation>
+    </message>
+    <message>
+        <source> dpi</source>
+        <translation> dpi</translation>
+    </message>
+    <message>
+        <source>Page</source>
+        <translation>ページ</translation>
+    </message>
+    <message>
+        <source>Automatic</source>
+        <translation>自動</translation>
+    </message>
+    <message>
+        <source>Portrait</source>
+        <translation>縦</translation>
+    </message>
+    <message>
+        <source>Landscape</source>
+        <translation>横</translation>
+    </message>
+    <message>
+        <source>&amp;Orientation:</source>
+        <translation>向き(&amp;O):</translation>
+    </message>
+    <message>
+        <source> mm</source>
+        <translation> mm</translation>
+    </message>
+    <message>
+        <source>&amp;Margins:</source>
+        <translation>余白(&amp;M):</translation>
+    </message>
+    <message>
+        <source>&amp;Center on page</source>
+        <translation>ページの中央に配置(&amp;C)</translation>
+    </message>
+    <message>
+        <source>Print a&amp;nnotations</source>
+        <translation>注釈を印刷(&amp;N)</translation>
+    </message>
+    <message>
+        <source>Paper size and printer page settings</source>
+        <translation>用紙サイズとプリンターのページ設定</translation>
+    </message>
+    <message>
+        <source>&amp;Print…</source>
+        <translation>印刷(&amp;P)…</translation>
+    </message>
+    <message>
+        <source>Pape&amp;r…</source>
+        <translation>用紙(&amp;R)…</translation>
     </message>
 </context>
 <context>
@@ -1572,34 +2148,173 @@ Off: fills every pixel of a similar color.</source>
     </message>
 </context>
 <context>
+    <name>QObject</name>
+    <message>
+        <source>%1 B</source>
+        <translation>%1 B</translation>
+    </message>
+</context>
+<context>
     <name>ResizeDialog</name>
     <message>
         <source>Resize Image</source>
         <translation>画像のサイズ変更</translation>
     </message>
     <message>
-        <source>Current size:</source>
-        <translation>現在のサイズ:</translation>
+        <source>New size</source>
+        <translation>新しいサイズ</translation>
     </message>
     <message>
-        <source>Keep aspect ratio</source>
-        <translation>縦横比を保持</translation>
+        <source>Choose…</source>
+        <translation>選択…</translation>
     </message>
     <message>
-        <source>Width:</source>
-        <translation>幅:</translation>
+        <source>Half (50 %)</source>
+        <translation>半分 (50 %)</translation>
     </message>
     <message>
-        <source>Height:</source>
-        <translation>高さ:</translation>
+        <source>Double (200 %)</source>
+        <translation>2 倍 (200 %)</translation>
     </message>
     <message>
-        <source>Scale:</source>
-        <translation>倍率:</translation>
+        <source>Best fit to screen (%1 × %2)</source>
+        <translation>画面に合わせる (%1 × %2)</translation>
     </message>
     <message>
-        <source>New size: %1 × %2 px (%3 in memory). Annotations are scaled too.</source>
-        <translation>新しいサイズ: %1 × %2 px（メモリ %3）。注釈も拡大縮小されます。</translation>
+        <source>Screen size, ignore aspect ratio</source>
+        <translation>画面サイズ（縦横比を無視）</translation>
+    </message>
+    <message>
+        <source>With "Keep aspect ratio" the image fits inside the chosen size</source>
+        <translation>「縦横比を保持」がオンなら、選んだサイズに収まるように縮小します</translation>
+    </message>
+    <message>
+        <source>&amp;Preset:</source>
+        <translation>プリセット(&amp;P):</translation>
+    </message>
+    <message>
+        <source>pixels</source>
+        <translation>ピクセル</translation>
+    </message>
+    <message>
+        <source>cm</source>
+        <translation>cm</translation>
+    </message>
+    <message>
+        <source>inches</source>
+        <translation>インチ</translation>
+    </message>
+    <message>
+        <source>&amp;Width:</source>
+        <translation>幅(&amp;W):</translation>
+    </message>
+    <message>
+        <source>H&amp;eight:</source>
+        <translation>高さ(&amp;E):</translation>
+    </message>
+    <message>
+        <source>&amp;Units:</source>
+        <translation>単位(&amp;U):</translation>
+    </message>
+    <message>
+        <source>As percentage of the original:</source>
+        <translation>元のサイズに対する割合:</translation>
+    </message>
+    <message>
+        <source>Wi&amp;dth:</source>
+        <translation>幅(&amp;D):</translation>
+    </message>
+    <message>
+        <source>Hei&amp;ght:</source>
+        <translation>高さ(&amp;G):</translation>
+    </message>
+    <message>
+        <source>&amp;Keep aspect ratio</source>
+        <translation>縦横比を保持(&amp;K)</translation>
+    </message>
+    <message>
+        <source> dpi</source>
+        <translation> dpi</translation>
+    </message>
+    <message>
+        <source>Print resolution stored in the file; also used for cm and inches</source>
+        <translation>ファイルに保存される印刷解像度。cm とインチの換算にも使います</translation>
+    </message>
+    <message>
+        <source>&amp;Resolution:</source>
+        <translation>解像度(&amp;R):</translation>
+    </message>
+    <message>
+        <source>Quality</source>
+        <translation>品質</translation>
+    </message>
+    <message>
+        <source>Lanczos – sharpest (recommended)</source>
+        <translation>Lanczos – 最もシャープ（推奨）</translation>
+    </message>
+    <message>
+        <source>Mitchell – smooth (bicubic)</source>
+        <translation>Mitchell – 滑らか（バイキュービック）</translation>
+    </message>
+    <message>
+        <source>B-spline – softest, no halos</source>
+        <translation>B スプライン – 最も柔らかく、ハロなし</translation>
+    </message>
+    <message>
+        <source>Nearest neighbor – hard pixels (pixel art, screenshots at 200 %)</source>
+        <translation>ニアレストネイバー – ピクセルをそのまま（ドット絵、200 % のスクリーンショット）</translation>
+    </message>
+    <message>
+        <source>&amp;Method:</source>
+        <translation>方式(&amp;M):</translation>
+    </message>
+    <message>
+        <source>&amp;Sharpen after resampling</source>
+        <translation>リサンプリング後にシャープ化(&amp;S)</translation>
+    </message>
+    <message>
+        <source>Restores crispness lost when shrinking photos</source>
+        <translation>写真を縮小したときに失われるシャープさを補います</translation>
+    </message>
+    <message>
+        <source> px</source>
+        <translation> px</translation>
+    </message>
+    <message>
+        <source> cm</source>
+        <translation> cm</translation>
+    </message>
+    <message>
+        <source> in</source>
+        <translation> in</translation>
+    </message>
+    <message>
+        <source>%1 × %2 cm at %3 dpi</source>
+        <translation>%1 × %2 cm（%3 dpi）</translation>
+    </message>
+    <message>
+        <source>Original size: %1 × %2 px (%3 MP), %4</source>
+        <translation>元のサイズ: %1 × %2 px（%3 MP）、%4</translation>
+    </message>
+    <message>
+        <source>New size: %1 × %2 px, %3 (%4 in memory). Annotations are scaled too.</source>
+        <translation>新しいサイズ: %1 × %2 px、%3（メモリ %4）。注釈も拡大縮小されます。</translation>
+    </message>
+    <message>
+        <source>Enlarging cannot add detail; for pixel art choose Nearest neighbor.</source>
+        <translation>拡大しても細部は増えません。ドット絵にはニアレストネイバーを選んでください。</translation>
+    </message>
+    <message>
+        <source>Hermite – smooth, no halos</source>
+        <translation>Hermite – 滑らか、ハロなし</translation>
+    </message>
+    <message>
+        <source>Triangle (bilinear) – fast</source>
+        <translation>Triangle（バイリニア）– 高速</translation>
+    </message>
+    <message>
+        <source>Bell – soft</source>
+        <translation>Bell – 柔らかい</translation>
     </message>
 </context>
 <context>
@@ -1619,6 +2334,29 @@ Off: fills every pixel of a similar color.</source>
     <message>
         <source>Blur brush</source>
         <translation>ぼかしブラシ</translation>
+    </message>
+</context>
+<context>
+    <name>ScreenCapture</name>
+    <message>
+        <source>The desktop did not take the screenshot.</source>
+        <translation>デスクトップがスクリーンショットを作成しませんでした。</translation>
+    </message>
+    <message>
+        <source>The screenshot could not be read.</source>
+        <translation>スクリーンショットを読み込めませんでした。</translation>
+    </message>
+    <message>
+        <source>Screenshots need the desktop portal (xdg-desktop-portal), which is not running.</source>
+        <translation>スクリーンショットにはデスクトップポータル (xdg-desktop-portal) が必要ですが、実行されていません。</translation>
+    </message>
+    <message>
+        <source>The desktop refused the screenshot: %1</source>
+        <translation>デスクトップがスクリーンショットを拒否しました: %1</translation>
+    </message>
+    <message>
+        <source>The screen could not be captured.</source>
+        <translation>画面をキャプチャできませんでした。</translation>
     </message>
 </context>
 <context>
@@ -1661,6 +2399,125 @@ Off: fills every pixel of a similar color.</source>
         <source>The language will change after you restart Rolidan.</source>
         <translation>Rolidan を再起動すると言語が変更されます。</translation>
     </message>
+    <message>
+        <source>Scrolls the image</source>
+        <translation>画像をスクロール</translation>
+    </message>
+    <message>
+        <source>Shows the next / previous image</source>
+        <translation>次 / 前の画像を表示</translation>
+    </message>
+    <message>
+        <source>Zooms</source>
+        <translation>ズーム</translation>
+    </message>
+    <message>
+        <source>Ctrl + wheel always zooms</source>
+        <translation>Ctrl + ホイールは常にズーム</translation>
+    </message>
+    <message>
+        <source>Mouse wheel:</source>
+        <translation>マウスホイール:</translation>
+    </message>
+    <message>
+        <source> s</source>
+        <translation> 秒</translation>
+    </message>
+    <message>
+        <source>Slideshow interval:</source>
+        <translation>スライドショーの間隔:</translation>
+    </message>
+    <message>
+        <source>Start again after the last image</source>
+        <translation>最後の画像の後は最初から繰り返す</translation>
+    </message>
+    <message>
+        <source>Ask before moving a file to the trash</source>
+        <translation>ファイルをゴミ箱に移動する前に確認する</translation>
+    </message>
+    <message>
+        <source>In full screen and slideshow, enlarge small images to fit the screen (Z)</source>
+        <translation>全画面とスライドショーで小さい画像を画面に合わせて拡大する (Z)</translation>
+    </message>
+    <message>
+        <source>Full screen:</source>
+        <translation>全画面:</translation>
+    </message>
+</context>
+<context>
+    <name>ShortcutsDialog</name>
+    <message>
+        <source>File</source>
+        <translation>ファイル</translation>
+    </message>
+    <message>
+        <source>Edit</source>
+        <translation>編集</translation>
+    </message>
+    <message>
+        <source>Arrange</source>
+        <translation>配置</translation>
+    </message>
+    <message>
+        <source>Image</source>
+        <translation>画像</translation>
+    </message>
+    <message>
+        <source>Colors and Filters</source>
+        <translation>色とフィルター</translation>
+    </message>
+    <message>
+        <source>Tools</source>
+        <translation>ツール</translation>
+    </message>
+    <message>
+        <source>View</source>
+        <translation>表示</translation>
+    </message>
+    <message>
+        <source>Other</source>
+        <translation>その他</translation>
+    </message>
+    <message>
+        <source>Keyboard Shortcuts</source>
+        <translation>キーボードショートカット</translation>
+    </message>
+    <message>
+        <source>Search actions or keys…</source>
+        <translation>アクションまたはキーを検索…</translation>
+    </message>
+    <message>
+        <source>Action</source>
+        <translation>アクション</translation>
+    </message>
+    <message>
+        <source>Shortcut</source>
+        <translation>ショートカット</translation>
+    </message>
+    <message>
+        <source>Alternative</source>
+        <translation>代替</translation>
+    </message>
+    <message>
+        <source>Click a field and press the new key. Tools keep working with Shift + their letter unless you change that too. Esc, Enter, Space, the arrow keys and [ ] keep their fixed meaning while a tool uses them.</source>
+        <translation>欄をクリックして新しいキーを押してください。ツールは Shift + 文字でも引き続き選べます (それも変更しない限り)。Esc、Enter、Space、矢印キー、[ ] はツール使用中は固定の意味のままです。</translation>
+    </message>
+    <message>
+        <source>Reset All to Defaults</source>
+        <translation>すべて既定に戻す</translation>
+    </message>
+    <message>
+        <source>Some keys are used by more than one action:
+
+%1
+
+Change them first.</source>
+        <translation>複数のアクションで使われているキーがあります:
+
+%1
+
+先に変更してください。</translation>
+    </message>
 </context>
 <context>
     <name>StraightenTool</name>
@@ -1686,6 +2543,13 @@ Off: fills every pixel of a similar color.</source>
     <message>
         <source>Edit text</source>
         <translation>テキストを編集</translation>
+    </message>
+</context>
+<context>
+    <name>ThumbnailPanel</name>
+    <message>
+        <source>Thumbnails</source>
+        <translation>サムネイル</translation>
     </message>
 </context>
 <context>

@@ -107,7 +107,7 @@
     </message>
     <message>
         <source>None</source>
-        <translation>Žádná</translation>
+        <translation>Žádné</translation>
     </message>
     <message>
         <source>Enhance colors</source>
@@ -513,6 +513,14 @@ nebo sem přetáhněte soubor</translation>
         <source>calculating…</source>
         <translation>počítám…</translation>
     </message>
+    <message>
+        <source>LZW compression (lossless, smaller file)</source>
+        <translation>Komprese LZW (bezeztrátová, menší soubor)</translation>
+    </message>
+    <message>
+        <source>Higher quality means fewer artifacts and a larger file; 100 is lossless</source>
+        <translation>Vyšší kvalita znamená méně artefaktů a větší soubor; 100 je bezeztrátově</translation>
+    </message>
 </context>
 <context>
     <name>FilterDialog</name>
@@ -554,6 +562,221 @@ nebo sem přetáhněte soubor</translation>
     </message>
 </context>
 <context>
+    <name>ImageInfoDialog</name>
+    <message>
+        <source>Image Information</source>
+        <translation>Informace o obrázku</translation>
+    </message>
+    <message>
+        <source>File</source>
+        <translation>Soubor</translation>
+    </message>
+    <message>
+        <source>Name:</source>
+        <translation>Název:</translation>
+    </message>
+    <message>
+        <source>Folder:</source>
+        <translation>Složka:</translation>
+    </message>
+    <message>
+        <source>File size:</source>
+        <translation>Velikost souboru:</translation>
+    </message>
+    <message>
+        <source>Modified:</source>
+        <translation>Změněno:</translation>
+    </message>
+    <message>
+        <source>the file no longer exists</source>
+        <translation>soubor už neexistuje</translation>
+    </message>
+    <message>
+        <source>Format:</source>
+        <translation>Formát:</translation>
+    </message>
+    <message>
+        <source>Rolidan project</source>
+        <translation>Projekt Rolidan</translation>
+    </message>
+    <message>
+        <source>Size in file:</source>
+        <translation>Velikost v souboru:</translation>
+    </message>
+    <message>
+        <source>%1 × %2 px</source>
+        <translation>%1 × %2 px</translation>
+    </message>
+    <message>
+        <source>Image</source>
+        <translation>Obrázek</translation>
+    </message>
+    <message>
+        <source>Size:</source>
+        <translation>Velikost:</translation>
+    </message>
+    <message>
+        <source>no image</source>
+        <translation>žádný obrázek</translation>
+    </message>
+    <message>
+        <source>Megapixels:</source>
+        <translation>Megapixely:</translation>
+    </message>
+    <message>
+        <source>Resolution:</source>
+        <translation>Rozlišení:</translation>
+    </message>
+    <message>
+        <source>%1 dpi</source>
+        <translation>%1 dpi</translation>
+    </message>
+    <message>
+        <source>Transparency:</source>
+        <translation>Průhlednost:</translation>
+    </message>
+    <message>
+        <source>yes</source>
+        <translation>ano</translation>
+    </message>
+    <message>
+        <source>no</source>
+        <translation>ne</translation>
+    </message>
+    <message>
+        <source>Colors:</source>
+        <translation>Barvy:</translation>
+    </message>
+    <message>
+        <source>grayscale</source>
+        <translation>odstíny šedi</translation>
+    </message>
+    <message>
+        <source>Camera</source>
+        <translation>Fotoaparát</translation>
+    </message>
+    <message>
+        <source>Camera:</source>
+        <translation>Fotoaparát:</translation>
+    </message>
+    <message>
+        <source>Lens:</source>
+        <translation>Objektiv:</translation>
+    </message>
+    <message>
+        <source>Taken:</source>
+        <translation>Pořízeno:</translation>
+    </message>
+    <message>
+        <source>Exposure:</source>
+        <translation>Expozice:</translation>
+    </message>
+    <message>
+        <source>Aperture:</source>
+        <translation>Clona:</translation>
+    </message>
+    <message>
+        <source>ISO:</source>
+        <translation>ISO:</translation>
+    </message>
+    <message>
+        <source>%1 mm</source>
+        <translation>%1 mm</translation>
+    </message>
+    <message>
+        <source>(%1 mm in 35 mm format)</source>
+        <translation>(%1 mm v kinoformátu)</translation>
+    </message>
+    <message>
+        <source>Focal length:</source>
+        <translation>Ohnisková vzdálenost:</translation>
+    </message>
+    <message>
+        <source>Exposure bias:</source>
+        <translation>Korekce expozice:</translation>
+    </message>
+    <message>
+        <source>%1 EV</source>
+        <translation>%1 EV</translation>
+    </message>
+    <message>
+        <source>Flash:</source>
+        <translation>Blesk:</translation>
+    </message>
+    <message>
+        <source>fired</source>
+        <translation>použit</translation>
+    </message>
+    <message>
+        <source>did not fire</source>
+        <translation>nepoužit</translation>
+    </message>
+    <message>
+        <source>Details</source>
+        <translation>Podrobnosti</translation>
+    </message>
+    <message>
+        <source>Description:</source>
+        <translation>Popis:</translation>
+    </message>
+    <message>
+        <source>Author:</source>
+        <translation>Autor:</translation>
+    </message>
+    <message>
+        <source>Copyright:</source>
+        <translation>Autorská práva:</translation>
+    </message>
+    <message>
+        <source>Software:</source>
+        <translation>Software:</translation>
+    </message>
+    <message>
+        <source>Location</source>
+        <translation>Poloha</translation>
+    </message>
+    <message>
+        <source>Latitude:</source>
+        <translation>Zeměpisná šířka:</translation>
+    </message>
+    <message>
+        <source>Longitude:</source>
+        <translation>Zeměpisná délka:</translation>
+    </message>
+    <message>
+        <source>Altitude:</source>
+        <translation>Nadmořská výška:</translation>
+    </message>
+    <message>
+        <source>%1 m</source>
+        <translation>%1 m</translation>
+    </message>
+    <message>
+        <source>The photo contains its location. Rolidan does not copy metadata into exported images, but the original file still has it.</source>
+        <translation>Fotka obsahuje místo pořízení. Rolidan metadata do exportovaných obrázků nepřenáší, ale původní soubor je stále obsahuje.</translation>
+    </message>
+    <message>
+        <source>EXIF:</source>
+        <translation>EXIF:</translation>
+    </message>
+    <message>
+        <source>none</source>
+        <translation>žádné</translation>
+    </message>
+    <message>
+        <source>Copy as Text</source>
+        <translation>Kopírovat jako text</translation>
+    </message>
+    <message>
+        <source>Show on Map</source>
+        <translation>Zobrazit na mapě</translation>
+    </message>
+    <message>
+        <source>Opens OpenStreetMap in the web browser</source>
+        <translation>Otevře OpenStreetMap ve webovém prohlížeči</translation>
+    </message>
+</context>
+<context>
     <name>MainWindow</name>
     <message>
         <source>New from Clipboard</source>
@@ -589,7 +812,7 @@ nebo sem přetáhněte soubor</translation>
     </message>
     <message>
         <source>&amp;Redo</source>
-        <translation>&amp;Znovu</translation>
+        <translation>Z&amp;novu</translation>
     </message>
     <message>
         <source>Undo</source>
@@ -616,10 +839,6 @@ nebo sem přetáhněte soubor</translation>
         <translation>Kopírovat i s anotacemi</translation>
     </message>
     <message>
-        <source>Copy &amp;Result</source>
-        <translation>Kopírovat &amp;výsledek</translation>
-    </message>
-    <message>
         <source>Copy the whole resulting image (Ctrl+Alt+C)</source>
         <translation>Zkopírovat celý výsledný obrázek (Ctrl+Alt+C)</translation>
     </message>
@@ -633,7 +852,7 @@ nebo sem přetáhněte soubor</translation>
     </message>
     <message>
         <source>Select &amp;All</source>
-        <translation>Vybrat &amp;vše</translation>
+        <translation>Vybrat vš&amp;e</translation>
     </message>
     <message>
         <source>Crop to &amp;Selection</source>
@@ -753,7 +972,7 @@ nebo sem přetáhněte soubor</translation>
     </message>
     <message>
         <source>&amp;Redo %1</source>
-        <translation>&amp;Znovu: %1</translation>
+        <translation>Z&amp;novu: %1</translation>
     </message>
     <message>
         <source>Untitled</source>
@@ -960,10 +1179,6 @@ nebo sem přetáhněte soubor</translation>
         <translation>Zakrytí</translation>
     </message>
     <message>
-        <source>Opaque cover for sensitive data (K)</source>
-        <translation>Neprůhledné zakrytí citlivých údajů (K)</translation>
-    </message>
-    <message>
         <source>Color Picker</source>
         <translation>Kapátko</translation>
     </message>
@@ -981,11 +1196,7 @@ nebo sem přetáhněte soubor</translation>
     </message>
     <message>
         <source>Send to Bac&amp;k</source>
-        <translation>Přenést do po&amp;zadí</translation>
-    </message>
-    <message>
-        <source>D&amp;uplicate</source>
-        <translation>D&amp;uplikovat</translation>
+        <translation>Přenést do poza&amp;dí</translation>
     </message>
     <message>
         <source>&amp;Merge Selected into Image</source>
@@ -998,10 +1209,6 @@ nebo sem přetáhněte soubor</translation>
     <message>
         <source>&amp;Arrange</source>
         <translation>&amp;Uspořádat</translation>
-    </message>
-    <message>
-        <source>Click to select an object, drag to move it, drag a corner to resize (Shift: free aspect ratio). Double-click a text to edit it. Arrow keys move by 1 px, with Shift by 10 px.</source>
-        <translation>Klepnutím vyberete objekt, tažením ho posunete, tažením za roh změníte velikost (Shift: volný poměr stran). Dvojklikem upravíte text. Šipky posouvají o 1 px, se Shiftem o 10 px.</translation>
     </message>
     <message>
         <source>Click to pick a color from the image; it is used by the previous tool.</source>
@@ -1028,16 +1235,8 @@ nebo sem přetáhněte soubor</translation>
         <translation>Razítko</translation>
     </message>
     <message>
-        <source>Clone stamp (S): Ctrl+click or right-click sets the source</source>
-        <translation>Klonovací razítko (S): Ctrl+klik nebo pravé tlačítko nastaví zdroj</translation>
-    </message>
-    <message>
         <source>Eraser</source>
         <translation>Guma</translation>
-    </message>
-    <message>
-        <source>Pixel eraser (E): erases the image to transparency, not annotations</source>
-        <translation>Pixelová guma (E): maže obrázek do průhlednosti, ne anotace</translation>
     </message>
     <message>
         <source>Blur Brush</source>
@@ -1046,10 +1245,6 @@ nebo sem přetáhněte soubor</translation>
     <message>
         <source>Resi&amp;ze Image…</source>
         <translation>Změnit rozli&amp;šení…</translation>
-    </message>
-    <message>
-        <source>Canvas Si&amp;ze…</source>
-        <translation>Velikost &amp;plátna…</translation>
     </message>
     <message>
         <source>&amp;Blur Selection</source>
@@ -1116,32 +1311,16 @@ nebo sem přetáhněte soubor</translation>
         <translation>Číslování</translation>
     </message>
     <message>
-        <source>Numbered marker (N): each click adds the next number</source>
-        <translation>Číslovaná značka (N): každé klepnutí přidá další číslo</translation>
-    </message>
-    <message>
         <source>Polyline</source>
         <translation>Lomená čára</translation>
-    </message>
-    <message>
-        <source>Polyline (P): click to add points, double-click or Enter to finish</source>
-        <translation>Lomená čára (P): klepnutím přidáte bod, dvojklikem nebo Enterem dokončíte</translation>
     </message>
     <message>
         <source>Polygon</source>
         <translation>Mnohoúhelník</translation>
     </message>
     <message>
-        <source>Polygon (G): click to add points, click the first point or press Enter to close</source>
-        <translation>Mnohoúhelník (G): klepnutím přidáte bod, klepnutím na první bod nebo Enterem uzavřete</translation>
-    </message>
-    <message>
         <source>Bubble</source>
         <translation>Bublina</translation>
-    </message>
-    <message>
-        <source>Speech bubble (Q): press where the tail points, drag to place the bubble</source>
-        <translation>Bublina (Q): stiskněte tam, kam má mířit ocásek, a tažením umístěte bublinu</translation>
     </message>
     <message>
         <source>Annotations stay editable only until the window is closed — save as project (Ctrl+Alt+S) to keep them</source>
@@ -1196,10 +1375,6 @@ nebo sem přetáhněte soubor</translation>
         <translation>Poznámky</translation>
     </message>
     <message>
-        <source>Text notes about the image, Markdown (Ctrl+Alt+N)</source>
-        <translation>Textové poznámky k obrázku, Markdown (Ctrl+Alt+N)</translation>
-    </message>
-    <message>
         <source>Notes are kept only in a project (Ctrl+Alt+S) or exported as .md</source>
         <translation>Poznámky se uchovají jen v projektu (Ctrl+Alt+S) nebo exportem do .md</translation>
     </message>
@@ -1212,24 +1387,12 @@ nebo sem přetáhněte soubor</translation>
         <translation>Pixelizační štětec</translation>
     </message>
     <message>
-        <source>Pixelate brush (J): mosaic where you paint</source>
-        <translation>Pixelizační štětec (J): mozaika tam, kde malujete</translation>
-    </message>
-    <message>
         <source>Paint Bucket</source>
         <translation>Plechovka</translation>
     </message>
     <message>
-        <source>Paint bucket (F): fills an area of similar color in the image</source>
-        <translation>Plechovka (F): vyplní v obrázku oblast podobné barvy</translation>
-    </message>
-    <message>
         <source>Straighten</source>
         <translation>Narovnat</translation>
-    </message>
-    <message>
-        <source>Straighten (W): drag along a line that should be level or upright</source>
-        <translation>Narovnat (W): táhněte podél čáry, která má být vodorovná nebo svislá</translation>
     </message>
     <message>
         <source>Add Noise…</source>
@@ -1258,10 +1421,6 @@ nebo sem přetáhněte soubor</translation>
     <message>
         <source>Convert, shrink or adjust many images at once</source>
         <translation>Převést, zmenšit nebo upravit mnoho obrázků najednou</translation>
-    </message>
-    <message>
-        <source>&amp;Next Image in Folder</source>
-        <translation>&amp;Další obrázek ve složce</translation>
     </message>
     <message>
         <source>Pre&amp;vious Image in Folder</source>
@@ -1294,6 +1453,344 @@ nebo sem přetáhněte soubor</translation>
     <message>
         <source>&lt;p&gt;Free software under the GNU General Public License version 3 (GPL-3.0). It comes with ABSOLUTELY NO WARRANTY.&lt;/p&gt;&lt;p&gt;Built with Qt %1 (LGPL-3.0), libjpeg-turbo and libwebp (BSD).&lt;/p&gt;</source>
         <translation>&lt;p&gt;Svobodný software pod licencí GNU General Public License verze 3 (GPL-3.0). Je poskytován BEZ JAKÉKOLI ZÁRUKY.&lt;/p&gt;&lt;p&gt;Sestaveno s Qt %1 (LGPL-3.0), libjpeg-turbo a libwebp (BSD).&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>No recent files</source>
+        <translation>Žádné nedávné soubory</translation>
+    </message>
+    <message>
+        <source>Open Recent</source>
+        <translation>Otevřít nedávné</translation>
+    </message>
+    <message>
+        <source>The file no longer exists:
+%1</source>
+        <translation>Soubor už neexistuje:
+%1</translation>
+    </message>
+    <message>
+        <source>Full screen · F11 or Esc to leave</source>
+        <translation>Celá obrazovka · F11 nebo Esc ji ukončí</translation>
+    </message>
+    <message>
+        <source>Open an image from a folder with more images to start a slideshow</source>
+        <translation>Pro spuštění prezentace otevřete obrázek ze složky, kde je více obrázků</translation>
+    </message>
+    <message>
+        <source>Slideshow · Space pauses, arrows browse, Esc ends</source>
+        <translation>Prezentace · mezerník pozastaví, šipky listují, Esc ukončí</translation>
+    </message>
+    <message>
+        <source>Slideshow paused · Space continues</source>
+        <translation>Prezentace pozastavena · mezerník pokračuje</translation>
+    </message>
+    <message>
+        <source>Slideshow continues</source>
+        <translation>Prezentace pokračuje</translation>
+    </message>
+    <message>
+        <source>End of slideshow</source>
+        <translation>Konec prezentace</translation>
+    </message>
+    <message>
+        <source>Rename</source>
+        <translation>Přejmenovat</translation>
+    </message>
+    <message>
+        <source>A file named “%1” already exists.</source>
+        <translation>Soubor s názvem „%1“ už existuje.</translation>
+    </message>
+    <message>
+        <source>Could not rename the file.</source>
+        <translation>Soubor se nepodařilo přejmenovat.</translation>
+    </message>
+    <message>
+        <source>New name:</source>
+        <translation>Nový název:</translation>
+    </message>
+    <message>
+        <source>Move to Trash</source>
+        <translation>Přesunout do koše</translation>
+    </message>
+    <message>
+        <source>Move “%1” to the trash?</source>
+        <translation>Přesunout „%1“ do koše?</translation>
+    </message>
+    <message>
+        <source>Unsaved changes in this window will be lost.</source>
+        <translation>Neuložené změny v tomto okně se ztratí.</translation>
+    </message>
+    <message>
+        <source>Don’t ask again</source>
+        <translation>Už se neptat</translation>
+    </message>
+    <message>
+        <source>Could not move the file to the trash. It may be on a drive without a trash folder, or you lack permission.</source>
+        <translation>Soubor se nepodařilo přesunout do koše. Může být na disku bez koše, nebo k tomu nemáte oprávnění.</translation>
+    </message>
+    <message>
+        <source>Moved to the trash: %1</source>
+        <translation>Přesunuto do koše: %1</translation>
+    </message>
+    <message>
+        <source>Move to Folder</source>
+        <translation>Přesunout do složky</translation>
+    </message>
+    <message>
+        <source>Copy to Folder</source>
+        <translation>Kopírovat do složky</translation>
+    </message>
+    <message>
+        <source>The file is already in this folder.</source>
+        <translation>Soubor už v této složce je.</translation>
+    </message>
+    <message>
+        <source>“%1” already exists in the target folder.</source>
+        <translation>„%1“ už v cílové složce existuje.</translation>
+    </message>
+    <message>
+        <source>Keep Both</source>
+        <translation>Ponechat oba</translation>
+    </message>
+    <message>
+        <source>Replace</source>
+        <translation>Nahradit</translation>
+    </message>
+    <message>
+        <source>Could not replace the existing file.</source>
+        <translation>Existující soubor se nepodařilo nahradit.</translation>
+    </message>
+    <message>
+        <source>Could not copy the file.</source>
+        <translation>Soubor se nepodařilo zkopírovat.</translation>
+    </message>
+    <message>
+        <source>Copied to %1</source>
+        <translation>Zkopírováno do %1</translation>
+    </message>
+    <message>
+        <source>Could not move the file.</source>
+        <translation>Soubor se nepodařilo přesunout.</translation>
+    </message>
+    <message>
+        <source>Moved to %1</source>
+        <translation>Přesunuto do %1</translation>
+    </message>
+    <message>
+        <source>Move “%1” to Folder</source>
+        <translation>Přesunout „%1“ do složky</translation>
+    </message>
+    <message>
+        <source>Copy “%1” to Folder</source>
+        <translation>Kopírovat „%1“ do složky</translation>
+    </message>
+    <message>
+        <source>&amp;Slideshow</source>
+        <translation>Pre&amp;zentace</translation>
+    </message>
+    <message>
+        <source>Show the images of the folder one after another in full screen (F5)</source>
+        <translation>Ukáže obrázky ze složky jeden po druhém na celé obrazovce (F5)</translation>
+    </message>
+    <message>
+        <source>&amp;Move File to Folder…</source>
+        <translation>Přesunout soubor do slo&amp;žky…</translation>
+    </message>
+    <message>
+        <source>&amp;Clear List</source>
+        <translation>&amp;Vymazat seznam</translation>
+    </message>
+    <message>
+        <source>Open &amp;Recent</source>
+        <translation>Ot&amp;evřít nedávné</translation>
+    </message>
+    <message>
+        <source>Slideshow ended because the image was edited</source>
+        <translation>Prezentace skončila, protože se obrázek upravil</translation>
+    </message>
+    <message>
+        <source>Copy Re&amp;sult</source>
+        <translation>Kopírovat výsle&amp;dek</translation>
+    </message>
+    <message>
+        <source>Dup&amp;licate</source>
+        <translation>D&amp;uplikovat</translation>
+    </message>
+    <message>
+        <source>Ca&amp;nvas Size…</source>
+        <translation>Velikost &amp;plátna…</translation>
+    </message>
+    <message>
+        <source>F&amp;ull Screen</source>
+        <translation>&amp;Celá obrazovka</translation>
+    </message>
+    <message>
+        <source>Image In&amp;formation…</source>
+        <translation>&amp;Informace o obrázku…</translation>
+    </message>
+    <message>
+        <source>R&amp;ename File…</source>
+        <translation>Přej&amp;menovat soubor…</translation>
+    </message>
+    <message>
+        <source>Move File to Tras&amp;h…</source>
+        <translation>Přesunout soubor do ko&amp;še…</translation>
+    </message>
+    <message>
+        <source>Cop&amp;y File to Folder…</source>
+        <translation>Kopírovat soubor do &amp;složky…</translation>
+    </message>
+    <message>
+        <source>Show in File Mana&amp;ger</source>
+        <translation>Zo&amp;brazit ve správci souborů</translation>
+    </message>
+    <message>
+        <source>Text notes about the image, Markdown</source>
+        <translation>Textové poznámky k obrázku, Markdown</translation>
+    </message>
+    <message>
+        <source>Opaque cover for sensitive data</source>
+        <translation>Neprůhledné zakrytí citlivých údajů</translation>
+    </message>
+    <message>
+        <source>Each click adds the next number</source>
+        <translation>Každé kliknutí přidá další číslo</translation>
+    </message>
+    <message>
+        <source>Click to add points, double-click or Enter to finish</source>
+        <translation>Kliknutím přidáte body, dvojklik nebo Enter dokončí</translation>
+    </message>
+    <message>
+        <source>Click to add points, click the first point or press Enter to close</source>
+        <translation>Kliknutím přidáte body, klik na první bod nebo Enter tvar uzavře</translation>
+    </message>
+    <message>
+        <source>Press where the tail points, drag to place the bubble</source>
+        <translation>Stiskněte tam, kam míří ocásek, a tažením umístěte bublinu</translation>
+    </message>
+    <message>
+        <source>Ctrl+click or right-click sets the source</source>
+        <translation>Ctrl+klik nebo pravé tlačítko nastaví zdroj</translation>
+    </message>
+    <message>
+        <source>Erases the image to transparency, not annotations</source>
+        <translation>Maže obrázek do průhlednosti, ne anotace</translation>
+    </message>
+    <message>
+        <source>Mosaic where you paint</source>
+        <translation>Mozaika tam, kde malujete</translation>
+    </message>
+    <message>
+        <source>Fills an area of similar color in the image</source>
+        <translation>Vyplní oblast podobné barvy v obrázku</translation>
+    </message>
+    <message>
+        <source>Drag along a line that should be level or upright</source>
+        <translation>Táhněte podél čáry, která má být vodorovná nebo svislá</translation>
+    </message>
+    <message>
+        <source>&amp;Keyboard Shortcuts…</source>
+        <translation>Klávesové zkra&amp;tky…</translation>
+    </message>
+    <message>
+        <source>Full screen: small images are enlarged to fit the screen</source>
+        <translation>Celá obrazovka: malé obrázky se zvětší na celou obrazovku</translation>
+    </message>
+    <message>
+        <source>Full screen: small images are shown at actual size</source>
+        <translation>Celá obrazovka: malé obrázky ve skutečné velikosti</translation>
+    </message>
+    <message>
+        <source>&amp;Thumbnails</source>
+        <translation>Ná&amp;hledy</translation>
+    </message>
+    <message>
+        <source>Thumbnails</source>
+        <translation>Náhledy</translation>
+    </message>
+    <message>
+        <source>Thumbnails of the images in the folder</source>
+        <translation>Náhledy obrázků ve složce</translation>
+    </message>
+    <message>
+        <source>&amp;Enlarge Small Images in Full Screen</source>
+        <translation>Zvětšovat &amp;malé obrázky na celé obrazovce</translation>
+    </message>
+    <message>
+        <source>In full screen, fit every image to the screen, small ones too (Z)</source>
+        <translation>Na celé obrazovce přizpůsobit obrazovce každý obrázek, i malý (Z)</translation>
+    </message>
+    <message>
+        <source>Pri&amp;nt…</source>
+        <translation>V&amp;ytisknout…</translation>
+    </message>
+    <message>
+        <source>Print the image: fit to page or actual size, with a preview</source>
+        <translation>Vytisknout obrázek: přizpůsobit stránce nebo ve skutečné velikosti, s náhledem</translation>
+    </message>
+    <message>
+        <source>Ne&amp;xt Image in Folder</source>
+        <translation>&amp;Další obrázek ve složce</translation>
+    </message>
+    <message>
+        <source>Click to select an object, drag to move it, drag a corner to resize (Shift: free aspect ratio), drag the round handle to rotate (Shift: 15° steps). Double-click a text to edit it. Arrow keys move by 1 px, with Shift by 10 px.</source>
+        <translation>Klepnutím vyberete objekt, tažením ho posunete, tažením za roh změníte velikost (Shift: volný poměr stran), tažením za kulatý úchyt otočíte (Shift: po 15°). Dvojklikem upravíte text. Šipky posouvají o 1 px, se Shiftem o 10 px.</translation>
+    </message>
+    <message>
+        <source>Capture Screen</source>
+        <translation>Zachytit obrazovku</translation>
+    </message>
+    <message>
+        <source>Drag to choose the area, Enter crops</source>
+        <translation>Tažením vyberte oblast, Enter ořízne</translation>
+    </message>
+    <message>
+        <source>Capt&amp;ure Screen</source>
+        <translation>Za&amp;chytit obrazovku</translation>
+    </message>
+    <message>
+        <source>Screenshot: Rolidan steps aside, takes the screenshot and comes back with it. The arrow chooses whole screen or area, the field next to it the delay.</source>
+        <translation>Snímek obrazovky: Rolidan se schová, vyfotí obrazovku a vrátí se se snímkem. Šipkou zvolíte celou obrazovku nebo oblast, políčkem vedle zpoždění.</translation>
+    </message>
+    <message>
+        <source>&amp;Whole screen</source>
+        <translation>&amp;Celá obrazovka</translation>
+    </message>
+    <message>
+        <source>&amp;Area or window</source>
+        <translation>&amp;Oblast nebo okno</translation>
+    </message>
+    <message>
+        <source>The whole screen is captured, then the crop tool lets you choose the area</source>
+        <translation>Zachytí se celá obrazovka, oblast pak vyberete nástrojem Oříznout</translation>
+    </message>
+    <message>
+        <source>The desktop lets you choose an area or a window</source>
+        <translation>Oblast nebo okno vyberete v nabídce pracovního prostředí</translation>
+    </message>
+    <message>
+        <source>&amp;Minimize Rolidan while capturing</source>
+        <translation>&amp;Minimalizovat Rolidan během snímání</translation>
+    </message>
+    <message>
+        <source> s</source>
+        <translation> s</translation>
+    </message>
+    <message>
+        <source>Now</source>
+        <translation>Hned</translation>
+    </message>
+    <message>
+        <source>Delay before the screenshot is taken</source>
+        <translation>Zpoždění, než se snímek pořídí</translation>
+    </message>
+    <message>
+        <source>Screenshot</source>
+        <translation>Snímek</translation>
+    </message>
+    <message>
+        <source>Change resolution</source>
+        <translation>Změna rozlišení</translation>
     </message>
 </context>
 <context>
@@ -1389,12 +1886,91 @@ Soubor .md načtete tlačítkem nahoře nebo přetažením do okna.</translation
         <source>Resize</source>
         <translation>Změnit velikost</translation>
     </message>
+    <message>
+        <source>Rotate</source>
+        <translation>Otočit</translation>
+    </message>
 </context>
 <context>
     <name>PolyTool</name>
     <message>
         <source>Draw</source>
         <translation>Kreslit</translation>
+    </message>
+</context>
+<context>
+    <name>PrintDialog</name>
+    <message>
+        <source>Print</source>
+        <translation>Tisk</translation>
+    </message>
+    <message>
+        <source>Size</source>
+        <translation>Velikost</translation>
+    </message>
+    <message>
+        <source>&amp;Fit to page</source>
+        <translation>&amp;Přizpůsobit stránce</translation>
+    </message>
+    <message>
+        <source>&amp;Actual size at</source>
+        <translation>&amp;Skutečná velikost při</translation>
+    </message>
+    <message>
+        <source>&amp;Scale</source>
+        <translation>&amp;Měřítko</translation>
+    </message>
+    <message>
+        <source> dpi</source>
+        <translation> dpi</translation>
+    </message>
+    <message>
+        <source>Page</source>
+        <translation>Stránka</translation>
+    </message>
+    <message>
+        <source>Automatic</source>
+        <translation>Automaticky</translation>
+    </message>
+    <message>
+        <source>Portrait</source>
+        <translation>Na výšku</translation>
+    </message>
+    <message>
+        <source>Landscape</source>
+        <translation>Na šířku</translation>
+    </message>
+    <message>
+        <source>&amp;Orientation:</source>
+        <translation>&amp;Orientace:</translation>
+    </message>
+    <message>
+        <source> mm</source>
+        <translation> mm</translation>
+    </message>
+    <message>
+        <source>&amp;Margins:</source>
+        <translation>O&amp;kraje:</translation>
+    </message>
+    <message>
+        <source>&amp;Center on page</source>
+        <translation>&amp;Vycentrovat na stránce</translation>
+    </message>
+    <message>
+        <source>Print a&amp;nnotations</source>
+        <translation>Tisknout a&amp;notace</translation>
+    </message>
+    <message>
+        <source>Paper size and printer page settings</source>
+        <translation>Velikost papíru a nastavení stránky tiskárny</translation>
+    </message>
+    <message>
+        <source>&amp;Print…</source>
+        <translation>&amp;Tisk…</translation>
+    </message>
+    <message>
+        <source>Pape&amp;r…</source>
+        <translation>P&amp;apír…</translation>
     </message>
 </context>
 <context>
@@ -1488,7 +2064,7 @@ Soubor .md načtete tlačítkem nahoře nebo přetažením do okna.</translation
     </message>
     <message>
         <source>None</source>
-        <translation>Žádná</translation>
+        <translation>Žádné</translation>
     </message>
     <message>
         <source>Other…</source>
@@ -1572,34 +2148,173 @@ Vypnuto: vyplní každý pixel podobné barvy.</translation>
     </message>
 </context>
 <context>
+    <name>QObject</name>
+    <message>
+        <source>%1 B</source>
+        <translation>%1 B</translation>
+    </message>
+</context>
+<context>
     <name>ResizeDialog</name>
     <message>
         <source>Resize Image</source>
         <translation>Změna rozlišení</translation>
     </message>
     <message>
-        <source>Current size:</source>
-        <translation>Aktuální velikost:</translation>
+        <source>New size</source>
+        <translation>Nová velikost</translation>
     </message>
     <message>
-        <source>Keep aspect ratio</source>
-        <translation>Zachovat poměr stran</translation>
+        <source>Choose…</source>
+        <translation>Vyberte…</translation>
     </message>
     <message>
-        <source>Width:</source>
-        <translation>Šířka:</translation>
+        <source>Half (50 %)</source>
+        <translation>Polovina (50 %)</translation>
     </message>
     <message>
-        <source>Height:</source>
-        <translation>Výška:</translation>
+        <source>Double (200 %)</source>
+        <translation>Dvojnásobek (200 %)</translation>
     </message>
     <message>
-        <source>Scale:</source>
-        <translation>Měřítko:</translation>
+        <source>Best fit to screen (%1 × %2)</source>
+        <translation>Přizpůsobit obrazovce (%1 × %2)</translation>
     </message>
     <message>
-        <source>New size: %1 × %2 px (%3 in memory). Annotations are scaled too.</source>
-        <translation>Nová velikost: %1 × %2 px (%3 v paměti). Anotace se zvětší či zmenší také.</translation>
+        <source>Screen size, ignore aspect ratio</source>
+        <translation>Velikost obrazovky, bez ohledu na poměr stran</translation>
+    </message>
+    <message>
+        <source>With "Keep aspect ratio" the image fits inside the chosen size</source>
+        <translation>Se zapnutým „Zachovat poměr stran“ se obrázek vejde do zvolené velikosti</translation>
+    </message>
+    <message>
+        <source>&amp;Preset:</source>
+        <translation>&amp;Předvolba:</translation>
+    </message>
+    <message>
+        <source>pixels</source>
+        <translation>pixely</translation>
+    </message>
+    <message>
+        <source>cm</source>
+        <translation>cm</translation>
+    </message>
+    <message>
+        <source>inches</source>
+        <translation>palce</translation>
+    </message>
+    <message>
+        <source>&amp;Width:</source>
+        <translation>Šíř&amp;ka:</translation>
+    </message>
+    <message>
+        <source>H&amp;eight:</source>
+        <translation>&amp;Výška:</translation>
+    </message>
+    <message>
+        <source>&amp;Units:</source>
+        <translation>&amp;Jednotky:</translation>
+    </message>
+    <message>
+        <source>As percentage of the original:</source>
+        <translation>V procentech původní velikosti:</translation>
+    </message>
+    <message>
+        <source>Wi&amp;dth:</source>
+        <translation>Ší&amp;řka:</translation>
+    </message>
+    <message>
+        <source>Hei&amp;ght:</source>
+        <translation>Vý&amp;ška:</translation>
+    </message>
+    <message>
+        <source>&amp;Keep aspect ratio</source>
+        <translation>&amp;Zachovat poměr stran</translation>
+    </message>
+    <message>
+        <source> dpi</source>
+        <translation> dpi</translation>
+    </message>
+    <message>
+        <source>Print resolution stored in the file; also used for cm and inches</source>
+        <translation>Rozlišení pro tisk uložené v souboru; používá se i pro cm a palce</translation>
+    </message>
+    <message>
+        <source>&amp;Resolution:</source>
+        <translation>&amp;Rozlišení:</translation>
+    </message>
+    <message>
+        <source>Quality</source>
+        <translation>Kvalita</translation>
+    </message>
+    <message>
+        <source>Lanczos – sharpest (recommended)</source>
+        <translation>Lanczos – nejostřejší (doporučeno)</translation>
+    </message>
+    <message>
+        <source>Mitchell – smooth (bicubic)</source>
+        <translation>Mitchell – hladký (bikubický)</translation>
+    </message>
+    <message>
+        <source>B-spline – softest, no halos</source>
+        <translation>B-spline – nejměkčí, bez světlých lemů</translation>
+    </message>
+    <message>
+        <source>Nearest neighbor – hard pixels (pixel art, screenshots at 200 %)</source>
+        <translation>Nejbližší soused – ostré pixely (pixel art, screenshoty na 200 %)</translation>
+    </message>
+    <message>
+        <source>&amp;Method:</source>
+        <translation>&amp;Metoda:</translation>
+    </message>
+    <message>
+        <source>&amp;Sharpen after resampling</source>
+        <translation>&amp;Doostřit po převzorkování</translation>
+    </message>
+    <message>
+        <source>Restores crispness lost when shrinking photos</source>
+        <translation>Vrátí ostrost, která se při zmenšení fotek ztratí</translation>
+    </message>
+    <message>
+        <source> px</source>
+        <translation> px</translation>
+    </message>
+    <message>
+        <source> cm</source>
+        <translation> cm</translation>
+    </message>
+    <message>
+        <source> in</source>
+        <translation> in</translation>
+    </message>
+    <message>
+        <source>%1 × %2 cm at %3 dpi</source>
+        <translation>%1 × %2 cm při %3 dpi</translation>
+    </message>
+    <message>
+        <source>Original size: %1 × %2 px (%3 MP), %4</source>
+        <translation>Původní velikost: %1 × %2 px (%3 MPx), %4</translation>
+    </message>
+    <message>
+        <source>New size: %1 × %2 px, %3 (%4 in memory). Annotations are scaled too.</source>
+        <translation>Nová velikost: %1 × %2 px, %3 (%4 v paměti). Anotace se zvětší nebo zmenší také.</translation>
+    </message>
+    <message>
+        <source>Enlarging cannot add detail; for pixel art choose Nearest neighbor.</source>
+        <translation>Zvětšením se detaily nepřidají; pro pixel art zvolte Nejbližší soused.</translation>
+    </message>
+    <message>
+        <source>Hermite – smooth, no halos</source>
+        <translation>Hermite – hladký, bez světlých lemů</translation>
+    </message>
+    <message>
+        <source>Triangle (bilinear) – fast</source>
+        <translation>Triangle (bilineární) – rychlý</translation>
+    </message>
+    <message>
+        <source>Bell – soft</source>
+        <translation>Bell – měkký</translation>
     </message>
 </context>
 <context>
@@ -1619,6 +2334,29 @@ Vypnuto: vyplní každý pixel podobné barvy.</translation>
     <message>
         <source>Blur brush</source>
         <translation>Rozmazávací štětec</translation>
+    </message>
+</context>
+<context>
+    <name>ScreenCapture</name>
+    <message>
+        <source>The desktop did not take the screenshot.</source>
+        <translation>Pracovní prostředí snímek nepořídilo.</translation>
+    </message>
+    <message>
+        <source>The screenshot could not be read.</source>
+        <translation>Snímek se nepodařilo načíst.</translation>
+    </message>
+    <message>
+        <source>Screenshots need the desktop portal (xdg-desktop-portal), which is not running.</source>
+        <translation>Snímky obrazovky potřebují desktopový portál (xdg-desktop-portal), který neběží.</translation>
+    </message>
+    <message>
+        <source>The desktop refused the screenshot: %1</source>
+        <translation>Pracovní prostředí snímek odmítlo: %1</translation>
+    </message>
+    <message>
+        <source>The screen could not be captured.</source>
+        <translation>Obrazovku se nepodařilo zachytit.</translation>
     </message>
 </context>
 <context>
@@ -1661,6 +2399,125 @@ Vypnuto: vyplní každý pixel podobné barvy.</translation>
         <source>The language will change after you restart Rolidan.</source>
         <translation>Jazyk se změní po restartu Rolidanu.</translation>
     </message>
+    <message>
+        <source>Scrolls the image</source>
+        <translation>posouvá obrázek</translation>
+    </message>
+    <message>
+        <source>Shows the next / previous image</source>
+        <translation>ukazuje další / předchozí obrázek</translation>
+    </message>
+    <message>
+        <source>Zooms</source>
+        <translation>mění zvětšení</translation>
+    </message>
+    <message>
+        <source>Ctrl + wheel always zooms</source>
+        <translation>Ctrl + kolečko vždy mění zvětšení</translation>
+    </message>
+    <message>
+        <source>Mouse wheel:</source>
+        <translation>Kolečko myši:</translation>
+    </message>
+    <message>
+        <source> s</source>
+        <translation> s</translation>
+    </message>
+    <message>
+        <source>Slideshow interval:</source>
+        <translation>Interval prezentace:</translation>
+    </message>
+    <message>
+        <source>Start again after the last image</source>
+        <translation>Po posledním obrázku začít znovu</translation>
+    </message>
+    <message>
+        <source>Ask before moving a file to the trash</source>
+        <translation>Ptát se před přesunem souboru do koše</translation>
+    </message>
+    <message>
+        <source>In full screen and slideshow, enlarge small images to fit the screen (Z)</source>
+        <translation>Na celé obrazovce a v prezentaci zvětšit malé obrázky na celou obrazovku (Z)</translation>
+    </message>
+    <message>
+        <source>Full screen:</source>
+        <translation>Celá obrazovka:</translation>
+    </message>
+</context>
+<context>
+    <name>ShortcutsDialog</name>
+    <message>
+        <source>File</source>
+        <translation>Soubor</translation>
+    </message>
+    <message>
+        <source>Edit</source>
+        <translation>Úpravy</translation>
+    </message>
+    <message>
+        <source>Arrange</source>
+        <translation>Uspořádat</translation>
+    </message>
+    <message>
+        <source>Image</source>
+        <translation>Obrázek</translation>
+    </message>
+    <message>
+        <source>Colors and Filters</source>
+        <translation>Barvy a filtry</translation>
+    </message>
+    <message>
+        <source>Tools</source>
+        <translation>Nástroje</translation>
+    </message>
+    <message>
+        <source>View</source>
+        <translation>Zobrazení</translation>
+    </message>
+    <message>
+        <source>Other</source>
+        <translation>Ostatní</translation>
+    </message>
+    <message>
+        <source>Keyboard Shortcuts</source>
+        <translation>Klávesové zkratky</translation>
+    </message>
+    <message>
+        <source>Search actions or keys…</source>
+        <translation>Hledat akce nebo klávesy…</translation>
+    </message>
+    <message>
+        <source>Action</source>
+        <translation>Akce</translation>
+    </message>
+    <message>
+        <source>Shortcut</source>
+        <translation>Zkratka</translation>
+    </message>
+    <message>
+        <source>Alternative</source>
+        <translation>Alternativní</translation>
+    </message>
+    <message>
+        <source>Click a field and press the new key. Tools keep working with Shift + their letter unless you change that too. Esc, Enter, Space, the arrow keys and [ ] keep their fixed meaning while a tool uses them.</source>
+        <translation>Klikněte do pole a stiskněte novou klávesu. Nástroje dál fungují se Shift + svým písmenem, pokud nezměníte i to. Esc, Enter, mezerník, šipky a [ ] si ponechají pevný význam, když je používá nástroj.</translation>
+    </message>
+    <message>
+        <source>Reset All to Defaults</source>
+        <translation>Vše vrátit na výchozí</translation>
+    </message>
+    <message>
+        <source>Some keys are used by more than one action:
+
+%1
+
+Change them first.</source>
+        <translation>Některé klávesy používá víc akcí:
+
+%1
+
+Nejdřív je změňte.</translation>
+    </message>
 </context>
 <context>
     <name>StraightenTool</name>
@@ -1686,6 +2543,13 @@ Vypnuto: vyplní každý pixel podobné barvy.</translation>
     <message>
         <source>Edit text</source>
         <translation>Upravit text</translation>
+    </message>
+</context>
+<context>
+    <name>ThumbnailPanel</name>
+    <message>
+        <source>Thumbnails</source>
+        <translation>Náhledy</translation>
     </message>
 </context>
 <context>
