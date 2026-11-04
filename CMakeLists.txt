@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.25)
-project(Rolidan VERSION 0.2.0 LANGUAGES CXX)
+project(Rolidan VERSION 0.4.3 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Widgets LinguistTools Test)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Widgets PrintSupport DBus LinguistTools Test)
 qt_standard_project_setup(REQUIRES 6.5)
 
 # Core library: everything except main(), so tests can link it.
@@ -18,6 +18,13 @@ qt_add_library(rolidan_core STATIC
     src/filters.h src/filters.cpp
     src/filterdialog.h src/filterdialog.cpp
     src/batch.h src/batch.cpp
+    src/exif.h src/exif.cpp
+    src/imageinfo.h src/imageinfo.cpp
+    src/viewer.cpp
+    src/shortcuts.h src/shortcuts.cpp
+    src/thumbnails.h src/thumbnails.cpp
+    src/printing.h src/printing.cpp
+    src/capture.h src/capture.cpp
     src/zip.h src/zip.cpp
     src/project.h src/project.cpp
     src/recovery.h src/recovery.cpp
@@ -39,7 +46,7 @@ qt_add_library(rolidan_core STATIC
     src/application.h src/application.cpp
 )
 target_include_directories(rolidan_core PUBLIC src)
-target_link_libraries(rolidan_core PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets)
+target_link_libraries(rolidan_core PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets Qt6::PrintSupport Qt6::DBus)
 target_compile_definitions(rolidan_core PUBLIC ROLIDAN_VERSION="${PROJECT_VERSION}")
 target_compile_options(rolidan_core PRIVATE -Wall -Wextra)
 
