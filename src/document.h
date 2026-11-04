@@ -37,7 +37,9 @@ DocState clearBase(const DocState &s, const QRect &sel);
 DocState expandCanvasToInclude(const DocState &s, const QRectF &r);
 // Resample the base to `size`; objects scale with it, line widths and font
 // sizes by the smaller factor (spec C4).
-DocState resizeImage(const DocState &s, const QSize &size);
+// `filter`: filters::Resample (0 Lanczos … 4 nearest); `sharpen` after resampling;
+// `dpi` > 0 stores a new resolution (also alone, without changing the size).
+DocState resizeImage(const DocState &s, const QSize &size, int filter = 0, bool sharpen = false, double dpi = 0);
 // New canvas of `size`; the old base is placed at `offset`, the rest filled
 // with `fill` (may be transparent). Objects move by the same vector (spec C4).
 DocState resizeCanvas(const DocState &s, const QSize &size, const QPoint &offset, const QColor &fill);
@@ -90,6 +92,8 @@ public:
 
     bool isModified() const { return !isEmpty() && !m_history.isClean(); }
     void setSaved(const QString &path, const QByteArray &format);
+    // The file was renamed or moved outside the document (Etapa 5): follow it.
+    void relocate(const QString &from, const QString &to);
 
     QString filePath() const { return m_filePath; }
     QByteArray fileFormat() const { return m_fileFormat; }

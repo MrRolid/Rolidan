@@ -119,6 +119,34 @@ const QHash<QString, Draw> &drawings()
         // ---------------------------------------------------------- files
         m[QStringLiteral("document-open")] = folder;
         m[QStringLiteral("document-save")] = floppy;
+        m[QStringLiteral("camera-photo")] = [](Pen &d) {
+            d.stroke();
+            QPainterPath body;
+            body.moveTo(3.5, 8);
+            body.lineTo(8, 8);
+            body.lineTo(9.5, 5.5);
+            body.lineTo(14.5, 5.5);
+            body.lineTo(16, 8);
+            body.lineTo(20.5, 8);
+            body.lineTo(20.5, 19);
+            body.lineTo(3.5, 19);
+            body.closeSubpath();
+            d.p.drawPath(body);
+            d.p.drawEllipse(QPointF(12, 13), 3.6, 3.6); // lens
+            d.fill(d.accent);
+            d.p.drawEllipse(QPointF(17.8, 10.4), 0.9, 0.9);
+        };
+        m[QStringLiteral("document-print")] = [](Pen &d) {
+            d.stroke();
+            d.p.drawRect(QRectF(7.5, 3.5, 9, 5));                        // paper in
+            d.p.drawRoundedRect(QRectF(3.5, 8.5, 17, 8.5), 1.5, 1.5);   // body
+            d.fill(d.p.background().color().alpha() ? d.p.background().color() : QColor(Qt::white));
+            d.p.drawRect(QRectF(7.5, 13.5, 9, 7));                       // paper out
+            d.stroke();
+            d.p.drawRect(QRectF(7.5, 13.5, 9, 7));
+            d.fill(d.accent);
+            d.p.drawEllipse(QPointF(17.3, 11.3), 1.1, 1.1);              // light
+        };
         m[QStringLiteral("document-save-as")] = [](Pen &d) {
             floppy(d);
             // pencil
@@ -415,6 +443,70 @@ const QHash<QString, Draw> &drawings()
         m[QStringLiteral("go-previous")] = [](Pen &d) {
             d.stroke(2.2);
             d.p.drawPolyline(QPolygonF({QPointF(15, 5), QPointF(8, 12), QPointF(15, 19)}));
+        };
+        // ---------------------------------------------------------- viewer (Etapa 5)
+        m[QStringLiteral("view-fullscreen")] = [](Pen &d) {
+            d.stroke(2);
+            const QPointF c[4][3] = {{{3.5, 9}, {3.5, 3.5}, {9, 3.5}},
+                                     {{15, 3.5}, {20.5, 3.5}, {20.5, 9}},
+                                     {{20.5, 15}, {20.5, 20.5}, {15, 20.5}},
+                                     {{9, 20.5}, {3.5, 20.5}, {3.5, 15}}};
+            for (const auto &corner : c)
+                d.p.drawPolyline(corner, 3);
+        };
+        m[QStringLiteral("media-playback-start")] = [](Pen &d) {
+            d.stroke();
+            d.p.drawRoundedRect(QRectF(2.5, 4.5, 19, 15), 2, 2);
+            d.fill(d.fg);
+            d.p.drawPolygon(QPolygonF({QPointF(10, 8.5), QPointF(10, 15.5), QPointF(16, 12)}));
+        };
+        m[QStringLiteral("document-properties")] = [](Pen &d) {
+            d.stroke();
+            d.p.drawEllipse(QRectF(3, 3, 18, 18));
+            d.fill(d.fg);
+            d.p.drawEllipse(QRectF(10.9, 6.4, 2.2, 2.2));
+            d.p.drawRoundedRect(QRectF(11, 10.2, 2, 7.6), 0.8, 0.8);
+        };
+        m[QStringLiteral("edit-rename")] = [](Pen &d) {
+            d.stroke();
+            d.p.drawRoundedRect(QRectF(2.5, 7.5, 19, 9), 1.5, 1.5);
+            d.stroke(1.6);
+            d.p.drawLine(QPointF(14, 4.5), QPointF(14, 19.5));
+            d.p.drawLine(QPointF(12, 4.5), QPointF(16, 4.5));
+            d.p.drawLine(QPointF(12, 19.5), QPointF(16, 19.5));
+            d.fill(d.soft());
+            d.p.drawRect(QRectF(5, 10, 7, 4));
+        };
+        m[QStringLiteral("user-trash")] = [](Pen &d) {
+            d.stroke();
+            d.p.drawLine(QPointF(3.5, 6.5), QPointF(20.5, 6.5));
+            d.p.drawPolyline(QPolygonF({QPointF(9, 6.5), QPointF(9.5, 3.5), QPointF(14.5, 3.5), QPointF(15, 6.5)}));
+            d.p.drawPolygon(QPolygonF({QPointF(5.5, 6.5), QPointF(7, 20.5), QPointF(17, 20.5), QPointF(18.5, 6.5)}));
+            d.stroke(1.4);
+            for (double x : {9.8, 12.0, 14.2})
+                d.p.drawLine(QPointF(x, 9.5), QPointF(x, 17.5));
+        };
+        m[QStringLiteral("go-jump")] = [](Pen &d) {
+            folder(d);
+            d.stroke(1.9);
+            d.p.drawLine(QPointF(9, 15), QPointF(16, 15));
+            d.p.drawPolyline(QPolygonF({QPointF(13.5, 12.5), QPointF(16, 15), QPointF(13.5, 17.5)}));
+        };
+        m[QStringLiteral("folder-open")] = folder;
+        m[QStringLiteral("view-thumbnails")] = [](Pen &d) {
+            d.stroke(1.5);
+            for (int i = 0; i < 3; ++i)
+                d.p.drawRoundedRect(QRectF(2.5 + i * 6.7, 7, 5.5, 5.5), 1, 1);
+            d.fill(d.soft());
+            for (int i = 0; i < 3; ++i)
+                d.p.drawRect(QRectF(3.3 + i * 6.7, 7.8, 3.9, 3.9));
+            d.stroke(1.5);
+            d.p.drawLine(QPointF(2.5, 17), QPointF(21.5, 17));
+        };
+        m[QStringLiteral("document-open-recent")] = [](Pen &d) {
+            d.stroke();
+            d.p.drawEllipse(QRectF(3, 3, 18, 18));
+            d.p.drawPolyline(QPolygonF({QPointF(12, 7), QPointF(12, 12), QPointF(15.5, 14.5)}));
         };
         return m;
     }();

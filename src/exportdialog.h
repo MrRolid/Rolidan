@@ -50,6 +50,7 @@ private:
     // JPEG
     QComboBox *m_subsampling = nullptr;
     QCheckBox *m_progressive = nullptr;
+    QCheckBox *m_tiffLzw = nullptr;
     QCheckBox *m_optimize = nullptr;
     QSpinBox *m_smoothing = nullptr;
     // WebP

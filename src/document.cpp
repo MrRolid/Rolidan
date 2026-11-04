@@ -1,5 +1,7 @@
 #include "document.h"
 
+#include "filters.h"
+
 #include <QPainter>
 
 namespace docops {
@@ -159,12 +161,32 @@ DocState expandCanvasToInclude(const DocState &s, const QRectF &r)
                        DocTransformKind::Translate);
 }
 
-DocState resizeImage(const DocState &s, const QSize &size)
+DocState resizeImage(const DocState &s, const QSize &size, int filter, bool sharpen, double dpi)
 {
-    if (size.isEmpty() || size == s.base.size())
+    if (size.isEmpty())
         return s;
-    const QImage base = s.base.scaled(size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)
-                            .convertToFormat(QImage::Format_ARGB32_Premultiplied);
+    auto withDpi = [dpi, &s](QImage img) {
+        if (dpi > 0) {
+            const int dpm = int(std::lround(dpi / 0.0254));
+            img.setDotsPerMeterX(dpm);
+            img.setDotsPerMeterY(dpm);
+        } else { // keep the original resolution
+            img.setDotsPerMeterX(s.base.dotsPerMeterX());
+            img.setDotsPerMeterY(s.base.dotsPerMeterY());
+        }
+        return img;
+    };
+    if (size == s.base.size()) {
+        if (dpi <= 0)
+            return s;
+        DocState out = s; // resolution only
+        out.base = withDpi(s.base.copy());
+        return out;
+    }
+    QImage base = filters::resample(s.base, size, filters::Resample(std::clamp(filter, 0, 6)));
+    if (sharpen)
+        base = filters::sharpen(base, 40, 0.6, 2);
+    base = withDpi(base);
     const QTransform t = QTransform::fromScale(double(size.width()) / s.base.width(),
                                                double(size.height()) / s.base.height());
     return transformed(s, base, t, DocTransformKind::Scale);
@@ -346,6 +368,21 @@ void Document::setSaved(const QString &path, const QByteArray &format)
     m_fileFormat = format;
     m_history.setClean();
     emit historyChanged();
+}
+
+void Document::relocate(const QString &from, const QString &to)
+{
+    bool changedPath = false;
+    if (m_filePath == from) {
+        m_filePath = to;
+        changedPath = true;
+    }
+    if (m_originPath == from) {
+        m_originPath = to;
+        changedPath = true;
+    }
+    if (changedPath)
+        emit historyChanged(); // title and actions follow the path
 }
 
 void Document::apply(const DocState &s)

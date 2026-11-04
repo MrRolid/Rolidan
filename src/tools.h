@@ -1,5 +1,7 @@
 #pragma once
 
+#include <optional>
+
 #include "history.h"
 #include "toolid.h"
 
@@ -94,7 +96,13 @@ public:
     void finish(Canvas *c);
     void abort(Canvas *c);
     bool active() const { return m_active; }
-    static Qt::CursorShape cursorFor(const Canvas *c, int handle);
+    static QCursor cursorFor(const Canvas *c, int handle);
+    // Size or angle next to the object while dragging.
+    void paintLabel(QPainter &p, const Canvas *c) const;
+    // Where the round rotation handle of `o` is (widget coordinates), if it has one.
+    static std::optional<QPointF> rotateHandlePos(const Canvas *c, const Annotation &o);
+    static constexpr int kRotateHandle = 1000;
+    bool rotating() const { return m_active && m_handle == kRotateHandle; }
 
 private:
     bool m_active = false;
@@ -102,7 +110,11 @@ private:
     DocState m_start;
     quint64 m_id = 0;
     int m_handle = -1;
-    QRectF m_startRect;
+    QRectF m_startRect;    // frame (unrotated box) at the start
+    double m_startAngle = 0.0;
+    QPointF m_pivot;       // center of the box
+    double m_pressAngle = 0.0;
+    double m_angle = 0.0;  // current angle while rotating
 };
 
 // Outline + handles of selected objects.

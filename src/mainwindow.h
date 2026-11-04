@@ -46,16 +46,52 @@ public:
     void discardRecovery();
     bool restoreRecovery(const QString &path);
     QString recoveryPath() const { return m_recoveryPath; }
+
+    // Viewer (Etapa 5, viewer.cpp)
+    // The file the document shows on disk (saved file, else the opened one), empty if none.
+    QString currentFile() const;
+    // Next / previous image in the folder; `wrap` continues at the other end.
+    bool browse(int delta, bool wrap = false);
+    void setFullScreenMode(bool on);
+    void setEnlargeSmallImages(bool on); // full screen option, remembered
+    bool isFullScreenMode() const { return m_fullScreen; }
+    void startSlideshow();
+    void stopSlideshow();
+    bool isSlideshowRunning() const { return m_slideshowTimer != nullptr; }
+    bool isSlideshowPaused() const { return m_slideshowPaused; }
+    void setSlideshowPaused(bool paused);
+    void showImageInfo();
+    bool renameCurrentFile(const QString &newName); // without a dialog (tests); false on failure
+    void renameDialog();
+    bool trashCurrentFile(bool ask = true);
+    bool copyOrMoveCurrentFile(const QString &dir, bool move, bool ask = true);
+    void copyOrMoveDialog(bool move);
+    void showInFolder();
+    void openRecent(const QString &path);
+    // Show another image of the folder in this window (thumbnails), saving first if needed.
+    bool showFolderImage(const QString &path);
+    class ThumbnailPanel *thumbnails() const { return m_thumbs; }
+    // Actions whose shortcuts the user can change (they have an objectName id).
+    QList<QAction *> customizableActions() const;
+    void showShortcuts();
+    void print(); // Ctrl+P (Etapa 6)
+    void captureScreen(); // C (Etapa 7)
+    // Show a screenshot like Ctrl+V does (new document or a new object);
+    // `chooseArea` starts the crop tool on a new document.
+    void showCapture(const QImage &img, bool chooseArea);
     ~MainWindow() override;
 
 protected:
     void closeEvent(QCloseEvent *) override;
+    void keyPressEvent(QKeyEvent *) override;
+    bool eventFilter(QObject *, QEvent *) override;
     void dragEnterEvent(QDragEnterEvent *) override;
     void dropEvent(QDropEvent *) override;
     bool event(QEvent *) override;
 
 private:
     void createActions();
+    QWidget *createCaptureControls(QWidget *parent);
     void createMenusAndToolbars();
     void updateActions();
     void updateTitle();
@@ -82,7 +118,11 @@ private:
     void onHistoryChanged();
     void runFilter(const QString &id, const QHash<QString, double> &overrides = {});
     QStringList folderImages(const QString &dir) const;
-    void browse(int delta);
+    void populateRecentMenu();
+    void addRecent(const QString &path);
+    void showAfterRemoval(const QStringList &before, int index); // next image after trash / move
+    void slideshowStep();
+    void updateShortcutTips();
     bool needsRecovery() const;
 
     int m_serial = 0;
@@ -104,6 +144,16 @@ private:
     QLabel *m_statusState = nullptr;
     bool m_pasteOnActivate = false;
 
+    // Viewer state
+    class QMenu *m_recentMenu = nullptr;
+    class ThumbnailPanel *m_thumbs = nullptr;
+    bool m_fullScreen = false;
+    bool m_wasMaximized = false;
+    QList<QWidget *> m_hiddenForFullScreen;
+    class QTimer *m_slideshowTimer = nullptr;
+    bool m_slideshowPaused = false;
+    bool m_slideshowStartedFullScreen = false;
+
     struct Actions
     {
         QAction *newFromClipboard, *open, *save, *saveAs, *saveProject, *settings, *close, *quit;
@@ -114,10 +164,13 @@ private:
         QAction *forward, *backward, *toFront, *toBack, *duplicate, *mergeSelected, *mergeAll;
         QAction *resizeImage, *canvasSize, *blurArea, *pixelateArea, *coverArea, *hideObjects;
         QAction *notes;
-        QAction *batch;
+        QAction *batch, *print, *capture;
         QAction *straightenDocument, *nextImage, *prevImage, *firstImage, *lastImage;
+        QAction *fullScreen, *slideshow, *info, *rename, *trash, *copyTo, *moveTo, *showInFolder, *clearRecent, *shortcuts, *enlargeSmall, *thumbnails;
         QAction *about;
     } a{};
     QActionGroup *m_toolGroup = nullptr;
     QList<QAction *> m_filterActions;
+    bool m_captureBusy = false;
+    std::unique_ptr<class QPrinter> m_printer; // keeps the chosen printer and paper
 };

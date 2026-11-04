@@ -4,6 +4,7 @@
 
 class QCheckBox;
 class QComboBox;
+class QDoubleSpinBox;
 class QSpinBox;
 
 class SettingsDialog : public QDialog
@@ -17,4 +18,9 @@ private:
     QComboBox *m_language;
     QCheckBox *m_keepClipboard;
     QSpinBox *m_historyLimit;
+    QComboBox *m_wheel = nullptr;
+    QDoubleSpinBox *m_slideshowSeconds = nullptr;
+    QCheckBox *m_slideshowLoop = nullptr;
+    QCheckBox *m_confirmTrash = nullptr;
+    QCheckBox *m_fullScreenEnlarge = nullptr;
 };

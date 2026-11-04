@@ -115,6 +115,12 @@ QList<FormatInfo> exportFormats()
         {"webp", QStringLiteral("WebP"), {QStringLiteral("webp")}},
         {"bmp", QStringLiteral("BMP"), {QStringLiteral("bmp")}},
         {"ico", QStringLiteral("ICO"), {QStringLiteral("ico")}},
+        // Etapa 7: offered when the plugins are there (Qt TIFF plugin, KImageFormats).
+        {"tiff", QStringLiteral("TIFF"), {QStringLiteral("tif"), QStringLiteral("tiff")}},
+        {"avif", QStringLiteral("AVIF"), {QStringLiteral("avif")}},
+        {"heif", QStringLiteral("HEIC"), {QStringLiteral("heic"), QStringLiteral("heif")}},
+        {"jxl", QStringLiteral("JPEG XL"), {QStringLiteral("jxl")}},
+        {"qoi", QStringLiteral("QOI"), {QStringLiteral("qoi")}},
     };
     const QList<QByteArray> supported = QImageWriter::supportedImageFormats();
     QList<FormatInfo> out;
@@ -146,14 +152,22 @@ static QString defaultSuffix(const QByteArray &format)
     return QStringLiteral("png");
 }
 
+bool hasQuality(const QByteArray &format)
+{
+    return format == "avif" || format == "heif" || format == "jxl";
+}
+
 bool isLossy(const SaveOptions &o)
 {
+    if (hasQuality(o.format))
+        return o.format == "heif" || o.quality < 100;
     return o.format == "jpeg" || (o.format == "webp" && !o.webp.lossless);
 }
 
 bool formatHasAlpha(const QByteArray &format)
 {
-    return format == "png" || format == "webp" || format == "ico";
+    return format == "png" || format == "webp" || format == "ico" || format == "tiff" || format == "avif"
+           || format == "heif" || format == "jxl" || format == "qoi";
 }
 
 QString resolveSavePath(const QString &typedPath, const QByteArray &filterFormat,
@@ -202,6 +216,10 @@ static void configure(QImageWriter &w, const SaveOptions &o)
         w.setProgressiveScanWrite(o.jpeg.progressive);
     } else if (o.format == "webp") {
         w.setQuality(o.webp.lossless ? 100 : qBound(0, o.webp.quality, 99));
+    } else if (o.format == "tiff") {
+        w.setCompression(o.tiffLzw ? 1 : 0); // Qt's TIFF handler: 1 = LZW
+    } else if (hasQuality(o.format)) {
+        w.setQuality(qBound(0, o.quality, 100));
     }
 }
 

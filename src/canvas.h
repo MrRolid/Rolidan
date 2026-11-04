@@ -80,6 +80,15 @@ public:
     bool objectsHidden() const { return m_objectsHidden; }
     // Alignment grid over the image (view only), e.g. while rotating.
     void setGridVisible(bool on);
+    // Near-black surroundings for full screen and slideshow (Etapa 5).
+    void setDarkSurroundings(bool on) { m_dark = on; update(); }
+    // Fitting also enlarges images smaller than the view (full screen option, Etapa 5).
+    void setEnlargeSmallImages(bool on);
+    bool enlargesSmallImages() const { return m_enlargeSmall; }
+    // The view is fitted and follows size changes (until zooming or panning).
+    bool isAutoFit() const { return m_autoFit; }
+    // Hide the mouse pointer after a moment without movement (full screen).
+    void setAutoHideCursor(bool on);
     bool gridVisible() const { return m_grid; }
     void setObjectsHidden(bool hidden);
 
@@ -92,6 +101,10 @@ signals:
     void toolChanged(ToolId id);
     // The straighten tool measured a line: rotate by `degrees` (clockwise).
     void straightenRequested(double degrees);
+    // Mouse wheel in "browse images" mode (Etapa 5): +1 next, -1 previous.
+    void browseRequested(int delta);
+    // Pointer tool: double-click outside annotations.
+    void imageDoubleClicked();
 
 protected:
     void paintEvent(QPaintEvent *) override;
@@ -139,4 +152,11 @@ private:
     QImage m_scaledCache;       // downscaled base for zoom < 100 %
     qint64 m_scaledKey = 0;
     double m_scaledZoom = 0;
+    bool m_autoFit = false;
+    class QTimer *m_hideCursorTimer = nullptr;
+    bool m_cursorHidden = false;
+    bool m_autoFitEnlarge = false;
+    bool m_enlargeSmall = false;
+    bool m_dark = false;
+    int m_wheelBrowse = 0;
 };

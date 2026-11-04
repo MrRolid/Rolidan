@@ -13,6 +13,7 @@
 #include <QTextCursor>
 #include <QTextDocument>
 #include <QTextOption>
+#include <QtMath>
 #include <atomic>
 #include <cmath>
 
@@ -113,6 +114,26 @@ double transformScale(const QTransform &t)
     return std::min(sx, sy);
 }
 
+QTransform rotationAbout(const QPointF &c, double degrees)
+{
+    return QTransform::fromTranslate(-c.x(), -c.y()) * QTransform().rotate(degrees)
+           * QTransform::fromTranslate(c.x(), c.y());
+}
+
+namespace {
+// Angle of the linear part of `t` in degrees, (-180, 180].
+double rawAngle(const QTransform &t)
+{
+    return qRadiansToDegrees(std::atan2(t.m12(), t.m11()));
+}
+
+bool isRightAngle(double degrees)
+{
+    const double k = degrees / 90.0;
+    return std::abs(k - std::round(k)) < 1e-4;
+}
+} // namespace
+
 QPointF snapAngle(const QPointF &origin, const QPointF &p, double stepDegrees)
 {
     const QPointF d = p - origin;
@@ -146,8 +167,13 @@ bool Annotation::hitTest(const QPointF &p, double tolerance) const
 
 QList<QPointF> Annotation::handlePoints() const
 {
-    const QRectF r = boundingRect();
-    return {r.topLeft(), r.topRight(), r.bottomRight(), r.bottomLeft()};
+    const QRectF r = frameRect();
+    const double a = rotation();
+    if (a == 0.0)
+        return {r.topLeft(), r.topRight(), r.bottomRight(), r.bottomLeft()};
+    // Rotated: the corners of the box in its own orientation (TL, TR, BR, BL).
+    const QTransform t = rotationAbout(r.center(), a);
+    return {t.map(r.topLeft()), t.map(r.topRight()), t.map(r.bottomRight()), t.map(r.bottomLeft())};
 }
 
 void Annotation::resizeTo(const QRectF &oldBounds, const QRectF &newBounds)
@@ -161,6 +187,28 @@ void Annotation::resizeTo(const QRectF &oldBounds, const QRectF &newBounds)
 }
 
 void Annotation::moveHandle(int, const QPointF &, bool) {}
+
+void Annotation::rotate(double degrees, const QPointF &center)
+{
+    transform = transform * rotationAbout(center, degrees);
+}
+
+double Annotation::rotation() const
+{
+    if (transform.isIdentity() || transform.type() <= QTransform::TxScale)
+        return 0.0;
+    const double a = rawAngle(transform);
+    return isRightAngle(a) ? 0.0 : a;
+}
+
+QRectF Annotation::frameRect() const
+{
+    const double a = rotation();
+    if (a == 0.0)
+        return boundingRect();
+    const QPointF c = boundingRect().center();
+    return rotationAbout(c, -a).map(outline()).boundingRect();
+}
 
 // ================================================================== ImageObject
 
@@ -214,7 +262,7 @@ std::shared_ptr<Annotation> ShapeObject::clone() const
 QRectF ShapeObject::visualRect() const
 {
     const double h = style == Style::Outline ? width / 2.0 : 0.0;
-    return rect.normalized().adjusted(-h, -h, h, h);
+    return transform.mapRect(rect.normalized().adjusted(-h, -h, h, h));
 }
 
 void ShapeObject::paint(QPainter &p) const
@@ -265,8 +313,10 @@ void ShapeObject::paint(QPainter &p) const
     p.restore();
 }
 
-bool ShapeObject::hitTest(const QPointF &pt, double tolerance) const
+bool ShapeObject::hitTest(const QPointF &docPt, double tolerance) const
 {
+    // Rotated shapes: test in their own (unrotated) frame; the transform is rigid.
+    const QPointF pt = transform.isIdentity() ? docPt : transform.inverted().map(docPt);
     const QRectF r = rect.normalized();
     const bool filled = style != Style::Outline || fill.alpha() > 0;
     const double half = (style == Style::Outline ? width / 2.0 : 0.0) + tolerance;
@@ -289,6 +339,34 @@ bool ShapeObject::hitTest(const QPointF &pt, double tolerance) const
 
 void ShapeObject::applyDocumentTransform(const QTransform &t, DocTransformKind kind_)
 {
+    if (!transform.isIdentity()) {
+        // A rotated shape: keep it a rotated rectangle.
+        const QPointF c = boundingRect().center();
+        switch (kind_) {
+        case DocTransformKind::FreeRotate: { // boxes keep their orientation (spec C4)
+            const QPointF d = t.map(c) - c;
+            rect.translate(d);
+            transform = rotationAbout(rect.normalized().center(), rawAngle(transform));
+            return;
+        }
+        case DocTransformKind::Scale: {
+            const double s = transformScale(t);
+            const double a = rawAngle(transform);
+            const QPointF nc = t.map(c);
+            const QSizeF size = rect.normalized().size() * s;
+            rect = QRectF(nc - QPointF(size.width() / 2, size.height() / 2), size);
+            transform = rotationAbout(nc, a);
+            width *= s;
+            radius *= s;
+            normalize();
+            return;
+        }
+        default:
+            transform = transform * t;
+            normalize();
+            return;
+        }
+    }
     if (kind_ == DocTransformKind::FreeRotate) {
         const QRectF r = rect.normalized();
         rect = r.translated(t.map(r.center()) - r.center());
@@ -305,6 +383,38 @@ void ShapeObject::applyDocumentTransform(const QTransform &t, DocTransformKind k
 void ShapeObject::resizeTo(const QRectF &, const QRectF &newBounds)
 {
     rect = newBounds.normalized();
+    transform = QTransform(); // callers resize rotated shapes in their own frame
+}
+
+void ShapeObject::rotate(double degrees, const QPointF &center)
+{
+    transform = transform * rotationAbout(center, degrees);
+    normalize();
+}
+
+void ShapeObject::normalize()
+{
+    const QRectF r = rect.normalized();
+    QTransform t = transform;
+    if (t.isIdentity()) {
+        rect = r;
+        return;
+    }
+    // Rectangles and ellipses are symmetric: a mirrored one is the same shape
+    // rotated the other way.
+    if (t.determinant() < 0)
+        t = QTransform::fromTranslate(-r.center().x(), -r.center().y()) * QTransform::fromScale(-1, 1)
+            * QTransform::fromTranslate(r.center().x(), r.center().y()) * t;
+    const QPointF c = t.map(r.center());
+    double a = rawAngle(t);
+    QSizeF size = r.size();
+    if (isRightAngle(a)) {
+        if (std::lround(a / 90.0) % 2 != 0)
+            size.transpose();
+        a = 0.0;
+    }
+    rect = QRectF(c - QPointF(size.width() / 2, size.height() / 2), size);
+    transform = a == 0.0 ? QTransform() : rotationAbout(c, a);
 }
 
 QList<Prop> ShapeObject::props() const
@@ -456,6 +566,13 @@ void LineObject::applyDocumentTransform(const QTransform &t, DocTransformKind ki
     }
 }
 
+void LineObject::rotate(double degrees, const QPointF &center)
+{
+    const QTransform t = rotationAbout(center, degrees);
+    p1 = t.map(p1);
+    p2 = t.map(p2);
+}
+
 void LineObject::moveHandle(int index, const QPointF &docPoint, bool constrain)
 {
     const QPointF other = index == 0 ? p2 : p1;
@@ -594,6 +711,11 @@ void StrokeObject::applyDocumentTransform(const QTransform &t, DocTransformKind 
     points = t.map(points);
     if (kind == DocTransformKind::Scale)
         width *= transformScale(t);
+}
+
+void StrokeObject::rotate(double degrees, const QPointF &center)
+{
+    points = rotationAbout(center, degrees).map(points);
 }
 
 void StrokeObject::resizeTo(const QRectF &oldBounds, const QRectF &newBounds)
@@ -928,6 +1050,12 @@ QList<QPointF> TextObject::handlePoints() const
     return h;
 }
 
+void TextObject::rotate(double degrees, const QPointF &center)
+{
+    // The bubble tail keeps pointing at the same spot of the image.
+    transform = transform * rotationAbout(center, degrees);
+}
+
 void TextObject::moveHandle(int index, const QPointF &docPoint, bool)
 {
     if (index == 1) {
@@ -1072,6 +1200,11 @@ void MarkerObject::applyDocumentTransform(const QTransform &t, DocTransformKind 
     center = t.map(center);
     if (kind == DocTransformKind::Scale)
         diameter *= transformScale(t);
+}
+
+void MarkerObject::rotate(double degrees, const QPointF &c)
+{
+    center = rotationAbout(c, degrees).map(center);
 }
 
 void MarkerObject::resizeTo(const QRectF &, const QRectF &n)
@@ -1232,6 +1365,11 @@ void PolylineObject::applyDocumentTransform(const QTransform &t, DocTransformKin
         width *= s;
         headSize *= s;
     }
+}
+
+void PolylineObject::rotate(double degrees, const QPointF &center)
+{
+    points = rotationAbout(center, degrees).map(points);
 }
 
 void PolylineObject::moveHandle(int index, const QPointF &docPoint, bool constrain)

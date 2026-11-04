@@ -1,6 +1,7 @@
 #include "settings.h"
 
 #include <QDir>
+#include <QFileInfo>
 #include <QSettings>
 
 namespace settings {
@@ -60,12 +61,18 @@ imageio::SaveOptions saveOptions(const QByteArray &format)
     }
     if (!o.background.isValid())
         o.background = Qt::white;
+    o.tiffLzw = b("export/tiff/lzw", o.tiffLzw);
+    if (imageio::hasQuality(format))
+        o.quality = s().value("export/" + QString::fromLatin1(format) + "/quality", o.quality).toInt();
     return o;
 }
 
 void setSaveOptions(const imageio::SaveOptions &o)
 {
     s().setValue("export/png/compression", o.pngCompression);
+    s().setValue("export/tiff/lzw", o.tiffLzw);
+    if (imageio::hasQuality(o.format))
+        s().setValue("export/" + QString::fromLatin1(o.format) + "/quality", o.quality);
     s().setValue("export/jpeg/quality", o.jpeg.quality);
     s().setValue("export/jpeg/subsampling", o.jpeg.subsampling);
     s().setValue("export/jpeg/progressive", o.jpeg.progressive);
@@ -92,5 +99,46 @@ void setLastExportFormat(const QByteArray &f) { s().setValue("export/lastFormat"
 
 QString cropRatio() { return s().value("tools/crop/ratio", QStringLiteral("free")).toString(); }
 void setCropRatio(const QString &r) { s().setValue("tools/crop/ratio", r); }
+
+QStringList recentFiles()
+{
+    QStringList out;
+    for (const QString &f : s().value("files/recent").toStringList())
+        if (QFileInfo::exists(f) && !out.contains(f))
+            out.append(f);
+    return out.mid(0, kMaxRecent);
+}
+void addRecentFile(const QString &path)
+{
+    const QString abs = QFileInfo(path).absoluteFilePath();
+    QStringList l = s().value("files/recent").toStringList();
+    l.removeAll(abs);
+    l.prepend(abs);
+    s().setValue("files/recent", l.mid(0, kMaxRecent * 2)); // a few spares for vanished files
+}
+void removeRecentFile(const QString &path)
+{
+    QStringList l = s().value("files/recent").toStringList();
+    l.removeAll(QFileInfo(path).absoluteFilePath());
+    s().setValue("files/recent", l);
+}
+void clearRecentFiles() { s().remove("files/recent"); }
+
+double slideshowSeconds() { return qBound(0.5, s().value("viewer/slideshowSeconds", 4.0).toDouble(), 3600.0); }
+void setSlideshowSeconds(double v) { s().setValue("viewer/slideshowSeconds", v); }
+bool slideshowLoop() { return s().value("viewer/slideshowLoop", true).toBool(); }
+void setSlideshowLoop(bool v) { s().setValue("viewer/slideshowLoop", v); }
+
+Wheel wheelAction() { return Wheel(qBound(0, s().value("viewer/wheel", 0).toInt(), 2)); }
+void setWheelAction(Wheel w) { s().setValue("viewer/wheel", int(w)); }
+
+bool fullScreenEnlarge() { return s().value("viewer/fullScreenEnlarge", false).toBool(); }
+void setFullScreenEnlarge(bool v) { s().setValue("viewer/fullScreenEnlarge", v); }
+
+bool confirmTrash() { return s().value("files/confirmTrash", true).toBool(); }
+void setConfirmTrash(bool v) { s().setValue("files/confirmTrash", v); }
+
+QString copyMoveDirectory() { return s().value("files/copyMoveDirectory").toString(); }
+void setCopyMoveDirectory(const QString &dir) { s().setValue("files/copyMoveDirectory", dir); }
 
 } // namespace settings

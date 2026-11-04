@@ -32,7 +32,8 @@ bool ExportDialog::hasOptions(const QByteArray &format, const QImage &composite)
 {
     if (format == "bmp") // only the background for transparent areas
         return composite.hasAlphaChannel();
-    return format == "png" || format == "jpeg" || format == "webp" || format == "ico";
+    return format == "png" || format == "jpeg" || format == "webp" || format == "ico" || format == "tiff"
+           || imageio::hasQuality(format);
 }
 
 QSlider *ExportDialog::addSlider(const QString &label, int min, int max, int value, const QString &tip)
@@ -95,6 +96,20 @@ ExportDialog::ExportDialog(const QImage &composite, const imageio::SaveOptions &
         row->addWidget(m_compression);
         row->addWidget(new QLabel(tr("Smaller"), this));
         form->addRow(tr("Compression:"), row);
+        form->addRow(new QLabel(tr("Transparency is preserved."), this));
+    }
+
+    if (options.format == "tiff") {
+        m_tiffLzw = check(tr("LZW compression (lossless, smaller file)"), options.tiffLzw);
+        form->addRow(m_tiffLzw);
+        form->addRow(new QLabel(tr("Transparency is preserved."), this));
+    }
+
+    if (imageio::hasQuality(options.format)) {
+        m_quality = addSlider(tr("Quality:"), 1, 100, options.quality,
+                              options.format == "heif" ? tr("Higher quality means fewer artifacts and a larger file")
+                                                       : tr("Higher quality means fewer artifacts and a larger file; "
+                                                            "100 is lossless"));
         form->addRow(new QLabel(tr("Transparency is preserved."), this));
     }
 
@@ -225,7 +240,7 @@ ExportDialog::ExportDialog(const QImage &composite, const imageio::SaveOptions &
         });
         updateBackgroundButton();
     }
-    if (options.format == "jpeg" || options.format == "webp") {
+    if (options.format == "jpeg" || options.format == "webp" || imageio::hasQuality(options.format)) {
         m_estimate = new QLabel(this);
         form->addRow(tr("Estimated size:"), m_estimate);
         m_preview = new QLabel(this);
@@ -278,6 +293,10 @@ imageio::SaveOptions ExportDialog::options() const
                 o.icoSizes.append(c->property("icoSize").toInt());
         }
     }
+    if (m_tiffLzw)
+        o.tiffLzw = m_tiffLzw->isChecked();
+    if (imageio::hasQuality(o.format) && m_quality)
+        o.quality = m_quality->value();
     if (o.format == "jpeg") {
         o.jpeg.quality = m_quality->value();
         if (m_subsampling)

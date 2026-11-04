@@ -1,5 +1,9 @@
 #include "canvas.h"
 
+#include "settings.h"
+#include <QApplication>
+#include <QTimer>
+
 #include "document.h"
 #include "tooldefaults.h"
 #include "toast.h"
@@ -107,6 +111,7 @@ void Canvas::setZoom(double zoom, const QPointF &anchor)
     if (qFuzzyCompare(zoom, m_zoom))
         return;
     const QPointF imgAnchor = toImage(anchor);
+    m_autoFit = false;
     m_zoom = zoom;
     m_origin = anchor - imgAnchor * scale();
     clampOrigin();
@@ -136,14 +141,16 @@ void Canvas::zoomOut()
 
 void Canvas::fitToWindow(bool allowEnlarge)
 {
-    if (m_doc->isEmpty() || width() <= 2 * kViewMargin || height() <= 2 * kViewMargin)
+    const int margin = m_dark ? 0 : kViewMargin; // full screen: edge to edge
+    if (m_doc->isEmpty() || width() <= 2 * margin || height() <= 2 * margin)
         return;
     const QSize s = m_doc->size();
-    double z = std::min((width() - 2.0 * kViewMargin) / s.width(),
-                        (height() - 2.0 * kViewMargin) / s.height())
+    double z = std::min((width() - 2.0 * margin) / s.width(), (height() - 2.0 * margin) / s.height())
                * devicePixelRatioF();
-    if (!allowEnlarge)
+    if (!allowEnlarge && !m_enlargeSmall)
         z = std::min(z, 1.0);
+    m_autoFit = true; // follows the window size until the user zooms or pans
+    m_autoFitEnlarge = allowEnlarge;
     m_zoom = std::clamp(z, kMinZoom, kMaxZoom);
     m_origin = QPointF((width() - s.width() * scale()) / 2, (height() - s.height() * scale()) / 2);
     snapOrigin();
@@ -155,6 +162,7 @@ void Canvas::fitToWindow(bool allowEnlarge)
 void Canvas::actualSize()
 {
     const QPointF centerImg = toImage(rect().center());
+    m_autoFit = false;
     m_zoom = 1.0;
     m_origin = QPointF(rect().center()) - centerImg * scale();
     clampOrigin();
@@ -168,8 +176,9 @@ void Canvas::clampOrigin()
         return;
     const QSizeF sz = QSizeF(m_doc->size()) * scale();
     // Keep the image centered when it fits, otherwise keep part of it visible.
-    auto clampAxis = [](double origin, double extent, double view) {
-        if (extent <= view - 2 * kViewMargin)
+    const int margin = m_dark ? 0 : kViewMargin;
+    auto clampAxis = [margin](double origin, double extent, double view) {
+        if (extent <= view - 2 * margin)
             return (view - extent) / 2;
         return std::clamp(origin, kKeepVisible - extent, view - kKeepVisible);
     };
@@ -188,9 +197,44 @@ void Canvas::snapOrigin()
 
 void Canvas::panBy(const QPointF &delta)
 {
+    const QPointF before = m_origin;
     m_origin += delta;
     clampOrigin();
+    if ((m_origin - before).manhattanLength() > 0.5)
+        m_autoFit = false; // a real pan (a fitted image cannot move)
     update();
+}
+
+void Canvas::setAutoHideCursor(bool on)
+{
+    if (on && !m_hideCursorTimer) {
+        m_hideCursorTimer = new QTimer(this);
+        m_hideCursorTimer->setSingleShot(true);
+        m_hideCursorTimer->setInterval(1500);
+        connect(m_hideCursorTimer, &QTimer::timeout, this, [this] {
+            if (m_panning || m_tool->isBusy() || QApplication::mouseButtons() != Qt::NoButton)
+                return;
+            m_cursorHidden = true;
+            setCursor(Qt::BlankCursor);
+        });
+        m_hideCursorTimer->start();
+    } else if (!on && m_hideCursorTimer) {
+        delete m_hideCursorTimer;
+        m_hideCursorTimer = nullptr;
+        if (m_cursorHidden) {
+            m_cursorHidden = false;
+            updateCursor(mapFromGlobal(QCursor::pos()));
+        }
+    }
+}
+
+void Canvas::setEnlargeSmallImages(bool on)
+{
+    if (on == m_enlargeSmall)
+        return;
+    m_enlargeSmall = on;
+    if (m_autoFit && !m_doc->isEmpty())
+        fitToWindow(m_autoFitEnlarge);
 }
 
 // ---------------------------------------------------------------- selection
@@ -467,7 +511,7 @@ void Canvas::drawObjects(QPainter &p, const QRectF &imgW)
 void Canvas::paintEvent(QPaintEvent *)
 {
     QPainter p(this);
-    p.fillRect(rect(), palette().color(QPalette::Dark));
+    p.fillRect(rect(), m_dark ? QColor(18, 18, 18) : palette().color(QPalette::Dark));
     if (m_doc->isEmpty()) {
         p.setPen(palette().color(QPalette::BrightText));
         QFont f = font();
@@ -554,6 +598,13 @@ void Canvas::mousePressEvent(QMouseEvent *e)
 
 void Canvas::mouseMoveEvent(QMouseEvent *e)
 {
+    if (m_hideCursorTimer) {
+        m_hideCursorTimer->start();
+        if (m_cursorHidden) {
+            m_cursorHidden = false;
+            updateCursor(e->position());
+        }
+    }
     if (m_panning) {
         panBy(e->position() - m_panLast);
         m_panLast = e->position();
@@ -600,9 +651,22 @@ void Canvas::wheelEvent(QWheelEvent *e)
 {
     if (m_doc->isEmpty())
         return;
-    if (e->modifiers() & Qt::ControlModifier) {
+    const settings::Wheel mode = settings::wheelAction();
+    const bool plain = !(e->modifiers() & (Qt::ControlModifier | Qt::ShiftModifier | Qt::AltModifier));
+    if ((e->modifiers() & Qt::ControlModifier) || (plain && mode == settings::Wheel::Zoom)) {
         const double steps = e->angleDelta().y() / 120.0;
         setZoom(m_zoom * std::pow(1.25, steps), e->position());
+        e->accept();
+        return;
+    }
+    if (plain && mode == settings::Wheel::Browse) {
+        // One image per notch; touchpads send small deltas that add up.
+        m_wheelBrowse += e->angleDelta().y();
+        while (std::abs(m_wheelBrowse) >= 120) {
+            const int dir = m_wheelBrowse > 0 ? -1 : 1; // wheel down = next image
+            m_wheelBrowse += dir * 120;
+            emit browseRequested(dir);
+        }
         e->accept();
         return;
     }
@@ -646,8 +710,13 @@ void Canvas::keyPressEvent(QKeyEvent *e)
         return;
     }
     if (e->key() == Qt::Key_Escape) {
-        if (!m_tool->cancel() && !m_area.isEmpty())
+        if (!m_tool->cancel()) {
+            if (m_area.isEmpty()) {
+                e->ignore(); // nothing to cancel: the window may use it (leave full screen)
+                return;
+            }
             setAreaSelection({});
+        }
         update();
         return;
     }
@@ -666,8 +735,8 @@ void Canvas::keyReleaseEvent(QKeyEvent *e)
 
 void Canvas::resizeEvent(QResizeEvent *e)
 {
-    if (m_fitPending && !m_doc->isEmpty()) {
-        fitToWindow(false);
+    if ((m_fitPending || m_autoFit) && !m_doc->isEmpty()) {
+        fitToWindow(m_fitPending ? false : m_autoFitEnlarge); // e.g. entering full screen
         m_fitPending = false;
         return;
     }

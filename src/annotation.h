@@ -67,6 +67,18 @@ public:
     // Endpoints / TextWidth mode. `constrain` = Shift (15° steps for lines).
     virtual void moveHandle(int index, const QPointF &docPoint, bool constrain);
 
+    // ---- free rotation (Etapa 6) ----
+    // Whether the Pointer tool offers a rotation handle.
+    virtual bool rotatable() const { return true; }
+    // Rotate by `degrees` (clockwise on screen) around `center` (document coordinates).
+    virtual void rotate(double degrees, const QPointF &center);
+    // Angle of the object's box in degrees, (-180, 180]; 0 when the box is
+    // axis-aligned (also after 90° document rotations).
+    double rotation() const;
+    // The box before rotation: rotating it by rotation() around its center
+    // gives outline(). Equals boundingRect() for axis-aligned objects.
+    QRectF frameRect() const;
+
     // ---- properties (spec D1) ----
     virtual QList<Prop> props() const { return {}; }
     virtual QVariant prop(Prop) const { return {}; }
@@ -90,6 +102,8 @@ using ObjectList = QList<ObjectPtr>;
 
 // Uniform-ish scale factor of a transform (for widths, font sizes: spec C4).
 double transformScale(const QTransform &t);
+// Rotation by `degrees` around `center`.
+QTransform rotationAbout(const QPointF &center, double degrees);
 
 // ------------------------------------------------------------------ image
 
@@ -132,9 +146,15 @@ public:
     bool hitTest(const QPointF &docPoint, double tolerance) const override;
     void applyDocumentTransform(const QTransform &t, DocTransformKind kind) override;
     void resizeTo(const QRectF &oldBounds, const QRectF &newBounds) override;
+    void rotate(double degrees, const QPointF &center) override;
     QList<Prop> props() const override;
     QVariant prop(Prop) const override;
     void setProp(Prop, const QVariant &) override;
+
+    // Rotated shapes (Etapa 6): `rect` is the unrotated box in document
+    // coordinates and `transform` a rotation around its center (identity when
+    // not rotated, which keeps all the older code paths exact).
+    void normalize();
 
     Kind kind = Kind::Rect;
     Style style = Style::Outline;
@@ -167,6 +187,8 @@ public:
     HandleMode handleMode() const override { return HandleMode::Endpoints; }
     QList<QPointF> handlePoints() const override { return {p1, p2}; }
     void moveHandle(int index, const QPointF &docPoint, bool constrain) override;
+    bool rotatable() const override { return false; } // the endpoints do it
+    void rotate(double degrees, const QPointF &center) override;
     QList<Prop> props() const override;
     QVariant prop(Prop) const override;
     void setProp(Prop, const QVariant &) override;
@@ -207,6 +229,7 @@ public:
     bool hitTest(const QPointF &docPoint, double tolerance) const override;
     void applyDocumentTransform(const QTransform &t, DocTransformKind kind) override;
     void resizeTo(const QRectF &oldBounds, const QRectF &newBounds) override;
+    void rotate(double degrees, const QPointF &center) override;
     QList<Prop> props() const override;
     QVariant prop(Prop) const override;
     void setProp(Prop, const QVariant &) override;
@@ -265,6 +288,7 @@ public:
     HandleMode handleMode() const override { return HandleMode::TextWidth; }
     QList<QPointF> handlePoints() const override;
     void moveHandle(int index, const QPointF &docPoint, bool constrain) override;
+    void rotate(double degrees, const QPointF &center) override;
     QList<Prop> props() const override;
     QVariant prop(Prop) const override;
     void setProp(Prop, const QVariant &) override;
@@ -327,6 +351,8 @@ public:
     void applyDocumentTransform(const QTransform &t, DocTransformKind kind) override;
     bool keepsAspect() const override { return true; }
     void resizeTo(const QRectF &oldBounds, const QRectF &newBounds) override;
+    bool rotatable() const override { return false; } // a circle with an upright number
+    void rotate(double degrees, const QPointF &center) override;
     QList<Prop> props() const override;
     QVariant prop(Prop) const override;
     void setProp(Prop, const QVariant &) override;
@@ -362,6 +388,7 @@ public:
     HandleMode handleMode() const override { return HandleMode::Endpoints; }
     QList<QPointF> handlePoints() const override { return QList<QPointF>(points.begin(), points.end()); }
     void moveHandle(int index, const QPointF &docPoint, bool constrain) override;
+    void rotate(double degrees, const QPointF &center) override;
     QList<Prop> props() const override;
     QVariant prop(Prop) const override;
     void setProp(Prop, const QVariant &) override;

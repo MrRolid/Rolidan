@@ -9,7 +9,11 @@
 #include "recovery.h"
 #include "filterdialog.h"
 #include "batch.h"
+#include "printing.h"
+#include "capture.h"
 #include "filters.h"
+#include <QPrinter>
+#include <QScreen>
 #include <QRegularExpression>
 #include "notespanel.h"
 #include "icons.h"
@@ -19,6 +23,8 @@
 #include "tools.h"
 #include "settings.h"
 #include "settingsdialog.h"
+#include "shortcuts.h"
+#include "thumbnails.h"
 #include "toast.h"
 
 #include <QAction>
@@ -36,6 +42,7 @@
 #include <QLocale>
 #include <QMenuBar>
 #include <QMessageBox>
+#include <QPrinter>
 #include <QRegularExpression>
 #include <QMimeData>
 #include <QPushButton>
@@ -44,7 +51,9 @@
 #include <QToolBar>
 #include <QThreadPool>
 #include <QUrl>
+#include <QGuiApplication>
 #include <QHBoxLayout>
+#include <QMenu>
 #include <QScrollArea>
 #include <QScrollBar>
 #include <QSettings>
@@ -107,8 +116,33 @@ MainWindow::MainWindow(QWidget *parent)
     a.notes->setIconText(tr("Notes"));
     a.notes->setIcon(icons::get(QStringLiteral("notes")));
     a.notes->setShortcut(QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_N));
-    a.notes->setToolTip(tr("Text notes about the image, Markdown (Ctrl+Alt+N)"));
+    a.notes->setToolTip(tr("Text notes about the image, Markdown"));
+    a.notes->setObjectName(QStringLiteral("view.notes"));
+    shortcuts::init(a.notes);
     addAction(a.notes);
+
+    // Thumbnails of the current folder (Etapa 5).
+    m_thumbs = new ThumbnailPanel([this](const QString &dir) { return folderImages(dir); }, this);
+    addDockWidget(Qt::BottomDockWidgetArea, m_thumbs);
+    m_thumbs->setVisible(QSettings().value(QStringLiteral("viewer/thumbnails"), false).toBool());
+    a.thumbnails = m_thumbs->toggleViewAction();
+    a.thumbnails->setText(tr("&Thumbnails"));
+    a.thumbnails->setIconText(tr("Thumbnails"));
+    a.thumbnails->setIcon(icons::get(QStringLiteral("view-thumbnails")));
+    a.thumbnails->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_T));
+    a.thumbnails->setToolTip(tr("Thumbnails of the images in the folder"));
+    a.thumbnails->setObjectName(QStringLiteral("view.thumbnails"));
+    shortcuts::init(a.thumbnails);
+    addAction(a.thumbnails);
+    connect(a.thumbnails, &QAction::triggered, this, [](bool on) {
+        QSettings().setValue(QStringLiteral("viewer/thumbnails"), on);
+    });
+    connect(m_thumbs, &ThumbnailPanel::fileActivated, this, &MainWindow::showFolderImage);
+    auto followDocument = [this] {
+        m_thumbs->setCurrentFile(!m_doc->originPath().isEmpty() ? m_doc->originPath() : m_doc->filePath());
+    };
+    connect(m_doc, &Document::documentReset, this, followDocument);
+    connect(m_doc, &Document::historyChanged, this, followDocument);
     createMenusAndToolbars();
 
     connect(m_doc, &Document::historyChanged, this, [this] {
@@ -138,6 +172,8 @@ MainWindow::MainWindow(QWidget *parent)
         updateToolOptions();
         updateActions();
     });
+    connect(m_canvas, &Canvas::browseRequested, this, [this](int d) { browse(d); });
+    connect(m_canvas, &Canvas::imageDoubleClicked, this, [this] { setFullScreenMode(!m_fullScreen); });
     connect(m_canvas, &Canvas::cursorMoved, this, [this](const QPoint &p, bool inside) {
         m_statusCursor->setText(inside ? QStringLiteral("%1, %2").arg(p.x()).arg(p.y()) : QString());
     });
@@ -200,7 +236,7 @@ void MainWindow::createActions()
     a.copy = make(tr("&Copy Image Only"), QKeySequence(Qt::CTRL | Qt::Key_C), "edit-copy", [this] { copy(false); });
     a.copyAll = make(tr("Copy with Annotations"), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_C), "edit-copy",
                      [this] { copy(true); });
-    a.copyResult = make(tr("Copy &Result"), QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_C), "edit-copy",
+    a.copyResult = make(tr("Copy Re&sult"), QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_C), "edit-copy",
                         [this] { copyResult(); });
     a.copyResult->setToolTip(tr("Copy the whole resulting image (Ctrl+Alt+C)"));
     a.paste = make(tr("&Paste"), QKeySequence(Qt::CTRL | Qt::Key_V), "edit-paste", [this] { paste(); });
@@ -210,17 +246,20 @@ void MainWindow::createActions()
 
     a.cropToSelection = make(tr("Crop to &Selection"), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_K),
                              "transform-crop", [this] { cropToSelection(); });
-    a.rotateLeft = make(tr("Rotate &Left"), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_R), "object-rotate-left",
+    // Viewer-style single keys (IrfanView): L / R and < / > rotate, H / V flip.
+    a.rotateLeft = make(tr("Rotate &Left"), QKeySequence(Qt::Key_L), "object-rotate-left",
                         [this] { transformDocument([](const DocState &s) { return docops::rotate90(s, false); },
                                                    tr("Rotate left")); });
-    a.rotateRight = make(tr("Rotate &Right"), QKeySequence(Qt::CTRL | Qt::Key_R), "object-rotate-right",
+    a.rotateRight = make(tr("Rotate &Right"), QKeySequence(Qt::Key_R), "object-rotate-right",
                          [this] { transformDocument([](const DocState &s) { return docops::rotate90(s, true); },
                                                     tr("Rotate right")); });
+    a.rotateLeft->setShortcuts({QKeySequence(Qt::Key_L), QKeySequence(Qt::Key_Less)});
+    a.rotateRight->setShortcuts({QKeySequence(Qt::Key_R), QKeySequence(Qt::Key_Greater)});
     a.rotate180 = make(tr("Rotate 1&80°"), {}, "", [this] { transformDocument(&docops::rotate180, tr("Rotate 180°")); });
-    a.flipH = make(tr("Flip &Horizontally"), {}, "object-flip-horizontal",
+    a.flipH = make(tr("Flip &Horizontally"), QKeySequence(Qt::Key_H), "object-flip-horizontal",
                    [this] { transformDocument([](const DocState &s) { return docops::flip(s, Qt::Horizontal); },
                                               tr("Flip horizontally")); });
-    a.flipV = make(tr("Flip &Vertically"), {}, "object-flip-vertical",
+    a.flipV = make(tr("Flip &Vertically"), QKeySequence(Qt::Key_V), "object-flip-vertical",
                    [this] { transformDocument([](const DocState &s) { return docops::flip(s, Qt::Vertical); },
                                               tr("Flip vertically")); });
 
@@ -232,46 +271,52 @@ void MainWindow::createActions()
     a.zoomIn->setShortcuts({QKeySequence::ZoomIn, QKeySequence(Qt::CTRL | Qt::Key_Equal)});
     a.zoomOut = make(tr("Zoom &Out"), QKeySequence::ZoomOut, "zoom-out", [this] { m_canvas->zoomOut(); });
 
+    // Tools: Shift + letter always selects the tool; the plain letter too,
+    // unless a viewer action uses it (R, L, H, V, F).
     m_toolGroup = new QActionGroup(this);
-    auto tool = [&](const QString &text, Qt::Key key, const char *icon, ToolId id) {
+    auto tool = [&](const QString &text, Qt::Key key, const char *icon, ToolId id, const QString &tip = {},
+                    bool plain = true) {
         QAction *act = make(text, QKeySequence(key), icon, [this, id] { m_canvas->setTool(id); });
+        QList<QKeySequence> keys;
+        if (plain)
+            keys << QKeySequence(key);
+        keys << QKeySequence(Qt::SHIFT | key);
+        act->setShortcuts(keys);
         act->setCheckable(true);
         act->setData(int(id));
-        act->setToolTip(QStringLiteral("%1 (%2)").arg(text, QKeySequence(key).toString(QKeySequence::NativeText)));
+        act->setProperty("tip", tip);
+        act->setObjectName(QStringLiteral("tool.") + QLatin1String(toolName(id)));
         m_toolGroup->addAction(act);
         return act;
     };
-    a.toolPointer = tool(tr("Pointer"), Qt::Key_V, "edit-select", ToolId::Pointer);
+    a.toolPointer = tool(tr("Pointer"), Qt::Key_V, "edit-select", ToolId::Pointer, {}, false);
     a.toolSelect = tool(tr("Select Area"), Qt::Key_M, "select-rectangular", ToolId::Select);
-    a.toolCrop = tool(tr("Crop"), Qt::Key_C, "transform-crop", ToolId::Crop);
+    a.toolCrop = tool(tr("Crop"), Qt::Key_Y, "transform-crop", ToolId::Crop);
     tool(tr("Text"), Qt::Key_T, "draw-text", ToolId::Text);
     tool(tr("Arrow"), Qt::Key_A, "draw-arrow", ToolId::Arrow);
-    tool(tr("Line"), Qt::Key_L, "draw-line", ToolId::Line);
-    tool(tr("Rectangle"), Qt::Key_R, "draw-rectangle", ToolId::Rect);
+    tool(tr("Line"), Qt::Key_L, "draw-line", ToolId::Line, {}, false);
+    tool(tr("Rectangle"), Qt::Key_R, "draw-rectangle", ToolId::Rect, {}, false);
     tool(tr("Ellipse"), Qt::Key_O, "draw-ellipse", ToolId::Ellipse);
     tool(tr("Brush"), Qt::Key_B, "draw-brush", ToolId::Brush);
-    tool(tr("Highlighter"), Qt::Key_H, "draw-highlight", ToolId::Highlighter);
-    tool(tr("Cover"), Qt::Key_K, "draw-cover", ToolId::Cover)->setToolTip(tr("Opaque cover for sensitive data (K)"));
+    tool(tr("Highlighter"), Qt::Key_H, "draw-highlight", ToolId::Highlighter, {}, false);
+    tool(tr("Cover"), Qt::Key_K, "draw-cover", ToolId::Cover, tr("Opaque cover for sensitive data"));
     tool(tr("Color Picker"), Qt::Key_I, "color-picker", ToolId::Eyedropper);
-    tool(tr("Numbered Marker"), Qt::Key_N, "draw-marker", ToolId::Marker)
-        ->setToolTip(tr("Numbered marker (N): each click adds the next number"));
-    tool(tr("Polyline"), Qt::Key_P, "draw-polyline", ToolId::Polyline)
-        ->setToolTip(tr("Polyline (P): click to add points, double-click or Enter to finish"));
-    tool(tr("Polygon"), Qt::Key_G, "draw-polygon", ToolId::Polygon)
-        ->setToolTip(tr("Polygon (G): click to add points, click the first point or press Enter to close"));
-    tool(tr("Bubble"), Qt::Key_Q, "draw-bubble", ToolId::Bubble)
-        ->setToolTip(tr("Speech bubble (Q): press where the tail points, drag to place the bubble"));
-    tool(tr("Clone Stamp"), Qt::Key_S, "tool-clone", ToolId::Clone)
-        ->setToolTip(tr("Clone stamp (S): Ctrl+click or right-click sets the source"));
-    tool(tr("Eraser"), Qt::Key_E, "draw-eraser", ToolId::Eraser)
-        ->setToolTip(tr("Pixel eraser (E): erases the image to transparency, not annotations"));
+    tool(tr("Numbered Marker"), Qt::Key_N, "draw-marker", ToolId::Marker, tr("Each click adds the next number"));
+    tool(tr("Polyline"), Qt::Key_P, "draw-polyline", ToolId::Polyline,
+         tr("Click to add points, double-click or Enter to finish"));
+    tool(tr("Polygon"), Qt::Key_G, "draw-polygon", ToolId::Polygon,
+         tr("Click to add points, click the first point or press Enter to close"));
+    tool(tr("Bubble"), Qt::Key_Q, "draw-bubble", ToolId::Bubble,
+         tr("Press where the tail points, drag to place the bubble"));
+    tool(tr("Clone Stamp"), Qt::Key_S, "tool-clone", ToolId::Clone, tr("Ctrl+click or right-click sets the source"));
+    tool(tr("Eraser"), Qt::Key_E, "draw-eraser", ToolId::Eraser,
+         tr("Erases the image to transparency, not annotations"));
     tool(tr("Blur Brush"), Qt::Key_U, "tool-blur", ToolId::BlurBrush);
-    tool(tr("Pixelate Brush"), Qt::Key_J, "tool-pixelate", ToolId::PixelBrush)
-        ->setToolTip(tr("Pixelate brush (J): mosaic where you paint"));
-    tool(tr("Paint Bucket"), Qt::Key_F, "tool-bucket", ToolId::Bucket)
-        ->setToolTip(tr("Paint bucket (F): fills an area of similar color in the image"));
-    tool(tr("Straighten"), Qt::Key_W, "tool-straighten", ToolId::Straighten)
-        ->setToolTip(tr("Straighten (W): drag along a line that should be level or upright"));
+    tool(tr("Pixelate Brush"), Qt::Key_J, "tool-pixelate", ToolId::PixelBrush, tr("Mosaic where you paint"));
+    tool(tr("Paint Bucket"), Qt::Key_F, "tool-bucket", ToolId::Bucket,
+         tr("Fills an area of similar color in the image"), false);
+    tool(tr("Straighten"), Qt::Key_W, "tool-straighten", ToolId::Straighten,
+         tr("Drag along a line that should be level or upright"));
     a.toolPointer->setChecked(true);
 
     // Arrange (spec D1). Brackets are hard to reach on some layouts: Page Up/Down too.
@@ -289,14 +334,15 @@ void MainWindow::createActions()
                     [this] { arrange(int(docops::Order::ToBack)); });
     a.toBack->setShortcuts({QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_BracketLeft),
                             QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_PageDown)});
-    a.duplicate = make(tr("D&uplicate"), QKeySequence(Qt::CTRL | Qt::Key_D), "edit-copy",
+    a.duplicate = make(tr("Dup&licate"), QKeySequence(Qt::CTRL | Qt::Key_D), "edit-copy",
                        [this] { duplicateSelection(); });
     a.mergeSelected = make(tr("&Merge Selected into Image"), {}, "", [this] { mergeIntoImage(false); });
     a.mergeAll = make(tr("Merge &All Annotations into Image"), {}, "", [this] { mergeIntoImage(true); });
 
-    a.resizeImage = make(tr("Resi&ze Image…"), QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_I), "transform-scale",
+    a.resizeImage = make(tr("Resi&ze Image…"), QKeySequence(Qt::CTRL | Qt::Key_R), "transform-scale",
                          [this] { resizeImageDialog(); });
-    a.canvasSize = make(tr("Canvas Si&ze…"), QKeySequence(Qt::CTRL | Qt::ALT | Qt::SHIFT | Qt::Key_I), "",
+    a.resizeImage->setShortcuts({QKeySequence(Qt::CTRL | Qt::Key_R), QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_I)});
+    a.canvasSize = make(tr("Ca&nvas Size…"), QKeySequence(Qt::CTRL | Qt::ALT | Qt::SHIFT | Qt::Key_I), "",
                         [this] { canvasSizeDialog(); });
     a.blurArea = make(tr("&Blur Selection"), {}, "", [this] { areaEffect(0); });
     a.pixelateArea = make(tr("&Pixelate Selection"), {}, "", [this] { areaEffect(1); });
@@ -329,6 +375,7 @@ void MainWindow::createActions()
                 runFilter(QStringLiteral("noise"), {{QStringLiteral("color"), 1}});
             }));
             m_filterActions.last()->setData(id);
+            m_filterActions.last()->setProperty("filterColor", 1);
             continue;
         }
         QAction *act = make(text, filterKeys.value(id), "", [this, id] { runFilter(id); });
@@ -362,26 +409,142 @@ void MainWindow::createActions()
         dlg.exec();
     });
     a.batch->setToolTip(tr("Convert, shrink or adjust many images at once"));
+    a.print = make(tr("Pri&nt…"), QKeySequence::Print, "document-print", [this] { print(); });
+    a.print->setToolTip(tr("Print the image: fit to page or actual size, with a preview"));
+    a.capture = make(tr("Capt&ure Screen"), QKeySequence(Qt::Key_C), "camera-photo", [this] { captureScreen(); });
+    a.capture->setIconText(tr("Screenshot"));
+    a.capture->setToolTip(tr("Screenshot: Rolidan steps aside, takes the screenshot and comes back with it. "
+                             "The arrow chooses whole screen or area, the field next to it the delay."));
 
     // Browsing the folder of the current image (Etapa 4).
-    a.nextImage = make(tr("&Next Image in Folder"), QKeySequence(Qt::Key_PageDown), "go-next", [this] { browse(1); });
+    a.nextImage = make(tr("Ne&xt Image in Folder"), QKeySequence(Qt::Key_PageDown), "go-next", [this] { browse(1); });
     a.prevImage = make(tr("Pre&vious Image in Folder"), QKeySequence(Qt::Key_PageUp), "go-previous",
                        [this] { browse(-1); });
     a.firstImage = make(tr("F&irst Image in Folder"), QKeySequence(Qt::Key_Home), "", [this] { browse(-1000000); });
     a.lastImage = make(tr("&Last Image in Folder"), QKeySequence(Qt::Key_End), "", [this] { browse(1000000); });
+
+    // Viewer (Etapa 5).
+    a.fullScreen = make(tr("F&ull Screen"), QKeySequence(Qt::Key_F11), "view-fullscreen",
+                        [this] { setFullScreenMode(!m_fullScreen); });
+    a.fullScreen->setCheckable(true);
+    a.fullScreen->setShortcuts({QKeySequence(Qt::Key_F11), QKeySequence(Qt::Key_F)}); // Enter: see keyPressEvent
+    a.slideshow = make(tr("&Slideshow"), QKeySequence(Qt::Key_F5), "media-playback-start", [this] {
+        if (isSlideshowRunning())
+            stopSlideshow();
+        else
+            startSlideshow();
+    });
+    a.slideshow->setCheckable(true);
+    a.slideshow->setToolTip(tr("Show the images of the folder one after another in full screen (F5)"));
+    a.info = make(tr("Image In&formation…"), QKeySequence(Qt::CTRL | Qt::Key_I), "document-properties",
+                  [this] { showImageInfo(); });
+    a.info->setShortcuts({QKeySequence(Qt::CTRL | Qt::Key_I), QKeySequence(Qt::ALT | Qt::Key_Return)});
+    a.rename = make(tr("R&ename File…"), QKeySequence(Qt::Key_F2), "edit-rename", [this] { renameDialog(); });
+    a.trash = make(tr("Move File to Tras&h…"), QKeySequence(Qt::CTRL | Qt::Key_Delete), "user-trash",
+                   [this] { trashCurrentFile(); });
+    a.copyTo = make(tr("Cop&y File to Folder…"), QKeySequence(Qt::Key_F8), "edit-copy",
+                    [this] { copyOrMoveDialog(false); });
+    a.moveTo = make(tr("&Move File to Folder…"), QKeySequence(Qt::Key_F7), "go-jump",
+                    [this] { copyOrMoveDialog(true); });
+    a.showInFolder = make(tr("Show in File Mana&ger"), {}, "folder-open", [this] { showInFolder(); });
+    a.clearRecent = make(tr("&Clear List"), {}, "edit-clear", [this] { settings::clearRecentFiles(); });
+    a.enlargeSmall = make(tr("&Enlarge Small Images in Full Screen"), QKeySequence(Qt::Key_Z), "zoom-fit-best",
+                          [this] { setEnlargeSmallImages(!settings::fullScreenEnlarge()); });
+    a.enlargeSmall->setCheckable(true);
+    a.enlargeSmall->setChecked(settings::fullScreenEnlarge());
+    a.enlargeSmall->setToolTip(tr("In full screen, fit every image to the screen, small ones too (Z)"));
+    a.shortcuts = make(tr("&Keyboard Shortcuts…"), {}, "preferences-desktop-keyboard", [this] { showShortcuts(); });
+
+    // Stable ids for customizable shortcuts (settings keys, never translated).
+    const QList<std::pair<QAction *, const char *>> ids = {
+        {a.newFromClipboard, "file.newFromClipboard"}, {a.open, "file.open"}, {a.save, "file.save"},
+        {a.saveAs, "file.saveAs"}, {a.saveProject, "file.saveProject"}, {a.batch, "file.batch"}, {a.print, "file.print"}, {a.capture, "file.capture"},
+        {a.prevImage, "file.previousImage"}, {a.nextImage, "file.nextImage"}, {a.firstImage, "file.firstImage"},
+        {a.lastImage, "file.lastImage"}, {a.info, "file.info"}, {a.rename, "file.rename"},
+        {a.copyTo, "file.copyToFolder"}, {a.moveTo, "file.moveToFolder"}, {a.trash, "file.trash"},
+        {a.showInFolder, "file.showInFolder"}, {a.settings, "file.settings"}, {a.shortcuts, "file.shortcuts"},
+        {a.close, "file.close"}, {a.quit, "file.quit"},
+        {a.undo, "edit.undo"}, {a.redo, "edit.redo"}, {a.cut, "edit.cut"}, {a.cutAll, "edit.cutAll"},
+        {a.copy, "edit.copy"}, {a.copyAll, "edit.copyAll"}, {a.copyResult, "edit.copyResult"},
+        {a.paste, "edit.paste"}, {a.del, "edit.delete"}, {a.selectAll, "edit.selectAll"},
+        {a.duplicate, "edit.duplicate"},
+        {a.forward, "arrange.forward"}, {a.backward, "arrange.backward"}, {a.toFront, "arrange.toFront"},
+        {a.toBack, "arrange.toBack"},
+        {a.cropToSelection, "image.cropToSelection"}, {a.rotateLeft, "image.rotateLeft"},
+        {a.rotateRight, "image.rotateRight"}, {a.rotate180, "image.rotate180"}, {a.flipH, "image.flipHorizontally"},
+        {a.flipV, "image.flipVertically"}, {a.straightenDocument, "image.straightenDocument"},
+        {a.resizeImage, "image.resize"}, {a.canvasSize, "image.canvasSize"}, {a.blurArea, "image.blurSelection"},
+        {a.pixelateArea, "image.pixelateSelection"}, {a.coverArea, "image.coverSelection"},
+        {a.mergeSelected, "image.mergeSelected"}, {a.mergeAll, "image.mergeAll"},
+        {a.fit, "view.fit"}, {a.actual, "view.actualSize"}, {a.zoomIn, "view.zoomIn"}, {a.zoomOut, "view.zoomOut"},
+        {a.fullScreen, "view.fullScreen"}, {a.enlargeSmall, "view.enlargeSmall"}, {a.slideshow, "view.slideshow"}, {a.hideObjects, "view.hideAnnotations"},
+        {a.about, "help.about"}};
+    for (const auto &[act, id] : ids)
+        act->setObjectName(QLatin1String(id));
+    for (QAction *act : std::as_const(m_filterActions)) {
+        QString id = QStringLiteral("filter.") + act->data().toString();
+        if (act->property("filterColor").isValid())
+            id += act->property("filterColor").toInt() ? QStringLiteral(".color") : QString();
+        act->setObjectName(id);
+    }
+    for (QAction *act : customizableActions())
+        shortcuts::init(act);
+    updateShortcutTips();
+}
+
+QList<QAction *> MainWindow::customizableActions() const
+{
+    QList<QAction *> out;
+    for (QAction *act : actions())
+        if (!act->objectName().isEmpty())
+            out << act;
+    return out;
+}
+
+void MainWindow::updateShortcutTips()
+{
+    // Tool tips show the current keys, so they follow customized shortcuts.
+    for (QAction *act : m_toolGroup->actions()) {
+        const QString keys = shortcuts::text(act->shortcuts());
+        const QString name = act->iconText();
+        QString tip = keys.isEmpty() ? name : QStringLiteral("%1 (%2)").arg(name, keys);
+        const QString extra = act->property("tip").toString();
+        if (!extra.isEmpty())
+            tip += QStringLiteral(": ") + extra;
+        act->setToolTip(tip);
+    }
+}
+
+void MainWindow::showShortcuts()
+{
+    ShortcutsDialog dlg(customizableActions(), this);
+    if (dlg.exec() != QDialog::Accepted)
+        return;
+    for (QWidget *w : QApplication::topLevelWidgets()) {
+        if (auto *mw = qobject_cast<MainWindow *>(w)) {
+            shortcuts::reload(mw->customizableActions());
+            mw->updateShortcutTips();
+        }
+    }
 }
 
 void MainWindow::createMenusAndToolbars()
 {
     QMenu *file = menuBar()->addMenu(tr("&File"));
-    file->addActions({a.newFromClipboard, a.open});
+    file->addActions({a.newFromClipboard, a.capture, a.open});
+    m_recentMenu = file->addMenu(themeIcon("document-open-recent"), tr("Open &Recent"));
+    connect(m_recentMenu, &QMenu::aboutToShow, this, &MainWindow::populateRecentMenu);
+    populateRecentMenu();
     file->addSeparator();
     file->addActions({a.prevImage, a.nextImage, a.firstImage, a.lastImage});
     file->addSeparator();
     file->addActions({a.save, a.saveAs, a.saveProject});
     file->addAction(a.batch);
+    file->addAction(a.print);
     file->addSeparator();
-    file->addAction(a.settings);
+    file->addActions({a.info, a.rename, a.copyTo, a.moveTo, a.trash, a.showInFolder});
+    file->addSeparator();
+    file->addActions({a.settings, a.shortcuts});
     file->addSeparator();
     file->addActions({a.close, a.quit});
 
@@ -436,8 +599,10 @@ void MainWindow::createMenusAndToolbars()
     QMenu *view = menuBar()->addMenu(tr("&View"));
     view->addActions({a.fit, a.actual, a.zoomIn, a.zoomOut});
     view->addSeparator();
+    view->addActions({a.fullScreen, a.enlargeSmall, a.slideshow});
+    view->addSeparator();
     view->addAction(a.hideObjects);
-    view->addAction(a.notes);
+    view->addActions({a.notes, a.thumbnails});
 
     QMenu *help = menuBar()->addMenu(tr("&Help"));
     help->addAction(a.about);
@@ -453,11 +618,13 @@ void MainWindow::createMenusAndToolbars()
     main->addSeparator();
     main->addAction(a.copyResult);
     main->addSeparator();
+    main->addWidget(createCaptureControls(main));
+    main->addSeparator();
     main->addActions({a.rotateLeft, a.rotateRight, a.flipH, a.flipV});
     main->addSeparator();
-    main->addActions({a.fit, a.actual});
+    main->addActions({a.fit, a.actual, a.fullScreen});
     main->addSeparator();
-    main->addAction(a.notes);
+    main->addActions({a.notes, a.thumbnails});
 
     addToolBarBreak();
     m_optionsBar = addToolBar(tr("Tool Options"));
@@ -524,8 +691,12 @@ void MainWindow::updateActions()
         act->setEnabled(has);
     a.straightenDocument->setEnabled(has);
     const bool fromFile = has && !(m_doc->filePath().isEmpty() && m_doc->originPath().isEmpty());
-    for (QAction *act : {a.nextImage, a.prevImage, a.firstImage, a.lastImage})
-        act->setEnabled(fromFile);
+    for (QAction *act : {a.nextImage, a.prevImage, a.firstImage, a.lastImage, a.slideshow})
+        act->setEnabled(fromFile || isSlideshowRunning());
+    a.info->setEnabled(has);
+    const bool onDisk = has && !currentFile().isEmpty();
+    for (QAction *act : {a.rename, a.trash, a.copyTo, a.moveTo, a.showInFolder})
+        act->setEnabled(onDisk);
 }
 
 void MainWindow::updateTitle()
@@ -684,7 +855,8 @@ void MainWindow::updateToolOptions()
         switch (m_canvas->toolId()) {
         case ToolId::Pointer:
             hint = tr("Click to select an object, drag to move it, drag a corner to resize (Shift: free "
-                      "aspect ratio). Double-click a text to edit it. Arrow keys move by 1 px, with Shift by 10 px.");
+                      "aspect ratio), drag the round handle to rotate (Shift: 15° steps). Double-click a text "
+                      "to edit it. Arrow keys move by 1 px, with Shift by 10 px.");
             break;
         case ToolId::Select:
             hint = tr("Drag to select an area. Ctrl+C copies the image only, Ctrl+Shift+C including "
@@ -756,12 +928,16 @@ void MainWindow::resizeImageDialog()
     if (m_doc->isEmpty())
         return;
     m_canvas->cancelInteraction();
-    ResizeDialog dlg(m_doc->size(), this);
-    if (dlg.exec() != QDialog::Accepted || dlg.newSize() == m_doc->size())
+    QSize screenPx;
+    if (QScreen *sc = screen())
+        screenPx = (QSizeF(sc->size()) * sc->devicePixelRatio()).toSize(); // real pixels
+    ResizeDialog dlg(m_doc->size(), printing::imageDpi(m_doc->state().base), screenPx, this);
+    if (dlg.exec() != QDialog::Accepted || (dlg.newSize() == m_doc->size() && dlg.newDpi() <= 0))
         return;
     QApplication::setOverrideCursor(Qt::WaitCursor);
     m_canvas->setAreaSelection({});
-    m_doc->commit(docops::resizeImage(m_doc->state(), dlg.newSize()), tr("Resize image"));
+    m_doc->commit(docops::resizeImage(m_doc->state(), dlg.newSize(), dlg.filter(), dlg.sharpen(), dlg.newDpi()),
+                  dlg.newSize() == m_doc->size() ? tr("Change resolution") : tr("Resize image"));
     QApplication::restoreOverrideCursor();
     m_canvas->fitToWindow(false);
 }
@@ -870,48 +1046,6 @@ QStringList MainWindow::folderImages(const QString &dir) const
     return files;
 }
 
-void MainWindow::browse(int delta)
-{
-    if (m_doc->isEmpty() || m_canvas->tool()->isBusy())
-        return;
-    const QString current = !m_doc->originPath().isEmpty() ? m_doc->originPath() : m_doc->filePath();
-    if (current.isEmpty())
-        return;
-    const QStringList files = folderImages(QFileInfo(current).absolutePath());
-    if (files.isEmpty())
-        return;
-    int index = int(files.indexOf(QFileInfo(current).absoluteFilePath()));
-    int target;
-    if (index < 0) { // the current file was renamed or deleted
-        index = 0;
-        target = 0;
-    } else {
-        target = std::clamp(index + delta, 0, int(files.size()) - 1);
-    }
-    if (target == index && index >= 0 && files.value(index) == QFileInfo(current).absoluteFilePath()) {
-        m_canvas->toast()->showMessage(delta > 0 ? tr("This is the last image in the folder")
-                                                 : tr("This is the first image in the folder"));
-        return;
-    }
-    // Browsing replaces the shown image (a viewer, unlike opening): unsaved
-    // changes are offered for saving first.
-    if (!maybeSave())
-        return;
-    // First / last: if unreadable, continue inwards; otherwise in the direction of travel.
-    int step = delta > 0 ? 1 : -1;
-    if (std::abs(delta) >= 1000000)
-        step = -step;
-    for (int i = target; i >= 0 && i < files.size(); i += step) {
-        if (openFile(files[i])) {
-            m_canvas->toast()->showMessage(QStringLiteral("%1 / %2 · %3")
-                                               .arg(i + 1)
-                                               .arg(files.size())
-                                               .arg(QFileInfo(files[i]).fileName()));
-            return;
-        }
-    }
-}
-
 QWidget *MainWindow::createSelectOptions(QWidget *parent)
 {
     auto *w = new QWidget;
@@ -967,6 +1101,7 @@ bool MainWindow::openFile(const QString &path)
         m_doc->reset(s, {});
         m_doc->setSaved(QFileInfo(path).absoluteFilePath(), project::kSuffix);
         settings::setLastDirectory(QFileInfo(path).absolutePath());
+        addRecent(path);
         updateTitle();
         updateStatus();
         return true;
@@ -978,6 +1113,7 @@ bool MainWindow::openFile(const QString &path)
     }
     settings::setLastDirectory(QFileInfo(path).absolutePath());
     openImage(r.image, QFileInfo(path).absoluteFilePath(), r.notes);
+    addRecent(path);
     return true;
 }
 
@@ -1324,6 +1460,7 @@ bool MainWindow::writeTo(const QString &path, const imageio::SaveOptions &option
         return false;
     }
     m_doc->setSaved(path, options.format);
+    addRecent(path);
     settings::setLastDirectory(QFileInfo(path).absolutePath());
     settings::setLastExportFormat(options.format);
     statusBar()->showMessage(tr("Saved %1").arg(QDir::toNativeSeparators(path)), 4000);
@@ -1486,6 +1623,10 @@ MainWindow::~MainWindow()
 
 void MainWindow::onHistoryChanged()
 {
+    if (isSlideshowRunning() && m_doc->isModified()) {
+        stopSlideshow(); // editing ends the slideshow
+        m_canvas->toast()->showMessage(tr("Slideshow ended because the image was edited"));
+    }
     if (needsRecovery()) {
         m_autosaveDirty = true;
         if (!m_autosaveTimer->isActive())
@@ -1593,6 +1734,7 @@ bool MainWindow::saveProjectTo(const QString &path)
         return false;
     }
     m_doc->setSaved(path, project::kSuffix);
+    addRecent(path);
     settings::setLastDirectory(QFileInfo(path).absolutePath());
     statusBar()->showMessage(tr("Saved %1").arg(QDir::toNativeSeparators(path)), 4000);
     updateTitle();
@@ -1605,8 +1747,14 @@ void MainWindow::showSettings()
     SettingsDialog dlg(this);
     if (dlg.exec() == QDialog::Accepted) {
         for (QWidget *w : QApplication::topLevelWidgets()) {
-            if (auto *mw = qobject_cast<MainWindow *>(w))
+            if (auto *mw = qobject_cast<MainWindow *>(w)) {
                 mw->document()->history().setLimitBytes(qint64(settings::historyLimitMB()) * 1024 * 1024);
+                mw->a.enlargeSmall->setChecked(settings::fullScreenEnlarge());
+                if (mw->m_fullScreen) {
+                    mw->m_canvas->setEnlargeSmallImages(settings::fullScreenEnlarge());
+                    mw->m_canvas->fitToWindow(false);
+                }
+            }
         }
     }
 }
@@ -1620,4 +1768,143 @@ void MainWindow::showAbout()
                                 "(GPL-3.0). It comes with ABSOLUTELY NO WARRANTY.</p>"
                                 "<p>Built with Qt %1 (LGPL-3.0), libjpeg-turbo and libwebp (BSD).</p>")
                                  .arg(QString::fromLatin1(qVersion())));
+}
+
+void MainWindow::print()
+{
+    if (m_doc->isEmpty())
+        return;
+    if (!m_printer) {
+        m_printer = std::make_unique<QPrinter>(QPrinter::HighResolution);
+        m_printer->setDocName(QFileInfo(currentFile()).completeBaseName());
+    }
+    const DocState &s = m_doc->state();
+    // What you see is what gets printed: hidden annotations stay hidden.
+    const QImage full = s.objects.isEmpty() || m_canvas->objectsHidden() ? QImage() : docops::composite(s);
+    PrintDialog dlg(full, s.base, m_printer.get(), this);
+    dlg.exec();
+}
+
+void MainWindow::captureScreen()
+{
+    if (m_captureBusy)
+        return;
+    const CaptureOptions o = CaptureOptions::load();
+    m_captureBusy = true;
+    // Get out of the way: minimize on X11. On Wayland a program cannot bring
+    // itself back from the taskbar, so the window is hidden and shown again.
+    const bool hide = o.hideWindow && isVisible();
+    const Qt::WindowStates state = windowState();
+    const bool x11 = QGuiApplication::platformName() == QLatin1String("xcb");
+    if (hide) {
+        if (x11)
+            showMinimized();
+        else
+            setVisible(false);
+    }
+    // The compositor needs a moment to remove the window (and its animation).
+    const int wait = o.delaySeconds * 1000 + (hide ? 600 : 150);
+    QTimer::singleShot(wait, this, [this, o, hide, state, x11] {
+        auto *cap = new ScreenCapture(this);
+        auto restore = [this, hide, state, x11, cap] {
+            cap->deleteLater();
+            m_captureBusy = false;
+            if (hide) {
+                if (x11) {
+                    setWindowState(state & ~Qt::WindowMinimized);
+                    show();
+                } else {
+                    setWindowState(state);
+                    setVisible(true);
+                }
+                raise();
+                activateWindow();
+            }
+        };
+        connect(cap, &ScreenCapture::captured, this, [this, cap, o, restore](const QImage &img) {
+            const bool chooseArea = o.interactive && cap->direct();
+            restore();
+            showCapture(img, chooseArea);
+        });
+        connect(cap, &ScreenCapture::failed, this, [this, restore](const QString &message) {
+            restore();
+            if (!message.isEmpty())
+                QMessageBox::warning(this, tr("Capture Screen"), message);
+        });
+        cap->start(o.interactive);
+    });
+}
+
+void MainWindow::showCapture(const QImage &img, bool chooseArea)
+{
+    const bool wasEmpty = m_doc->isEmpty();
+    clip::Content c;
+    c.kind = clip::Content::Kind::Image;
+    c.image = img.convertToFormat(QImage::Format_ARGB32_Premultiplied);
+    // Like Ctrl+V: a new document, or a new object in the current image.
+    insertContent(c);
+    if (chooseArea && wasEmpty) {
+        m_canvas->setTool(ToolId::Crop);
+        m_canvas->toast()->showMessage(tr("Drag to choose the area, Enter crops"));
+    }
+}
+
+QWidget *MainWindow::createCaptureControls(QWidget *parent)
+{
+    auto *box = new QWidget(parent);
+    auto *lay = new QHBoxLayout(box);
+    lay->setContentsMargins(0, 0, 0, 0);
+    lay->setSpacing(2);
+    auto *button = new QToolButton(box);
+    button->setObjectName(QStringLiteral("captureButton"));
+    button->setDefaultAction(a.capture);
+    button->setPopupMode(QToolButton::MenuButtonPopup);
+    button->setAutoRaise(true);
+    if (auto *bar = qobject_cast<QToolBar *>(parent))
+        button->setIconSize(bar->iconSize());
+    button->setToolButtonStyle(Qt::ToolButtonTextBesideIcon); // say what it is
+    auto *menu = new QMenu(button);
+    const CaptureOptions o = CaptureOptions::load();
+    auto *group = new QActionGroup(menu);
+    QAction *whole = menu->addAction(tr("&Whole screen"));
+    QAction *area = menu->addAction(tr("&Area or window"));
+    for (QAction *x : {whole, area}) {
+        x->setCheckable(true);
+        group->addAction(x);
+    }
+    (o.interactive ? area : whole)->setChecked(true);
+    area->setToolTip(ScreenCapture::canGrabDirectly() && !ScreenCapture::portalAvailable()
+                         ? tr("The whole screen is captured, then the crop tool lets you choose the area")
+                         : tr("The desktop lets you choose an area or a window"));
+    menu->addSeparator();
+    QAction *hide = menu->addAction(tr("&Minimize Rolidan while capturing"));
+    hide->setCheckable(true);
+    hide->setChecked(o.hideWindow);
+    auto store = [whole, area, hide] {
+        Q_UNUSED(whole);
+        CaptureOptions c = CaptureOptions::load();
+        c.interactive = area->isChecked();
+        c.hideWindow = hide->isChecked();
+        c.save();
+    };
+    connect(group, &QActionGroup::triggered, box, store);
+    connect(hide, &QAction::toggled, box, store);
+    button->setMenu(menu);
+    lay->addWidget(button);
+
+    auto *delay = new QSpinBox(box);
+    delay->setObjectName(QStringLiteral("captureDelay"));
+    delay->setRange(0, 60);
+    delay->setSuffix(tr(" s"));
+    delay->setSpecialValueText(tr("Now"));
+    delay->setValue(o.delaySeconds);
+    delay->setToolTip(tr("Delay before the screenshot is taken"));
+    delay->setFocusPolicy(Qt::ClickFocus); // keys stay with the canvas
+    connect(delay, &QSpinBox::valueChanged, box, [](int v) {
+        CaptureOptions c = CaptureOptions::load();
+        c.delaySeconds = v;
+        c.save();
+    });
+    lay->addWidget(delay);
+    return box;
 }

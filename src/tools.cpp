@@ -20,6 +20,9 @@
 #include <QTextEdit>
 #include <QCoreApplication>
 #include <QLineF>
+#include <QApplication>
+#include <QPixmap>
+#include <QtMath>
 #include <cmath>
 
 namespace {
@@ -39,9 +42,8 @@ void drawHandle(QPainter &p, const QPointF &c)
     p.drawRect(r);
 }
 
-void drawSizeLabel(QPainter &p, const QRectF &anchor, const QSize &size)
+void drawLabel(QPainter &p, const QRectF &anchor, const QString &text)
 {
-    const QString text = QStringLiteral("%1 × %2").arg(size.width()).arg(size.height());
     const QFontMetrics fm(p.font());
     QRectF box(0, 0, fm.horizontalAdvance(text) + 10, fm.height() + 4);
     box.moveBottomLeft(anchor.topLeft() + QPointF(0, -4));
@@ -52,6 +54,48 @@ void drawSizeLabel(QPainter &p, const QRectF &anchor, const QSize &size)
     p.drawRoundedRect(box, 3, 3);
     p.setPen(Qt::white);
     p.drawText(box, Qt::AlignCenter, text);
+}
+
+void drawSizeLabel(QPainter &p, const QRectF &anchor, const QSize &size)
+{
+    drawLabel(p, anchor, QStringLiteral("%1 × %2").arg(size.width()).arg(size.height()));
+}
+
+// Distance of the rotation handle above the object's box, in screen pixels.
+constexpr double kRotateHandleDistance = 26.0;
+
+// A circular arrow: there is no standard "rotate" cursor.
+QCursor rotateCursor()
+{
+    static const QCursor cursor = [] {
+        const qreal dpr = qApp ? qApp->devicePixelRatio() : 1.0;
+        QPixmap pm(QSize(24, 24) * dpr);
+        pm.setDevicePixelRatio(dpr);
+        pm.fill(Qt::transparent);
+        QPainter p(&pm);
+        p.setRenderHint(QPainter::Antialiasing);
+        QPainterPath arc;
+        const QRectF r(5, 5, 14, 14);
+        arc.arcMoveTo(r, 120);
+        arc.arcTo(r, 120, 270);
+        const QPointF end = arc.currentPosition();
+        QPainterPath head;
+        head.moveTo(end + QPointF(-4.5, -1.5));
+        head.lineTo(end + QPointF(1.5, -4.5));
+        head.lineTo(end + QPointF(1.5, 2.5));
+        head.closeSubpath();
+        for (int pass = 0; pass < 2; ++pass) {
+            const QColor c = pass == 0 ? Qt::white : Qt::black;
+            p.setPen(QPen(c, pass == 0 ? 4.0 : 1.6, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            p.setBrush(Qt::NoBrush);
+            p.drawPath(arc);
+            p.setBrush(c);
+            p.drawPath(head);
+        }
+        p.end();
+        return QCursor(pm, 12, 12);
+    }();
+    return cursor;
 }
 
 void drawDashedRect(QPainter &p, const QRectF &r)
@@ -247,6 +291,21 @@ static ObjectPtr singleSelected(const Canvas *c)
     return sel.size() == 1 ? sel.first() : ObjectPtr();
 }
 
+std::optional<QPointF> ObjectDrag::rotateHandlePos(const Canvas *c, const Annotation &o)
+{
+    if (!o.rotatable())
+        return std::nullopt;
+    const QRectF f = o.frameRect();
+    const double a = o.rotation();
+    const QTransform rot = rotationAbout(f.center(), a);
+    // Above the top edge, in the object's own "up" direction.
+    const QPointF up = QTransform().rotate(a).map(QPointF(0, -1));
+    QPointF pos = c->toWidget(rot.map(QPointF(f.center().x(), f.top()))) + up * kRotateHandleDistance;
+    if (!QRectF(c->rect()).adjusted(4, 4, -4, -4).contains(pos)) // no room: below the box
+        pos = c->toWidget(rot.map(QPointF(f.center().x(), f.bottom()))) - up * kRotateHandleDistance;
+    return pos;
+}
+
 int ObjectDrag::handleAt(const Canvas *c, const QPointF &w) const
 {
     const ObjectPtr o = singleSelected(c);
@@ -258,16 +317,30 @@ int ObjectDrag::handleAt(const Canvas *c, const QPointF &w) const
         if (std::abs(hw.x() - w.x()) <= kHandleTolerance && std::abs(hw.y() - w.y()) <= kHandleTolerance)
             return i;
     }
+    if (const auto r = rotateHandlePos(c, *o); r && QLineF(*r, w).length() <= kHandleTolerance + 1)
+        return kRotateHandle;
     return -1;
 }
 
-Qt::CursorShape ObjectDrag::cursorFor(const Canvas *c, int handle)
+QCursor ObjectDrag::cursorFor(const Canvas *c, int handle)
 {
     const ObjectPtr o = singleSelected(c);
     if (!o || handle < 0)
         return Qt::ArrowCursor;
+    if (handle == kRotateHandle)
+        return rotateCursor();
     switch (o->handleMode()) {
-    case Annotation::HandleMode::Corners: return handle % 2 == 0 ? Qt::SizeFDiagCursor : Qt::SizeBDiagCursor;
+    case Annotation::HandleMode::Corners: {
+        // The diagonal through the handle, turned with the object.
+        const double a = std::fmod(o->rotation() + (handle % 2 == 0 ? 45.0 : 135.0) + 360.0, 180.0);
+        if (a < 22.5 || a >= 157.5)
+            return Qt::SizeHorCursor;
+        if (a < 67.5)
+            return Qt::SizeFDiagCursor;
+        if (a < 112.5)
+            return Qt::SizeVerCursor;
+        return Qt::SizeBDiagCursor;
+    }
     case Annotation::HandleMode::TextWidth: return Qt::SizeHorCursor;
     case Annotation::HandleMode::Endpoints: return Qt::CrossCursor;
     }
@@ -285,7 +358,11 @@ bool ObjectDrag::begin(Canvas *c, const QPointF &w)
     m_start = c->document()->state();
     m_id = o->id;
     m_handle = h;
-    m_startRect = o->boundingRect();
+    m_startRect = o->frameRect();
+    m_startAngle = o->rotation();
+    m_pivot = o->boundingRect().center();
+    m_pressAngle = qRadiansToDegrees(std::atan2(c->toImage(w).y() - m_pivot.y(), c->toImage(w).x() - m_pivot.x()));
+    m_angle = m_startAngle;
     return true;
 }
 
@@ -298,13 +375,39 @@ void ObjectDrag::update(Canvas *c, const QPointF &img, Qt::KeyboardModifiers mod
         return;
     auto obj = orig->clone();
     const bool shift = mods & Qt::ShiftModifier;
+    if (m_handle == kRotateHandle) {
+        const double now = qRadiansToDegrees(std::atan2(img.y() - m_pivot.y(), img.x() - m_pivot.x()));
+        // Raw angle of the box (0 for 90° rotated images), so Shift snaps to what you see.
+        const double base = orig->transform.type() > QTransform::TxScale
+                                ? qRadiansToDegrees(std::atan2(orig->transform.m12(), orig->transform.m11()))
+                                : 0.0;
+        double target = base + (now - m_pressAngle);
+        if (shift)
+            target = std::round(target / 15.0) * 15.0; // spec: Shift = 15° steps
+        const double delta = target - base;
+        obj->rotate(delta, m_pivot);
+        m_angle = std::remainder(target, 360.0);
+        if (std::abs(m_angle) < 1e-9)
+            m_angle = 0.0;
+        m_changed = true;
+        c->document()->setTransient(docops::replaceObject(m_start, obj));
+        return;
+    }
     if (orig->handleMode() == Annotation::HandleMode::Corners) {
+        // Rotated boxes are resized in their own frame: turn them upright,
+        // resize, turn back.
+        const bool rotated = m_startAngle != 0.0;
+        QPointF pt = img;
+        if (rotated) {
+            obj->rotate(-m_startAngle, m_pivot);
+            pt = rotationAbout(m_pivot, -m_startAngle).map(img);
+        }
         const QRectF r0 = m_startRect;
         const QPointF anchor = m_handle == 0 ? r0.bottomRight()
                                : m_handle == 1 ? r0.bottomLeft()
                                : m_handle == 2 ? r0.topLeft()
                                                : r0.topRight();
-        const double dx = std::abs(img.x() - anchor.x()), dy = std::abs(img.y() - anchor.y());
+        const double dx = std::abs(pt.x() - anchor.x()), dy = std::abs(pt.y() - anchor.y());
         double nw, nh;
         // Images keep their aspect ratio by default; Shift toggles (spec, stage 1).
         const bool lock = orig->keepsAspect() != shift;
@@ -318,7 +421,9 @@ void ObjectDrag::update(Canvas *c, const QPointF &img, Qt::KeyboardModifiers mod
         }
         const double left = (m_handle == 0 || m_handle == 3) ? anchor.x() - nw : anchor.x();
         const double top = (m_handle == 0 || m_handle == 1) ? anchor.y() - nh : anchor.y();
-        obj->resizeTo(r0, QRectF(left, top, nw, nh));
+        obj->resizeTo(obj->boundingRect(), QRectF(left, top, nw, nh));
+        if (rotated)
+            obj->rotate(m_startAngle, m_pivot);
     } else {
         obj->moveHandle(m_handle, img, shift);
     }
@@ -329,9 +434,26 @@ void ObjectDrag::update(Canvas *c, const QPointF &img, Qt::KeyboardModifiers mod
 void ObjectDrag::finish(Canvas *c)
 {
     if (m_active && m_changed)
-        c->document()->commit(c->document()->state(), QCoreApplication::translate("PointerTool", "Resize"));
+        c->document()->commit(c->document()->state(), m_handle == kRotateHandle
+                                                          ? QCoreApplication::translate("PointerTool", "Rotate")
+                                                          : QCoreApplication::translate("PointerTool", "Resize"));
     m_active = false;
     m_changed = false;
+}
+
+void ObjectDrag::paintLabel(QPainter &p, const Canvas *c) const
+{
+    if (!m_active)
+        return;
+    const ObjectPtr o = singleSelected(c);
+    if (!o)
+        return;
+    if (m_handle == kRotateHandle) {
+        drawLabel(p, c->toWidget(o->boundingRect()), QStringLiteral("%1°").arg(m_angle, 0, 'f', 1));
+    } else if (o->handleMode() == Annotation::HandleMode::Corners) {
+        const QRectF f = o->frameRect();
+        drawSizeLabel(p, c->toWidget(o->boundingRect()), f.toRect().size());
+    }
 }
 
 void ObjectDrag::abort(Canvas *c)
@@ -358,6 +480,20 @@ void paintObjectSelection(QPainter &p, const Canvas *c)
             p.drawPolygon(c->viewTransform().map(o->outline()));
     }
     if (sel.size() == 1 && sel.first()->id != c->hiddenObject()) {
+        if (const auto r = ObjectDrag::rotateHandlePos(c, *sel.first())) {
+            // Stem from the box to the round rotation handle.
+            const ObjectPtr &o = sel.first();
+            const QRectF f = o->frameRect();
+            const QTransform rot = rotationAbout(f.center(), o->rotation());
+            const QPointF top = c->toWidget(rot.map(QPointF(f.center().x(), f.top())));
+            const QPointF bottom = c->toWidget(rot.map(QPointF(f.center().x(), f.bottom())));
+            const QPointF from = QLineF(top, *r).length() < QLineF(bottom, *r).length() ? top : bottom;
+            p.setPen(QPen(QColor(0, 120, 215), 1));
+            p.drawLine(from, *r);
+            p.setPen(QPen(QColor(30, 30, 30), 1));
+            p.setBrush(QColor(0xe8, 0xf1, 0xfb));
+            p.drawEllipse(*r, 5.0, 5.0);
+        }
         for (const QPointF &pt : sel.first()->handlePoints()) {
             const QPointF w = c->toWidget(pt);
             if (sel.first()->handleMode() == Annotation::HandleMode::Endpoints) {
@@ -415,6 +551,11 @@ void PointerTool::mouseDoubleClick(QMouseEvent *e, const QPointF &img)
     if (const ObjectPtr o = m_canvas->objectAt(img); o && o->type() == Annotation::Type::Text) {
         m_mode = Idle;
         m_canvas->editTextObject(o->id);
+        return;
+    } else if (!o) {
+        // Double-click on the image itself: full screen, like a viewer (Etapa 5).
+        m_mode = Idle;
+        emit m_canvas->imageDoubleClicked();
         return;
     }
     mousePress(e, img);
@@ -507,8 +648,7 @@ void PointerTool::paintOverlay(QPainter &p)
 {
     paintObjectSelection(p, m_canvas);
     const ObjectList sel = m_canvas->selectedObjectList();
-    if (m_mode == Handle && sel.size() == 1 && sel.first()->handleMode() == Annotation::HandleMode::Corners)
-        drawSizeLabel(p, m_canvas->toWidget(sel.first()->boundingRect()), sel.first()->boundingRect().toRect().size());
+    m_drag.paintLabel(p, m_canvas);
     if (m_mode == Rubber) {
         const QRectF r = m_canvas->toWidget(m_rubber.normalized());
         p.setPen(QPen(QColor(0, 120, 215), 1));
@@ -1166,7 +1306,12 @@ void TextTool::updateEditorGeometry()
     const double w = m_obj->fixedWidth > 0 ? m_obj->fixedWidth * s
                                            : doc->idealWidth() + fm.horizontalAdvance(QLatin1Char('M'));
     const double h = std::max(doc->size().height(), fm.height());
-    m_editor->setGeometry(QRectF(tl, QSizeF(std::max(w, 8.0), h + 2)).toAlignedRect());
+    QRectF g(tl, QSizeF(std::max(w, 8.0), h + 2));
+    if (m_obj->transform.type() > QTransform::TxScale) {
+        // A rotated text is edited upright, centered on where it is (Etapa 6).
+        g.moveCenter(m_canvas->toWidget(m_obj->boundingRect().center()));
+    }
+    m_editor->setGeometry(g.toAlignedRect());
 }
 
 void TextTool::finishEditing()

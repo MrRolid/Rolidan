@@ -35,13 +35,18 @@ bool isLoadableImageFile(const QString &path);
 
 struct SaveOptions
 {
-    QByteArray format = "png";      // png | jpeg | webp | bmp | ico
+    QByteArray format = "png";      // png | jpeg | webp | bmp | ico | tiff | avif | heif | jxl | qoi
     int pngCompression = 6;         // 0..9
     codecs::JpegOptions jpeg;
     codecs::WebpOptions webp;
     QColor background = Qt::white;  // used where the format has no alpha
     QList<int> icoSizes = {16, 32, 48, 256}; // spec F: ICO sizes
+    bool tiffLzw = true;            // TIFF: LZW compression (lossless)
+    int quality = 80;               // AVIF, HEIF, JPEG XL: 0..100, 100 = lossless (AVIF, JPEG XL)
 };
+
+// Formats with a quality setting through a plugin (KImageFormats).
+bool hasQuality(const QByteArray &format);
 
 // All sizes offered for ICO (spec F).
 QList<int> icoSizeChoices();

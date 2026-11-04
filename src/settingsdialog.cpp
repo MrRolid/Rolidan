@@ -6,6 +6,7 @@
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDialogButtonBox>
+#include <QDoubleSpinBox>
 #include <QFormLayout>
 #include <QLabel>
 #include <QMessageBox>
@@ -54,6 +55,37 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     m_historyLimit->setValue(settings::historyLimitMB());
     form->addRow(tr("Undo history memory limit:"), m_historyLimit);
 
+    // Viewer (Etapa 5)
+    m_wheel = new QComboBox(this);
+    m_wheel->setObjectName(QStringLiteral("wheel"));
+    m_wheel->addItem(tr("Scrolls the image"), int(settings::Wheel::Scroll));
+    m_wheel->addItem(tr("Shows the next / previous image"), int(settings::Wheel::Browse));
+    m_wheel->addItem(tr("Zooms"), int(settings::Wheel::Zoom));
+    m_wheel->setCurrentIndex(m_wheel->findData(int(settings::wheelAction())));
+    m_wheel->setToolTip(tr("Ctrl + wheel always zooms"));
+    form->addRow(tr("Mouse wheel:"), m_wheel);
+
+    m_fullScreenEnlarge = new QCheckBox(tr("In full screen and slideshow, enlarge small images to fit the screen (Z)"), this);
+    m_fullScreenEnlarge->setObjectName(QStringLiteral("fullScreenEnlarge"));
+    m_fullScreenEnlarge->setChecked(settings::fullScreenEnlarge());
+    form->addRow(tr("Full screen:"), m_fullScreenEnlarge);
+
+    m_slideshowSeconds = new QDoubleSpinBox(this);
+    m_slideshowSeconds->setObjectName(QStringLiteral("slideshowSeconds"));
+    m_slideshowSeconds->setRange(0.5, 3600);
+    m_slideshowSeconds->setDecimals(1);
+    m_slideshowSeconds->setSingleStep(0.5);
+    m_slideshowSeconds->setSuffix(tr(" s"));
+    m_slideshowSeconds->setValue(settings::slideshowSeconds());
+    form->addRow(tr("Slideshow interval:"), m_slideshowSeconds);
+    m_slideshowLoop = new QCheckBox(tr("Start again after the last image"), this);
+    m_slideshowLoop->setChecked(settings::slideshowLoop());
+    form->addRow(QString(), m_slideshowLoop);
+
+    m_confirmTrash = new QCheckBox(tr("Ask before moving a file to the trash"), this);
+    m_confirmTrash->setChecked(settings::confirmTrash());
+    form->addRow(QString(), m_confirmTrash);
+
     auto *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
     connect(buttons, &QDialogButtonBox::accepted, this, &SettingsDialog::accept);
     connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
@@ -67,6 +99,11 @@ void SettingsDialog::accept()
     settings::setLanguage(lang);
     settings::setKeepClipboardAfterClose(m_keepClipboard->isChecked());
     settings::setHistoryLimitMB(m_historyLimit->value());
+    settings::setWheelAction(settings::Wheel(m_wheel->currentData().toInt()));
+    settings::setSlideshowSeconds(m_slideshowSeconds->value());
+    settings::setSlideshowLoop(m_slideshowLoop->isChecked());
+    settings::setConfirmTrash(m_confirmTrash->isChecked());
+    settings::setFullScreenEnlarge(m_fullScreenEnlarge->isChecked());
     if (langChanged)
         QMessageBox::information(this, tr("Language"),
                                  tr("The language will change after you restart Rolidan."));

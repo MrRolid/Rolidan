@@ -56,7 +56,8 @@ QString displayName(const Spec &spec); // translated, without "…"
 DocState apply(const Spec &spec, const DocState &s, const QRect &selection, const Values &v);
 
 // ---- individual operations (exposed for tests and tools) ----
-QImage brightnessContrast(const QImage &src, double brightness, double contrast); // -100..100
+// brightness, contrast -100..100; gamma 0.1..10, 1 = unchanged, above 1 brightens the midtones
+QImage brightnessContrast(const QImage &src, double brightness, double contrast, double gamma = 1.0);
 QImage hueSaturation(const QImage &src, double hue, double saturation, double lightness);
 QImage enhanceColors(const QImage &src, double strength, double vibrance, double clipPercent);
 QImage temperature(const QImage &src, double temperature, double tint);
@@ -68,6 +69,13 @@ QImage threshold(const QImage &src, int level);
 QImage posterize(const QImage &src, int levels);
 QImage gaussianBlur(const QImage &src, double radius);
 QImage sharpen(const QImage &src, double amountPercent, double radius, int threshold);
+
+// Resampling filters for Image > Resize (like IrfanView's "Resample" choices).
+// Values are stored in the settings: only append.
+enum class Resample { Lanczos = 0, Mitchell, BSpline, Bilinear, Nearest, Hermite, Bell };
+// Scale to `size` with a separable filter (premultiplied, multithreaded).
+// Metadata (resolution) is kept.
+QImage resample(const QImage &src, const QSize &size, Resample filter = Resample::Lanczos);
 QImage pixelate(const QImage &src, int cell);
 QImage addNoise(const QImage &src, double amount, bool color, quint32 seed = 1);
 QImage median(const QImage &src, int radius);

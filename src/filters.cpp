@@ -237,12 +237,15 @@ int blurMargin(const Values &v) { return int(std::ceil(v.value(QStringLiteral("r
 
 // ================================================================ operations
 
-QImage brightnessContrast(const QImage &src, double brightness, double contrast)
+QImage brightnessContrast(const QImage &src, double brightness, double contrast, double gamma)
 {
     const double b = std::clamp(brightness, -100.0, 100.0) / 100.0;
     const double c = std::clamp(contrast, -100.0, 100.0) / 100.0;
+    const double g = std::clamp(gamma, 0.1, 10.0);
     const double slant = std::tan((std::min(c, 0.99) + 1.0) * M_PI / 4.0);
     const Lut lut = makeLut([&](double x) {
+        if (g != 1.0)
+            x = std::pow(std::clamp(x, 0.0, 1.0), 1.0 / g);
         x = b < 0 ? x * (1.0 + b) : x + (1.0 - x) * b;
         return (x - 0.5) * slant + 0.5;
     });
@@ -402,6 +405,165 @@ QImage gaussianBlur(const QImage &srcIn, double radius)
         boxBlurV(b, a, r);
     }
     return a;
+}
+
+namespace {
+double sinc(double x)
+{
+    if (std::abs(x) < 1e-8)
+        return 1.0;
+    x *= M_PI;
+    return std::sin(x) / x;
+}
+
+// Cubic from Mitchell & Netravali; (B, C) = (1/3, 1/3) Mitchell, (1, 0) B-spline.
+double cubicBC(double x, double B, double C)
+{
+    x = std::abs(x);
+    if (x < 1.0)
+        return ((12 - 9 * B - 6 * C) * x * x * x + (-18 + 12 * B + 6 * C) * x * x + (6 - 2 * B)) / 6.0;
+    if (x < 2.0)
+        return ((-B - 6 * C) * x * x * x + (6 * B + 30 * C) * x * x + (-12 * B - 48 * C) * x + (8 * B + 24 * C)) / 6.0;
+    return 0.0;
+}
+
+double kernelRadius(Resample f)
+{
+    switch (f) {
+    case Resample::Lanczos: return 3.0;
+    case Resample::Mitchell:
+    case Resample::BSpline: return 2.0;
+    case Resample::Bilinear: return 1.0;
+    case Resample::Nearest: return 0.5;
+    case Resample::Hermite: return 1.0;
+    case Resample::Bell: return 1.5;
+    }
+    return 1.0;
+}
+
+double kernel(Resample f, double x)
+{
+    switch (f) {
+    case Resample::Lanczos: return std::abs(x) < 3.0 ? sinc(x) * sinc(x / 3.0) : 0.0;
+    case Resample::Mitchell: return cubicBC(x, 1.0 / 3.0, 1.0 / 3.0);
+    case Resample::BSpline: return cubicBC(x, 1.0, 0.0);
+    case Resample::Bilinear: return std::max(0.0, 1.0 - std::abs(x));
+    case Resample::Nearest: return 1.0;
+    case Resample::Hermite: { // smooth step: no overshoot, a little sharper than bilinear
+        x = std::abs(x);
+        return x < 1.0 ? (2.0 * x - 3.0) * x * x + 1.0 : 0.0;
+    }
+    case Resample::Bell: { // quadratic B-spline: soft
+        x = std::abs(x);
+        if (x < 0.5)
+            return 0.75 - x * x;
+        return x < 1.5 ? 0.5 * (x - 1.5) * (x - 1.5) : 0.0;
+    }
+    }
+    return 0.0;
+}
+
+// Weights of the source pixels for every destination pixel along one axis.
+struct Contrib
+{
+    int first = 0;
+    std::vector<float> w;
+};
+
+std::vector<Contrib> contributions(int srcLen, int dstLen, Resample f)
+{
+    std::vector<Contrib> out(static_cast<size_t>(dstLen));
+    const double scale = double(dstLen) / srcLen;
+    const double stretch = scale < 1.0 ? 1.0 / scale : 1.0; // widen the kernel when shrinking
+    const double support = kernelRadius(f) * stretch;
+    for (int i = 0; i < dstLen; ++i) {
+        const double center = (i + 0.5) / scale - 0.5;
+        Contrib &c = out[size_t(i)];
+        if (f == Resample::Nearest) {
+            c.first = std::clamp(int(std::floor((i + 0.5) / scale)), 0, srcLen - 1);
+            c.w = {1.0f};
+            continue;
+        }
+        const int lo = int(std::ceil(center - support)), hi = int(std::floor(center + support));
+        std::vector<double> w;
+        double sum = 0;
+        for (int j = lo; j <= hi; ++j) {
+            const double v = kernel(f, (j - center) / stretch);
+            w.push_back(v);
+            sum += v;
+        }
+        // Edge pixels repeat: fold the outside weights onto the border.
+        c.first = std::clamp(lo, 0, srcLen - 1);
+        const int last = std::clamp(hi, 0, srcLen - 1);
+        c.w.assign(size_t(last - c.first + 1), 0.0f);
+        for (int j = lo; j <= hi; ++j)
+            c.w[size_t(std::clamp(j, 0, srcLen - 1) - c.first)] += float(w[size_t(j - lo)] / (sum != 0 ? sum : 1));
+    }
+    return out;
+}
+} // namespace
+
+QImage resample(const QImage &srcIn, const QSize &size, Resample f)
+{
+    if (srcIn.isNull() || size.isEmpty())
+        return {};
+    const QImage src = premultiplied(srcIn);
+    const int sw = src.width(), sh = src.height(), dw = size.width(), dh = size.height();
+    QImage out(size, QImage::Format_ARGB32_Premultiplied);
+    out.setDotsPerMeterX(src.dotsPerMeterX());
+    out.setDotsPerMeterY(src.dotsPerMeterY());
+    if (src.size() == size) {
+        out = src.copy();
+        return out;
+    }
+    const std::vector<Contrib> cx = contributions(sw, dw, f), cy = contributions(sh, dh, f);
+    // Horizontal pass into floats (sh rows × dw columns × 4 channels).
+    std::vector<float> mid(size_t(sh) * dw * 4);
+    parallel(sh, [&](int y0, int y1) {
+        for (int y = y0; y < y1; ++y) {
+            const QRgb *line = reinterpret_cast<const QRgb *>(src.constScanLine(y));
+            float *o = mid.data() + size_t(y) * dw * 4;
+            for (int x = 0; x < dw; ++x) {
+                const Contrib &c = cx[size_t(x)];
+                float a = 0, r = 0, g = 0, b = 0;
+                for (size_t k = 0; k < c.w.size(); ++k) {
+                    const QRgb p = line[c.first + int(k)];
+                    const float w = c.w[k];
+                    a += w * qAlpha(p);
+                    r += w * qRed(p);
+                    g += w * qGreen(p);
+                    b += w * qBlue(p);
+                }
+                o[x * 4] = a;
+                o[x * 4 + 1] = r;
+                o[x * 4 + 2] = g;
+                o[x * 4 + 3] = b;
+            }
+        }
+    });
+    // Vertical pass; clamp ringing (Lanczos) and keep colors within alpha.
+    parallel(dh, [&](int y0, int y1) {
+        std::vector<float> acc(size_t(dw) * 4);
+        for (int y = y0; y < y1; ++y) {
+            const Contrib &c = cy[size_t(y)];
+            std::fill(acc.begin(), acc.end(), 0.0f);
+            for (size_t k = 0; k < c.w.size(); ++k) {
+                const float w = c.w[k];
+                const float *row = mid.data() + size_t(c.first + int(k)) * dw * 4;
+                for (int i = 0; i < dw * 4; ++i)
+                    acc[size_t(i)] += w * row[i];
+            }
+            QRgb *line = reinterpret_cast<QRgb *>(out.scanLine(y));
+            for (int x = 0; x < dw; ++x) {
+                const int a = clamp255(acc[size_t(x) * 4]);
+                const int r = std::min(a, clamp255(acc[size_t(x) * 4 + 1]));
+                const int g = std::min(a, clamp255(acc[size_t(x) * 4 + 2]));
+                const int b = std::min(a, clamp255(acc[size_t(x) * 4 + 3]));
+                line[x] = qRgba(r, g, b, a);
+            }
+        }
+    });
+    return out;
 }
 
 QImage sharpen(const QImage &srcIn, double amountPercent, double radius, int thresholdLevel)
@@ -750,10 +912,12 @@ const QList<Spec> &all()
         // ---------------------------------------------------------- Adjust
         l.append({QStringLiteral("brightnessContrast"), QT_TRANSLATE_NOOP("filters", "Brightness / Contrast"), Menu::Adjust,
                   {{QStringLiteral("brightness"), QT_TRANSLATE_NOOP("filters", "Brightness:"), T::Int, -100, 100, 0},
-                   {QStringLiteral("contrast"), QT_TRANSLATE_NOOP("filters", "Contrast:"), T::Int, -100, 100, 0}},
+                   {QStringLiteral("contrast"), QT_TRANSLATE_NOOP("filters", "Contrast:"), T::Int, -100, 100, 0},
+                   {QStringLiteral("gamma"), QT_TRANSLATE_NOOP("filters", "Gamma:"), T::Double, 0.1, 5.0, 1.0, 2, "", {},
+                    QT_TRANSLATE_NOOP("filters", "Above 1 brightens the midtones, below 1 darkens them")}},
                   true,
                   [](const QImage &i, const Values &v) {
-                      return brightnessContrast(i, val(v, "brightness"), val(v, "contrast"));
+                      return brightnessContrast(i, val(v, "brightness"), val(v, "contrast"), v.value(QStringLiteral("gamma"), 1.0));
                   }});
         l.append({QStringLiteral("hueSaturation"), QT_TRANSLATE_NOOP("filters", "Hue / Saturation"), Menu::Adjust,
                   {{QStringLiteral("hue"), QT_TRANSLATE_NOOP("filters", "Hue:"), T::Int, -180, 180, 0, 0, "°"},
