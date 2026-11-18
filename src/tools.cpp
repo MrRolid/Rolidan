@@ -734,6 +734,40 @@ void SelectTool::mouseRelease(QMouseEvent *, const QPointF &)
     m_editor.stop();
     m_editor.end();
     m_canvas->setAreaSelection(m_editor.rect.isEmpty() ? QRect() : m_editor.rect);
+    // Right after opening or pasting this is the default tool: crop is one key away.
+    const QRect sel = m_canvas->areaSelection();
+    if (!sel.isEmpty() && sel != canvasBounds(m_canvas)) {
+        Canvas *canvas = m_canvas;
+        m_canvas->toast()->showMessage(tr("Enter or double-click crops to the selection"), tr("Crop"),
+                                       [canvas] { cropToArea(canvas); });
+    }
+}
+
+void SelectTool::mouseDoubleClick(QMouseEvent *e, const QPointF &img)
+{
+    if (e->button() != Qt::LeftButton)
+        return;
+    m_editor.stop();
+    if (m_canvas->areaSelection().contains(img.toPoint())) {
+        cropToArea(m_canvas);
+        return;
+    }
+    // Outside a selection: full screen, as with the Pointer (Etapa 5).
+    emit m_canvas->imageDoubleClicked();
+}
+
+bool SelectTool::cropToArea(Canvas *canvas)
+{
+    const QRect sel = canvas->areaSelection();
+    if (sel.isEmpty())
+        return false;
+    canvas->cancelInteraction();
+    canvas->setAreaSelection({});
+    canvas->toast()->hide();
+    if (sel != canvasBounds(canvas))
+        canvas->document()->commit(docops::crop(canvas->document()->state(), sel), tr("Crop"));
+    canvas->update();
+    return true;
 }
 
 void SelectTool::paintOverlay(QPainter &p)

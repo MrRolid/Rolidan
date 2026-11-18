@@ -122,8 +122,8 @@ private slots:
         QCOMPARE(px(c.base, 0, 0), px(s.base, 3, 3));
         QCOMPARE(c.objects.size(), 2);
         QCOMPARE(c.objects[0]->boundingRect(), QRectF(1, 1, 2, 2));
-        // partial object stays whole (clipped only when rendering)
-        QCOMPARE(c.objects[1]->boundingRect(), QRectF(4, 4, 4, 4));
+        // a partly inside pasted image is cut to the canvas (user decision 2026-11-18)
+        QCOMPARE(c.objects[1]->boundingRect(), QRectF(4, 4, 1, 1));
         QCOMPARE(docops::composite(c).size(), QSize(5, 5));
     }
 
@@ -847,6 +847,56 @@ private slots:
         QVERIFY(std::abs(printing::imageDpi(img) - 300) < 0.1);
         img.setDotsPerMeterX(int(std::lround(96 / 0.0254)));
         QCOMPARE(printing::imageDpi(img), 0.0);
+    }
+
+    void cropCutsPastedImages()
+    {
+        DocState s;
+        s.base = QImage(200, 200, QImage::Format_ARGB32_Premultiplied);
+        s.base.fill(Qt::white);
+        QImage red(100, 100, QImage::Format_ARGB32_Premultiplied);
+        red.fill(Qt::red);
+        auto plain = std::make_shared<ImageObject>(red);
+        plain->transform = QTransform::fromTranslate(50, 50);           // 50..150
+        auto scaled = std::make_shared<ImageObject>(red);
+        scaled->transform = QTransform::fromScale(2, 2) * QTransform::fromTranslate(-20, -20); // -20..180
+        auto rotated = std::make_shared<ImageObject>(red);
+        rotated->rotate(30, QPointF(100, 100));
+        auto inside = std::make_shared<ImageObject>(red);
+        inside->transform = QTransform::fromScale(0.2, 0.2) * QTransform::fromTranslate(10, 10);
+        s.objects = {plain, scaled, rotated, inside};
+        const QImage before = docops::composite(docops::crop(s, QRect(0, 0, 200, 200)));
+
+        const DocState c = docops::crop(s, QRect(0, 0, 100, 100));
+        QCOMPARE(c.objects.size(), 4);
+        const QRectF canvas(0, 0, 100, 100);
+        for (int i = 0; i < 2; ++i)
+            QVERIFY(canvas.adjusted(-1, -1, 1, 1).contains(c.objects[i]->boundingRect()));
+        // Rotated: the frame may stick out, but only transparent corners do.
+        auto img2 = std::static_pointer_cast<const ImageObject>(c.objects[2]);
+        QVERIFY(img2.get() != rotated.get());
+        int opaqueOutside = 0;
+        for (int y = 0; y < img2->image.height(); ++y)
+            for (int x = 0; x < img2->image.width(); ++x)
+                if (qAlpha(img2->image.pixel(x, y)) > 200
+                    && !canvas.adjusted(-1.5, -1.5, 1.5, 1.5).contains(img2->transform.map(QPointF(x + 0.5, y + 0.5))))
+                    ++opaqueOutside;
+        QCOMPARE(opaqueOutside, 0);
+        auto img0 = std::static_pointer_cast<const ImageObject>(c.objects[0]);
+        QCOMPARE(img0->image.size(), QSize(50, 50));
+        QCOMPARE(img0->boundingRect(), QRectF(50, 50, 50, 50));
+        auto img1 = std::static_pointer_cast<const ImageObject>(c.objects[1]);
+        QCOMPARE(img1->boundingRect(), QRectF(0, 0, 100, 100));
+        QCOMPARE(std::static_pointer_cast<const ImageObject>(c.objects[3])->image.size(), QSize(100, 100)); // entirely inside: not cut
+        // What is visible does not change.
+        const QImage after = docops::composite(c);
+        QCOMPARE(after.size(), QSize(100, 100));
+        int diff = 0;
+        for (int y = 0; y < 100; ++y)
+            for (int x = 0; x < 100; ++x)
+                diff += qAbs(qRed(after.pixel(x, y)) - qRed(before.pixel(x, y)))
+                        + qAbs(qGreen(after.pixel(x, y)) - qGreen(before.pixel(x, y))) > 60;
+        QVERIFY2(diff < 150, qPrintable(QString::number(diff)));
     }
 
     void rotatedShapes()

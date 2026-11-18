@@ -513,6 +513,14 @@ o arrastre un archivo aquí</translation>
         <source>calculating…</source>
         <translation>calculando…</translation>
     </message>
+    <message>
+        <source>LZW compression (lossless, smaller file)</source>
+        <translation>Compresión LZW (sin pérdida, archivo más pequeño)</translation>
+    </message>
+    <message>
+        <source>Higher quality means fewer artifacts and a larger file; 100 is lossless</source>
+        <translation>Mayor calidad significa menos artefactos y un archivo más grande; 100 es sin pérdida</translation>
+    </message>
 </context>
 <context>
     <name>FilterDialog</name>
@@ -554,6 +562,221 @@ o arrastre un archivo aquí</translation>
     </message>
 </context>
 <context>
+    <name>ImageInfoDialog</name>
+    <message>
+        <source>Image Information</source>
+        <translation>Información de la imagen</translation>
+    </message>
+    <message>
+        <source>File</source>
+        <translation>Archivo</translation>
+    </message>
+    <message>
+        <source>Name:</source>
+        <translation>Nombre:</translation>
+    </message>
+    <message>
+        <source>Folder:</source>
+        <translation>Carpeta:</translation>
+    </message>
+    <message>
+        <source>File size:</source>
+        <translation>Tamaño del archivo:</translation>
+    </message>
+    <message>
+        <source>Modified:</source>
+        <translation>Modificado:</translation>
+    </message>
+    <message>
+        <source>the file no longer exists</source>
+        <translation>el archivo ya no existe</translation>
+    </message>
+    <message>
+        <source>Format:</source>
+        <translation>Formato:</translation>
+    </message>
+    <message>
+        <source>Rolidan project</source>
+        <translation>Proyecto de Rolidan</translation>
+    </message>
+    <message>
+        <source>Size in file:</source>
+        <translation>Tamaño en el archivo:</translation>
+    </message>
+    <message>
+        <source>%1 × %2 px</source>
+        <translation>%1 × %2 px</translation>
+    </message>
+    <message>
+        <source>Image</source>
+        <translation>Imagen</translation>
+    </message>
+    <message>
+        <source>Size:</source>
+        <translation>Tamaño:</translation>
+    </message>
+    <message>
+        <source>no image</source>
+        <translation>sin imagen</translation>
+    </message>
+    <message>
+        <source>Megapixels:</source>
+        <translation>Megapíxeles:</translation>
+    </message>
+    <message>
+        <source>Resolution:</source>
+        <translation>Resolución:</translation>
+    </message>
+    <message>
+        <source>%1 dpi</source>
+        <translation>%1 ppp</translation>
+    </message>
+    <message>
+        <source>Transparency:</source>
+        <translation>Transparencia:</translation>
+    </message>
+    <message>
+        <source>yes</source>
+        <translation>sí</translation>
+    </message>
+    <message>
+        <source>no</source>
+        <translation>no</translation>
+    </message>
+    <message>
+        <source>Colors:</source>
+        <translation>Colores:</translation>
+    </message>
+    <message>
+        <source>grayscale</source>
+        <translation>escala de grises</translation>
+    </message>
+    <message>
+        <source>Camera</source>
+        <translation>Cámara</translation>
+    </message>
+    <message>
+        <source>Camera:</source>
+        <translation>Cámara:</translation>
+    </message>
+    <message>
+        <source>Lens:</source>
+        <translation>Objetivo:</translation>
+    </message>
+    <message>
+        <source>Taken:</source>
+        <translation>Tomada:</translation>
+    </message>
+    <message>
+        <source>Exposure:</source>
+        <translation>Exposición:</translation>
+    </message>
+    <message>
+        <source>Aperture:</source>
+        <translation>Apertura:</translation>
+    </message>
+    <message>
+        <source>ISO:</source>
+        <translation>ISO:</translation>
+    </message>
+    <message>
+        <source>%1 mm</source>
+        <translation>%1 mm</translation>
+    </message>
+    <message>
+        <source>(%1 mm in 35 mm format)</source>
+        <translation>(%1 mm en formato de 35 mm)</translation>
+    </message>
+    <message>
+        <source>Focal length:</source>
+        <translation>Distancia focal:</translation>
+    </message>
+    <message>
+        <source>Exposure bias:</source>
+        <translation>Compensación de exposición:</translation>
+    </message>
+    <message>
+        <source>%1 EV</source>
+        <translation>%1 EV</translation>
+    </message>
+    <message>
+        <source>Flash:</source>
+        <translation>Flash:</translation>
+    </message>
+    <message>
+        <source>fired</source>
+        <translation>disparado</translation>
+    </message>
+    <message>
+        <source>did not fire</source>
+        <translation>no disparado</translation>
+    </message>
+    <message>
+        <source>Details</source>
+        <translation>Detalles</translation>
+    </message>
+    <message>
+        <source>Description:</source>
+        <translation>Descripción:</translation>
+    </message>
+    <message>
+        <source>Author:</source>
+        <translation>Autor:</translation>
+    </message>
+    <message>
+        <source>Copyright:</source>
+        <translation>Derechos de autor:</translation>
+    </message>
+    <message>
+        <source>Software:</source>
+        <translation>Software:</translation>
+    </message>
+    <message>
+        <source>Location</source>
+        <translation>Ubicación</translation>
+    </message>
+    <message>
+        <source>Latitude:</source>
+        <translation>Latitud:</translation>
+    </message>
+    <message>
+        <source>Longitude:</source>
+        <translation>Longitud:</translation>
+    </message>
+    <message>
+        <source>Altitude:</source>
+        <translation>Altitud:</translation>
+    </message>
+    <message>
+        <source>%1 m</source>
+        <translation>%1 m</translation>
+    </message>
+    <message>
+        <source>The photo contains its location. Rolidan does not copy metadata into exported images, but the original file still has it.</source>
+        <translation>La foto contiene su ubicación. Rolidan no copia los metadatos en las imágenes exportadas, pero el archivo original todavía los tiene.</translation>
+    </message>
+    <message>
+        <source>EXIF:</source>
+        <translation>EXIF:</translation>
+    </message>
+    <message>
+        <source>none</source>
+        <translation>ninguno</translation>
+    </message>
+    <message>
+        <source>Copy as Text</source>
+        <translation>Copiar como texto</translation>
+    </message>
+    <message>
+        <source>Show on Map</source>
+        <translation>Mostrar en el mapa</translation>
+    </message>
+    <message>
+        <source>Opens OpenStreetMap in the web browser</source>
+        <translation>Abre OpenStreetMap en el navegador web</translation>
+    </message>
+</context>
+<context>
     <name>MainWindow</name>
     <message>
         <source>New from Clipboard</source>
@@ -565,7 +788,7 @@ o arrastre un archivo aquí</translation>
     </message>
     <message>
         <source>&amp;Save</source>
-        <translation>&amp;Guardar</translation>
+        <translation>G&amp;uardar</translation>
     </message>
     <message>
         <source>Save &amp;As…</source>
@@ -577,7 +800,7 @@ o arrastre un archivo aquí</translation>
     </message>
     <message>
         <source>&amp;Close Window</source>
-        <translation>Cerrar &amp;ventana</translation>
+        <translation>C&amp;errar ventana</translation>
     </message>
     <message>
         <source>&amp;Quit</source>
@@ -600,26 +823,6 @@ o arrastre un archivo aquí</translation>
         <translation>Rehacer</translation>
     </message>
     <message>
-        <source>Cu&amp;t Image Only</source>
-        <translation>Cor&amp;tar solo imagen</translation>
-    </message>
-    <message>
-        <source>Cut with Annotations</source>
-        <translation>Cortar con anotaciones</translation>
-    </message>
-    <message>
-        <source>&amp;Copy Image Only</source>
-        <translation>&amp;Copiar solo imagen</translation>
-    </message>
-    <message>
-        <source>Copy with Annotations</source>
-        <translation>Copiar con anotaciones</translation>
-    </message>
-    <message>
-        <source>Copy &amp;Result</source>
-        <translation>Copiar &amp;resultado</translation>
-    </message>
-    <message>
         <source>Copy the whole resulting image (Ctrl+Alt+C)</source>
         <translation>Copiar la imagen resultante completa (Ctrl+Alt+C)</translation>
     </message>
@@ -633,7 +836,7 @@ o arrastre un archivo aquí</translation>
     </message>
     <message>
         <source>Select &amp;All</source>
-        <translation>Seleccionar &amp;todo</translation>
+        <translation>Seleccionar t&amp;odo</translation>
     </message>
     <message>
         <source>Crop to &amp;Selection</source>
@@ -844,10 +1047,6 @@ o arrastre un archivo aquí</translation>
         <translation>Selección cortada con anotaciones</translation>
     </message>
     <message>
-        <source>Cut selection — image only, annotations kept</source>
-        <translation>Selección cortada: solo la imagen, se conservan las anotaciones</translation>
-    </message>
-    <message>
         <source>Copied the whole image (%1 × %2)</source>
         <translation>Imagen completa copiada (%1 × %2)</translation>
     </message>
@@ -960,10 +1159,6 @@ o arrastre un archivo aquí</translation>
         <translation>Tapar</translation>
     </message>
     <message>
-        <source>Opaque cover for sensitive data (K)</source>
-        <translation>Tapa opaca para datos sensibles (K)</translation>
-    </message>
-    <message>
         <source>Color Picker</source>
         <translation>Cuentagotas</translation>
     </message>
@@ -981,11 +1176,7 @@ o arrastre un archivo aquí</translation>
     </message>
     <message>
         <source>Send to Bac&amp;k</source>
-        <translation>Enviar al &amp;fondo</translation>
-    </message>
-    <message>
-        <source>D&amp;uplicate</source>
-        <translation>D&amp;uplicar</translation>
+        <translation>Enviar al fo&amp;ndo</translation>
     </message>
     <message>
         <source>&amp;Merge Selected into Image</source>
@@ -993,15 +1184,11 @@ o arrastre un archivo aquí</translation>
     </message>
     <message>
         <source>Merge &amp;All Annotations into Image</source>
-        <translation>Combinar &amp;todas las anotaciones con la imagen</translation>
+        <translation>Combinar t&amp;odas las anotaciones con la imagen</translation>
     </message>
     <message>
         <source>&amp;Arrange</source>
         <translation>Or&amp;ganizar</translation>
-    </message>
-    <message>
-        <source>Click to select an object, drag to move it, drag a corner to resize (Shift: free aspect ratio). Double-click a text to edit it. Arrow keys move by 1 px, with Shift by 10 px.</source>
-        <translation>Haga clic para seleccionar un objeto, arrástrelo para moverlo, arrastre una esquina para cambiar el tamaño (Mayús: proporción libre). Doble clic para editar un texto. Las flechas mueven 1 px; con Mayús, 10 px.</translation>
     </message>
     <message>
         <source>Click to pick a color from the image; it is used by the previous tool.</source>
@@ -1028,16 +1215,8 @@ o arrastre un archivo aquí</translation>
         <translation>Tampón de clonar</translation>
     </message>
     <message>
-        <source>Clone stamp (S): Ctrl+click or right-click sets the source</source>
-        <translation>Tampón de clonar (S): Ctrl+clic o clic derecho fija el origen</translation>
-    </message>
-    <message>
         <source>Eraser</source>
         <translation>Borrador</translation>
-    </message>
-    <message>
-        <source>Pixel eraser (E): erases the image to transparency, not annotations</source>
-        <translation>Borrador de píxeles (E): borra la imagen a transparente, no las anotaciones</translation>
     </message>
     <message>
         <source>Blur Brush</source>
@@ -1046,10 +1225,6 @@ o arrastre un archivo aquí</translation>
     <message>
         <source>Resi&amp;ze Image…</source>
         <translation>&amp;Redimensionar imagen…</translation>
-    </message>
-    <message>
-        <source>Canvas Si&amp;ze…</source>
-        <translation>Tamaño del &amp;lienzo…</translation>
     </message>
     <message>
         <source>&amp;Blur Selection</source>
@@ -1105,7 +1280,7 @@ o arrastre un archivo aquí</translation>
     </message>
     <message>
         <source>Save as &amp;Project…</source>
-        <translation>Guardar como &amp;proyecto…</translation>
+        <translation>Guardar como pro&amp;yecto…</translation>
     </message>
     <message>
         <source>Save with editable annotations (.rolidan)</source>
@@ -1116,32 +1291,16 @@ o arrastre un archivo aquí</translation>
         <translation>Marcador numerado</translation>
     </message>
     <message>
-        <source>Numbered marker (N): each click adds the next number</source>
-        <translation>Marcador numerado (N): cada clic añade el número siguiente</translation>
-    </message>
-    <message>
         <source>Polyline</source>
         <translation>Polilínea</translation>
-    </message>
-    <message>
-        <source>Polyline (P): click to add points, double-click or Enter to finish</source>
-        <translation>Polilínea (P): haga clic para añadir puntos; doble clic o Intro para terminar</translation>
     </message>
     <message>
         <source>Polygon</source>
         <translation>Polígono</translation>
     </message>
     <message>
-        <source>Polygon (G): click to add points, click the first point or press Enter to close</source>
-        <translation>Polígono (G): haga clic para añadir puntos; clic en el primer punto o Intro para cerrar</translation>
-    </message>
-    <message>
         <source>Bubble</source>
         <translation>Bocadillo</translation>
-    </message>
-    <message>
-        <source>Speech bubble (Q): press where the tail points, drag to place the bubble</source>
-        <translation>Bocadillo (Q): pulse donde apunta la cola y arrastre para colocar el bocadillo</translation>
     </message>
     <message>
         <source>Annotations stay editable only until the window is closed — save as project (Ctrl+Alt+S) to keep them</source>
@@ -1196,10 +1355,6 @@ o arrastre un archivo aquí</translation>
         <translation>Notas</translation>
     </message>
     <message>
-        <source>Text notes about the image, Markdown (Ctrl+Alt+N)</source>
-        <translation>Notas de texto sobre la imagen, Markdown (Ctrl+Alt+N)</translation>
-    </message>
-    <message>
         <source>Notes are kept only in a project (Ctrl+Alt+S) or exported as .md</source>
         <translation>Las notas solo se conservan en un proyecto (Ctrl+Alt+S) o exportadas como .md</translation>
     </message>
@@ -1212,24 +1367,12 @@ o arrastre un archivo aquí</translation>
         <translation>Pincel de pixelado</translation>
     </message>
     <message>
-        <source>Pixelate brush (J): mosaic where you paint</source>
-        <translation>Pincel de pixelado (J): mosaico donde pinta</translation>
-    </message>
-    <message>
         <source>Paint Bucket</source>
         <translation>Bote de pintura</translation>
     </message>
     <message>
-        <source>Paint bucket (F): fills an area of similar color in the image</source>
-        <translation>Bote de pintura (F): rellena un área de color similar en la imagen</translation>
-    </message>
-    <message>
         <source>Straighten</source>
         <translation>Enderezar</translation>
-    </message>
-    <message>
-        <source>Straighten (W): drag along a line that should be level or upright</source>
-        <translation>Enderezar (W): arrastre a lo largo de una línea que debería estar horizontal o vertical</translation>
     </message>
     <message>
         <source>Add Noise…</source>
@@ -1253,15 +1396,11 @@ o arrastre un archivo aquí</translation>
     </message>
     <message>
         <source>&amp;Batch Convert…</source>
-        <translation>Conversión por lo&amp;tes…</translation>
+        <translation>Conversión por &amp;lotes…</translation>
     </message>
     <message>
         <source>Convert, shrink or adjust many images at once</source>
         <translation>Convertir, reducir o ajustar muchas imágenes a la vez</translation>
-    </message>
-    <message>
-        <source>&amp;Next Image in Folder</source>
-        <translation>Si&amp;guiente imagen de la carpeta</translation>
     </message>
     <message>
         <source>Pre&amp;vious Image in Folder</source>
@@ -1269,11 +1408,11 @@ o arrastre un archivo aquí</translation>
     </message>
     <message>
         <source>F&amp;irst Image in Folder</source>
-        <translation>P&amp;rimera imagen de la carpeta</translation>
+        <translation>Pri&amp;mera imagen de la carpeta</translation>
     </message>
     <message>
         <source>&amp;Last Image in Folder</source>
-        <translation>Ú&amp;ltima imagen de la carpeta</translation>
+        <translation>&amp;Última imagen de la carpeta</translation>
     </message>
     <message>
         <source>&amp;Colors</source>
@@ -1294,6 +1433,392 @@ o arrastre un archivo aquí</translation>
     <message>
         <source>&lt;p&gt;Free software under the GNU General Public License version 3 (GPL-3.0). It comes with ABSOLUTELY NO WARRANTY.&lt;/p&gt;&lt;p&gt;Built with Qt %1 (LGPL-3.0), libjpeg-turbo and libwebp (BSD).&lt;/p&gt;</source>
         <translation>&lt;p&gt;Software libre bajo la Licencia Pública General de GNU versión 3 (GPL-3.0). Se ofrece SIN NINGUNA GARANTÍA.&lt;/p&gt;&lt;p&gt;Compilado con Qt %1 (LGPL-3.0), libjpeg-turbo y libwebp (BSD).&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>No recent files</source>
+        <translation>No hay archivos recientes</translation>
+    </message>
+    <message>
+        <source>Open Recent</source>
+        <translation>Abrir reciente</translation>
+    </message>
+    <message>
+        <source>The file no longer exists:
+%1</source>
+        <translation>El archivo ya no existe:
+%1</translation>
+    </message>
+    <message>
+        <source>Full screen · F11 or Esc to leave</source>
+        <translation>Pantalla completa · F11 o Esc para salir</translation>
+    </message>
+    <message>
+        <source>Open an image from a folder with more images to start a slideshow</source>
+        <translation>Abra una imagen de una carpeta con varias imágenes para iniciar una presentación</translation>
+    </message>
+    <message>
+        <source>Slideshow · Space pauses, arrows browse, Esc ends</source>
+        <translation>Presentación · Espacio pausa, flechas cambian de imagen, Esc termina</translation>
+    </message>
+    <message>
+        <source>Slideshow paused · Space continues</source>
+        <translation>Presentación en pausa · Espacio continúa</translation>
+    </message>
+    <message>
+        <source>Slideshow continues</source>
+        <translation>La presentación continúa</translation>
+    </message>
+    <message>
+        <source>End of slideshow</source>
+        <translation>Fin de la presentación</translation>
+    </message>
+    <message>
+        <source>Rename</source>
+        <translation>Cambiar nombre</translation>
+    </message>
+    <message>
+        <source>A file named “%1” already exists.</source>
+        <translation>Ya existe un archivo llamado «%1».</translation>
+    </message>
+    <message>
+        <source>Could not rename the file.</source>
+        <translation>No se pudo cambiar el nombre del archivo.</translation>
+    </message>
+    <message>
+        <source>New name:</source>
+        <translation>Nombre nuevo:</translation>
+    </message>
+    <message>
+        <source>Move to Trash</source>
+        <translation>Mover a la papelera</translation>
+    </message>
+    <message>
+        <source>Move “%1” to the trash?</source>
+        <translation>¿Mover «%1» a la papelera?</translation>
+    </message>
+    <message>
+        <source>Unsaved changes in this window will be lost.</source>
+        <translation>Se perderán los cambios sin guardar de esta ventana.</translation>
+    </message>
+    <message>
+        <source>Don’t ask again</source>
+        <translation>No volver a preguntar</translation>
+    </message>
+    <message>
+        <source>Could not move the file to the trash. It may be on a drive without a trash folder, or you lack permission.</source>
+        <translation>No se pudo mover el archivo a la papelera. Puede estar en una unidad sin papelera o no tiene permiso.</translation>
+    </message>
+    <message>
+        <source>Moved to the trash: %1</source>
+        <translation>Movido a la papelera: %1</translation>
+    </message>
+    <message>
+        <source>Move to Folder</source>
+        <translation>Mover a carpeta</translation>
+    </message>
+    <message>
+        <source>Copy to Folder</source>
+        <translation>Copiar a carpeta</translation>
+    </message>
+    <message>
+        <source>The file is already in this folder.</source>
+        <translation>El archivo ya está en esta carpeta.</translation>
+    </message>
+    <message>
+        <source>“%1” already exists in the target folder.</source>
+        <translation>«%1» ya existe en la carpeta de destino.</translation>
+    </message>
+    <message>
+        <source>Keep Both</source>
+        <translation>Conservar ambos</translation>
+    </message>
+    <message>
+        <source>Replace</source>
+        <translation>Reemplazar</translation>
+    </message>
+    <message>
+        <source>Could not replace the existing file.</source>
+        <translation>No se pudo reemplazar el archivo existente.</translation>
+    </message>
+    <message>
+        <source>Could not copy the file.</source>
+        <translation>No se pudo copiar el archivo.</translation>
+    </message>
+    <message>
+        <source>Copied to %1</source>
+        <translation>Copiado a %1</translation>
+    </message>
+    <message>
+        <source>Could not move the file.</source>
+        <translation>No se pudo mover el archivo.</translation>
+    </message>
+    <message>
+        <source>Moved to %1</source>
+        <translation>Movido a %1</translation>
+    </message>
+    <message>
+        <source>Move “%1” to Folder</source>
+        <translation>Mover «%1» a una carpeta</translation>
+    </message>
+    <message>
+        <source>Copy “%1” to Folder</source>
+        <translation>Copiar «%1» a una carpeta</translation>
+    </message>
+    <message>
+        <source>&amp;Slideshow</source>
+        <translation>Pre&amp;sentación</translation>
+    </message>
+    <message>
+        <source>Show the images of the folder one after another in full screen (F5)</source>
+        <translation>Muestra las imágenes de la carpeta una tras otra en pantalla completa (F5)</translation>
+    </message>
+    <message>
+        <source>&amp;Move File to Folder…</source>
+        <translation>Mo&amp;ver archivo a una carpeta…</translation>
+    </message>
+    <message>
+        <source>&amp;Clear List</source>
+        <translation>&amp;Borrar lista</translation>
+    </message>
+    <message>
+        <source>Open &amp;Recent</source>
+        <translation>Abrir recien&amp;te</translation>
+    </message>
+    <message>
+        <source>Slideshow ended because the image was edited</source>
+        <translation>La presentación terminó porque se editó la imagen</translation>
+    </message>
+    <message>
+        <source>Copy Re&amp;sult</source>
+        <translation>Copiar re&amp;sultado</translation>
+    </message>
+    <message>
+        <source>Dup&amp;licate</source>
+        <translation>D&amp;uplicar</translation>
+    </message>
+    <message>
+        <source>Ca&amp;nvas Size…</source>
+        <translation>Tamaño del &amp;lienzo…</translation>
+    </message>
+    <message>
+        <source>F&amp;ull Screen</source>
+        <translation>&amp;Pantalla completa</translation>
+    </message>
+    <message>
+        <source>Image In&amp;formation…</source>
+        <translation>In&amp;formación de la imagen…</translation>
+    </message>
+    <message>
+        <source>R&amp;ename File…</source>
+        <translation>Cam&amp;biar nombre del archivo…</translation>
+    </message>
+    <message>
+        <source>Move File to Tras&amp;h…</source>
+        <translation>Mover arc&amp;hivo a la papelera…</translation>
+    </message>
+    <message>
+        <source>Cop&amp;y File to Folder…</source>
+        <translation>C&amp;opiar archivo a una carpeta…</translation>
+    </message>
+    <message>
+        <source>Show in File Mana&amp;ger</source>
+        <translation>Mostrar en el gestor &amp;de archivos</translation>
+    </message>
+    <message>
+        <source>Text notes about the image, Markdown</source>
+        <translation>Notas de texto sobre la imagen, Markdown</translation>
+    </message>
+    <message>
+        <source>Opaque cover for sensitive data</source>
+        <translation>Cubierta opaca para datos sensibles</translation>
+    </message>
+    <message>
+        <source>Each click adds the next number</source>
+        <translation>Cada clic añade el siguiente número</translation>
+    </message>
+    <message>
+        <source>Click to add points, double-click or Enter to finish</source>
+        <translation>Haga clic para añadir puntos; doble clic o Intro para terminar</translation>
+    </message>
+    <message>
+        <source>Click to add points, click the first point or press Enter to close</source>
+        <translation>Haga clic para añadir puntos; clic en el primero o Intro para cerrar</translation>
+    </message>
+    <message>
+        <source>Press where the tail points, drag to place the bubble</source>
+        <translation>Pulse donde apunta la cola y arrastre para colocar el bocadillo</translation>
+    </message>
+    <message>
+        <source>Ctrl+click or right-click sets the source</source>
+        <translation>Ctrl+clic o clic derecho fija el origen</translation>
+    </message>
+    <message>
+        <source>Erases the image to transparency, not annotations</source>
+        <translation>Borra la imagen a transparente, no las anotaciones</translation>
+    </message>
+    <message>
+        <source>Mosaic where you paint</source>
+        <translation>Mosaico donde pinte</translation>
+    </message>
+    <message>
+        <source>Fills an area of similar color in the image</source>
+        <translation>Rellena un área de color similar en la imagen</translation>
+    </message>
+    <message>
+        <source>Drag along a line that should be level or upright</source>
+        <translation>Arrastre a lo largo de una línea que deba quedar horizontal o vertical</translation>
+    </message>
+    <message>
+        <source>&amp;Keyboard Shortcuts…</source>
+        <translation>Ata&amp;jos de teclado…</translation>
+    </message>
+    <message>
+        <source>Full screen: small images are enlarged to fit the screen</source>
+        <translation>Pantalla completa: las imágenes pequeñas se amplían a la pantalla</translation>
+    </message>
+    <message>
+        <source>Full screen: small images are shown at actual size</source>
+        <translation>Pantalla completa: las imágenes pequeñas se muestran a tamaño real</translation>
+    </message>
+    <message>
+        <source>&amp;Thumbnails</source>
+        <translation>&amp;Miniaturas</translation>
+    </message>
+    <message>
+        <source>Thumbnails</source>
+        <translation>Miniaturas</translation>
+    </message>
+    <message>
+        <source>Thumbnails of the images in the folder</source>
+        <translation>Miniaturas de las imágenes de la carpeta</translation>
+    </message>
+    <message>
+        <source>&amp;Enlarge Small Images in Full Screen</source>
+        <translation>Ampliar &amp;imágenes pequeñas en pantalla completa</translation>
+    </message>
+    <message>
+        <source>In full screen, fit every image to the screen, small ones too (Z)</source>
+        <translation>En pantalla completa, ajustar cada imagen a la pantalla, también las pequeñas (Z)</translation>
+    </message>
+    <message>
+        <source>Pri&amp;nt…</source>
+        <translation>&amp;Imprimir…</translation>
+    </message>
+    <message>
+        <source>Print the image: fit to page or actual size, with a preview</source>
+        <translation>Imprimir la imagen: ajustada a la página o a tamaño real, con vista previa</translation>
+    </message>
+    <message>
+        <source>Ne&amp;xt Image in Folder</source>
+        <translation>Si&amp;guiente imagen de la carpeta</translation>
+    </message>
+    <message>
+        <source>Click to select an object, drag to move it, drag a corner to resize (Shift: free aspect ratio), drag the round handle to rotate (Shift: 15° steps). Double-click a text to edit it. Arrow keys move by 1 px, with Shift by 10 px.</source>
+        <translation>Haga clic para seleccionar un objeto, arrastre para moverlo, arrastre una esquina para cambiar el tamaño (Mayús: proporción libre), arrastre el asa redonda para girarlo (Mayús: pasos de 15°). Doble clic en un texto para editarlo. Las flechas mueven 1 px, con Mayús 10 px.</translation>
+    </message>
+    <message>
+        <source>Capture Screen</source>
+        <translation>Capturar pantalla</translation>
+    </message>
+    <message>
+        <source>Drag to choose the area, Enter crops</source>
+        <translation>Arrastre para elegir el área, Intro recorta</translation>
+    </message>
+    <message>
+        <source>Capt&amp;ure Screen</source>
+        <translation>Captu&amp;rar pantalla</translation>
+    </message>
+    <message>
+        <source>Screenshot: Rolidan steps aside, takes the screenshot and comes back with it. The arrow chooses whole screen or area, the field next to it the delay.</source>
+        <translation>Captura de pantalla: Rolidan se aparta, hace la captura y vuelve con ella. La flecha elige pantalla completa o área; el campo de al lado, el retardo.</translation>
+    </message>
+    <message>
+        <source>&amp;Whole screen</source>
+        <translation>&amp;Toda la pantalla</translation>
+    </message>
+    <message>
+        <source>&amp;Area or window</source>
+        <translation>&amp;Área o ventana</translation>
+    </message>
+    <message>
+        <source>The whole screen is captured, then the crop tool lets you choose the area</source>
+        <translation>Se captura toda la pantalla y luego se elige el área con la herramienta Recortar</translation>
+    </message>
+    <message>
+        <source>The desktop lets you choose an area or a window</source>
+        <translation>El escritorio le permite elegir un área o una ventana</translation>
+    </message>
+    <message>
+        <source>&amp;Minimize Rolidan while capturing</source>
+        <translation>&amp;Minimizar Rolidan durante la captura</translation>
+    </message>
+    <message>
+        <source> s</source>
+        <translation> s</translation>
+    </message>
+    <message>
+        <source>Now</source>
+        <translation>Ahora</translation>
+    </message>
+    <message>
+        <source>Delay before the screenshot is taken</source>
+        <translation>Retardo antes de hacer la captura</translation>
+    </message>
+    <message>
+        <source>Screenshot</source>
+        <translation>Captura</translation>
+    </message>
+    <message>
+        <source>Change resolution</source>
+        <translation>Cambiar resolución</translation>
+    </message>
+    <message>
+        <source>&amp;Copy</source>
+        <translation>&amp;Copiar</translation>
+    </message>
+    <message>
+        <source>Copy the image with annotations (inside the area selection, if any)</source>
+        <translation>Copiar la imagen con anotaciones (solo la selección de área, si la hay)</translation>
+    </message>
+    <message>
+        <source>Copy Selected &amp;Object or Image Only</source>
+        <translation>Copiar objeto seleccionado o solo &amp;imagen</translation>
+    </message>
+    <message>
+        <source>Copy only the selected object(s); without a selected object the image without annotations</source>
+        <translation>Copia solo los objetos seleccionados; sin selección, la imagen sin anotaciones</translation>
+    </message>
+    <message>
+        <source>Copied the image without annotations</source>
+        <translation>Imagen copiada sin anotaciones</translation>
+    </message>
+    <message>
+        <source>Cu&amp;t</source>
+        <translation>Cor&amp;tar</translation>
+    </message>
+    <message>
+        <source>Cut the area selection with annotations, or the selected object(s)</source>
+        <translation>Cortar la selección de área con anotaciones, o los objetos seleccionados</translation>
+    </message>
+    <message>
+        <source>Cut Selected Object or Image Only</source>
+        <translation>Cortar objeto seleccionado o solo imagen</translation>
+    </message>
+    <message>
+        <source>Cut only the selected object(s); in an area selection only the image, annotations stay</source>
+        <translation>Corta solo los objetos seleccionados; en una selección de área solo la imagen, las anotaciones se quedan</translation>
+    </message>
+    <message numerus="yes">
+        <source>Cut %n object(s)</source>
+        <translation><numerusform>%n objeto cortado</numerusform><numerusform>%n objetos cortados</numerusform></translation>
+    </message>
+    <message>
+        <source>Cut selection — image only, annotations stay</source>
+        <translation>Selección cortada: solo imagen, las anotaciones se quedan</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Author: %1&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Autor: %1&lt;/p&gt;</translation>
     </message>
 </context>
 <context>
@@ -1389,12 +1914,91 @@ Importe un archivo .md con el botón de arriba o suéltelo en la ventana.</trans
         <source>Resize</source>
         <translation>Cambiar tamaño</translation>
     </message>
+    <message>
+        <source>Rotate</source>
+        <translation>Girar</translation>
+    </message>
 </context>
 <context>
     <name>PolyTool</name>
     <message>
         <source>Draw</source>
         <translation>Dibujar</translation>
+    </message>
+</context>
+<context>
+    <name>PrintDialog</name>
+    <message>
+        <source>Print</source>
+        <translation>Imprimir</translation>
+    </message>
+    <message>
+        <source>Size</source>
+        <translation>Tamaño</translation>
+    </message>
+    <message>
+        <source>&amp;Fit to page</source>
+        <translation>&amp;Ajustar a la página</translation>
+    </message>
+    <message>
+        <source>&amp;Actual size at</source>
+        <translation>Tamaño &amp;real a</translation>
+    </message>
+    <message>
+        <source>&amp;Scale</source>
+        <translation>&amp;Escala</translation>
+    </message>
+    <message>
+        <source> dpi</source>
+        <translation> ppp</translation>
+    </message>
+    <message>
+        <source>Page</source>
+        <translation>Página</translation>
+    </message>
+    <message>
+        <source>Automatic</source>
+        <translation>Automática</translation>
+    </message>
+    <message>
+        <source>Portrait</source>
+        <translation>Vertical</translation>
+    </message>
+    <message>
+        <source>Landscape</source>
+        <translation>Horizontal</translation>
+    </message>
+    <message>
+        <source>&amp;Orientation:</source>
+        <translation>&amp;Orientación:</translation>
+    </message>
+    <message>
+        <source> mm</source>
+        <translation> mm</translation>
+    </message>
+    <message>
+        <source>&amp;Margins:</source>
+        <translation>&amp;Márgenes:</translation>
+    </message>
+    <message>
+        <source>&amp;Center on page</source>
+        <translation>&amp;Centrar en la página</translation>
+    </message>
+    <message>
+        <source>Print a&amp;nnotations</source>
+        <translation>Imprimir a&amp;notaciones</translation>
+    </message>
+    <message>
+        <source>Paper size and printer page settings</source>
+        <translation>Tamaño del papel y ajustes de página de la impresora</translation>
+    </message>
+    <message>
+        <source>&amp;Print…</source>
+        <translation>&amp;Imprimir…</translation>
+    </message>
+    <message>
+        <source>Pape&amp;r…</source>
+        <translation>Pa&amp;pel…</translation>
     </message>
 </context>
 <context>
@@ -1572,34 +2176,173 @@ Desactivado: rellena cada píxel de color similar.</translation>
     </message>
 </context>
 <context>
+    <name>QObject</name>
+    <message>
+        <source>%1 B</source>
+        <translation>%1 B</translation>
+    </message>
+</context>
+<context>
     <name>ResizeDialog</name>
     <message>
         <source>Resize Image</source>
         <translation>Redimensionar imagen</translation>
     </message>
     <message>
-        <source>Current size:</source>
-        <translation>Tamaño actual:</translation>
+        <source>New size</source>
+        <translation>Nuevo tamaño</translation>
     </message>
     <message>
-        <source>Keep aspect ratio</source>
-        <translation>Mantener proporción</translation>
+        <source>Choose…</source>
+        <translation>Elegir…</translation>
     </message>
     <message>
-        <source>Width:</source>
-        <translation>Ancho:</translation>
+        <source>Half (50 %)</source>
+        <translation>Mitad (50 %)</translation>
     </message>
     <message>
-        <source>Height:</source>
-        <translation>Alto:</translation>
+        <source>Double (200 %)</source>
+        <translation>Doble (200 %)</translation>
     </message>
     <message>
-        <source>Scale:</source>
-        <translation>Escala:</translation>
+        <source>Best fit to screen (%1 × %2)</source>
+        <translation>Ajustar a la pantalla (%1 × %2)</translation>
     </message>
     <message>
-        <source>New size: %1 × %2 px (%3 in memory). Annotations are scaled too.</source>
-        <translation>Tamaño nuevo: %1 × %2 px (%3 en memoria). Las anotaciones también se escalan.</translation>
+        <source>Screen size, ignore aspect ratio</source>
+        <translation>Tamaño de pantalla, sin mantener proporción</translation>
+    </message>
+    <message>
+        <source>With "Keep aspect ratio" the image fits inside the chosen size</source>
+        <translation>Con «Mantener proporción» la imagen cabe dentro del tamaño elegido</translation>
+    </message>
+    <message>
+        <source>&amp;Preset:</source>
+        <translation>&amp;Predefinido:</translation>
+    </message>
+    <message>
+        <source>pixels</source>
+        <translation>píxeles</translation>
+    </message>
+    <message>
+        <source>cm</source>
+        <translation>cm</translation>
+    </message>
+    <message>
+        <source>inches</source>
+        <translation>pulgadas</translation>
+    </message>
+    <message>
+        <source>&amp;Width:</source>
+        <translation>&amp;Ancho:</translation>
+    </message>
+    <message>
+        <source>H&amp;eight:</source>
+        <translation>A&amp;lto:</translation>
+    </message>
+    <message>
+        <source>&amp;Units:</source>
+        <translation>&amp;Unidades:</translation>
+    </message>
+    <message>
+        <source>As percentage of the original:</source>
+        <translation>En porcentaje del original:</translation>
+    </message>
+    <message>
+        <source>Wi&amp;dth:</source>
+        <translation>An&amp;cho:</translation>
+    </message>
+    <message>
+        <source>Hei&amp;ght:</source>
+        <translation>Al&amp;to:</translation>
+    </message>
+    <message>
+        <source>&amp;Keep aspect ratio</source>
+        <translation>&amp;Mantener proporción</translation>
+    </message>
+    <message>
+        <source> dpi</source>
+        <translation> ppp</translation>
+    </message>
+    <message>
+        <source>Print resolution stored in the file; also used for cm and inches</source>
+        <translation>Resolución de impresión guardada en el archivo; también se usa para cm y pulgadas</translation>
+    </message>
+    <message>
+        <source>&amp;Resolution:</source>
+        <translation>&amp;Resolución:</translation>
+    </message>
+    <message>
+        <source>Quality</source>
+        <translation>Calidad</translation>
+    </message>
+    <message>
+        <source>Lanczos – sharpest (recommended)</source>
+        <translation>Lanczos – el más nítido (recomendado)</translation>
+    </message>
+    <message>
+        <source>Mitchell – smooth (bicubic)</source>
+        <translation>Mitchell – suave (bicúbico)</translation>
+    </message>
+    <message>
+        <source>B-spline – softest, no halos</source>
+        <translation>B-spline – el más suave, sin halos</translation>
+    </message>
+    <message>
+        <source>Nearest neighbor – hard pixels (pixel art, screenshots at 200 %)</source>
+        <translation>Vecino más cercano – píxeles duros (pixel art, capturas al 200 %)</translation>
+    </message>
+    <message>
+        <source>&amp;Method:</source>
+        <translation>Métod&amp;o:</translation>
+    </message>
+    <message>
+        <source>&amp;Sharpen after resampling</source>
+        <translation>&amp;Enfocar tras remuestrear</translation>
+    </message>
+    <message>
+        <source>Restores crispness lost when shrinking photos</source>
+        <translation>Recupera la nitidez que se pierde al reducir fotos</translation>
+    </message>
+    <message>
+        <source> px</source>
+        <translation> px</translation>
+    </message>
+    <message>
+        <source> cm</source>
+        <translation> cm</translation>
+    </message>
+    <message>
+        <source> in</source>
+        <translation> pulg</translation>
+    </message>
+    <message>
+        <source>%1 × %2 cm at %3 dpi</source>
+        <translation>%1 × %2 cm a %3 ppp</translation>
+    </message>
+    <message>
+        <source>Original size: %1 × %2 px (%3 MP), %4</source>
+        <translation>Tamaño original: %1 × %2 px (%3 MP), %4</translation>
+    </message>
+    <message>
+        <source>New size: %1 × %2 px, %3 (%4 in memory). Annotations are scaled too.</source>
+        <translation>Nuevo tamaño: %1 × %2 px, %3 (%4 en memoria). Las anotaciones también se escalan.</translation>
+    </message>
+    <message>
+        <source>Enlarging cannot add detail; for pixel art choose Nearest neighbor.</source>
+        <translation>Ampliar no añade detalle; para pixel art elija Vecino más cercano.</translation>
+    </message>
+    <message>
+        <source>Hermite – smooth, no halos</source>
+        <translation>Hermite – suave, sin halos</translation>
+    </message>
+    <message>
+        <source>Triangle (bilinear) – fast</source>
+        <translation>Triangle (bilineal) – rápido</translation>
+    </message>
+    <message>
+        <source>Bell – soft</source>
+        <translation>Bell – suave</translation>
     </message>
 </context>
 <context>
@@ -1619,6 +2362,40 @@ Desactivado: rellena cada píxel de color similar.</translation>
     <message>
         <source>Blur brush</source>
         <translation>Pincel de desenfoque</translation>
+    </message>
+</context>
+<context>
+    <name>ScreenCapture</name>
+    <message>
+        <source>The desktop did not take the screenshot.</source>
+        <translation>El escritorio no realizó la captura.</translation>
+    </message>
+    <message>
+        <source>The screenshot could not be read.</source>
+        <translation>No se pudo leer la captura.</translation>
+    </message>
+    <message>
+        <source>Screenshots need the desktop portal (xdg-desktop-portal), which is not running.</source>
+        <translation>Las capturas necesitan el portal del escritorio (xdg-desktop-portal), que no se está ejecutando.</translation>
+    </message>
+    <message>
+        <source>The desktop refused the screenshot: %1</source>
+        <translation>El escritorio rechazó la captura: %1</translation>
+    </message>
+    <message>
+        <source>The screen could not be captured.</source>
+        <translation>No se pudo capturar la pantalla.</translation>
+    </message>
+</context>
+<context>
+    <name>SelectTool</name>
+    <message>
+        <source>Enter or double-click crops to the selection</source>
+        <translation>Intro o doble clic recorta a la selección</translation>
+    </message>
+    <message>
+        <source>Crop</source>
+        <translation>Recortar</translation>
     </message>
 </context>
 <context>
@@ -1661,6 +2438,125 @@ Desactivado: rellena cada píxel de color similar.</translation>
         <source>The language will change after you restart Rolidan.</source>
         <translation>El idioma cambiará después de reiniciar Rolidan.</translation>
     </message>
+    <message>
+        <source>Scrolls the image</source>
+        <translation>desplaza la imagen</translation>
+    </message>
+    <message>
+        <source>Shows the next / previous image</source>
+        <translation>muestra la imagen siguiente / anterior</translation>
+    </message>
+    <message>
+        <source>Zooms</source>
+        <translation>hace zoom</translation>
+    </message>
+    <message>
+        <source>Ctrl + wheel always zooms</source>
+        <translation>Ctrl + rueda siempre hace zoom</translation>
+    </message>
+    <message>
+        <source>Mouse wheel:</source>
+        <translation>Rueda del ratón:</translation>
+    </message>
+    <message>
+        <source> s</source>
+        <translation> s</translation>
+    </message>
+    <message>
+        <source>Slideshow interval:</source>
+        <translation>Intervalo de la presentación:</translation>
+    </message>
+    <message>
+        <source>Start again after the last image</source>
+        <translation>Volver a empezar tras la última imagen</translation>
+    </message>
+    <message>
+        <source>Ask before moving a file to the trash</source>
+        <translation>Preguntar antes de mover un archivo a la papelera</translation>
+    </message>
+    <message>
+        <source>In full screen and slideshow, enlarge small images to fit the screen (Z)</source>
+        <translation>En pantalla completa y en la presentación, ampliar las imágenes pequeñas a la pantalla (Z)</translation>
+    </message>
+    <message>
+        <source>Full screen:</source>
+        <translation>Pantalla completa:</translation>
+    </message>
+</context>
+<context>
+    <name>ShortcutsDialog</name>
+    <message>
+        <source>File</source>
+        <translation>Archivo</translation>
+    </message>
+    <message>
+        <source>Edit</source>
+        <translation>Editar</translation>
+    </message>
+    <message>
+        <source>Arrange</source>
+        <translation>Organizar</translation>
+    </message>
+    <message>
+        <source>Image</source>
+        <translation>Imagen</translation>
+    </message>
+    <message>
+        <source>Colors and Filters</source>
+        <translation>Colores y filtros</translation>
+    </message>
+    <message>
+        <source>Tools</source>
+        <translation>Herramientas</translation>
+    </message>
+    <message>
+        <source>View</source>
+        <translation>Ver</translation>
+    </message>
+    <message>
+        <source>Other</source>
+        <translation>Otros</translation>
+    </message>
+    <message>
+        <source>Keyboard Shortcuts</source>
+        <translation>Atajos de teclado</translation>
+    </message>
+    <message>
+        <source>Search actions or keys…</source>
+        <translation>Buscar acciones o teclas…</translation>
+    </message>
+    <message>
+        <source>Action</source>
+        <translation>Acción</translation>
+    </message>
+    <message>
+        <source>Shortcut</source>
+        <translation>Atajo</translation>
+    </message>
+    <message>
+        <source>Alternative</source>
+        <translation>Alternativo</translation>
+    </message>
+    <message>
+        <source>Click a field and press the new key. Tools keep working with Shift + their letter unless you change that too. Esc, Enter, Space, the arrow keys and [ ] keep their fixed meaning while a tool uses them.</source>
+        <translation>Haga clic en un campo y pulse la nueva tecla. Las herramientas siguen funcionando con Mayús + su letra, salvo que también lo cambie. Esc, Intro, Espacio, las flechas y [ ] mantienen su significado fijo cuando una herramienta las usa.</translation>
+    </message>
+    <message>
+        <source>Reset All to Defaults</source>
+        <translation>Restablecer todo</translation>
+    </message>
+    <message>
+        <source>Some keys are used by more than one action:
+
+%1
+
+Change them first.</source>
+        <translation>Algunas teclas las usa más de una acción:
+
+%1
+
+Cámbielas primero.</translation>
+    </message>
 </context>
 <context>
     <name>StraightenTool</name>
@@ -1686,6 +2582,13 @@ Desactivado: rellena cada píxel de color similar.</translation>
     <message>
         <source>Edit text</source>
         <translation>Editar texto</translation>
+    </message>
+</context>
+<context>
+    <name>ThumbnailPanel</name>
+    <message>
+        <source>Thumbnails</source>
+        <translation>Miniaturas</translation>
     </message>
 </context>
 <context>

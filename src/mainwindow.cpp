@@ -230,12 +230,19 @@ void MainWindow::createActions()
     // Toolbar labels stay fixed while the menu text shows what will be undone.
     a.undo->setIconText(tr("Undo"));
     a.redo->setIconText(tr("Redo"));
-    a.cut = make(tr("Cu&t Image Only"), QKeySequence(Qt::CTRL | Qt::Key_X), "edit-cut", [this] { cut(false); });
-    a.cutAll = make(tr("Cut with Annotations"), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_X), "edit-cut",
-                    [this] { cut(true); });
-    a.copy = make(tr("&Copy Image Only"), QKeySequence(Qt::CTRL | Qt::Key_C), "edit-copy", [this] { copy(false); });
-    a.copyAll = make(tr("Copy with Annotations"), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_C), "edit-copy",
-                     [this] { copy(true); });
+    // Like copy (2026-11-07): Ctrl+X cuts everything in the area, Ctrl+Shift+X only objects / the image.
+    a.cutAll = make(tr("Cu&t"), QKeySequence(Qt::CTRL | Qt::Key_X), "edit-cut", [this] { cut(true); });
+    a.cutAll->setToolTip(tr("Cut the area selection with annotations, or the selected object(s)"));
+    a.cut = make(tr("Cut Selected Object or Image Only"), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_X), "edit-cut",
+                 [this] { cut(false); });
+    a.cut->setToolTip(tr("Cut only the selected object(s); in an area selection only the image, annotations stay"));
+    // User decision 2026-11-04: Ctrl+C copies everything as seen (with annotations),
+    // Ctrl+Shift+C only the selected object(s), or the image without annotations.
+    a.copyAll = make(tr("&Copy"), QKeySequence(Qt::CTRL | Qt::Key_C), "edit-copy", [this] { copy(true); });
+    a.copyAll->setToolTip(tr("Copy the image with annotations (inside the area selection, if any)"));
+    a.copy = make(tr("Copy Selected &Object or Image Only"), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_C),
+                  "edit-copy", [this] { copy(false); });
+    a.copy->setToolTip(tr("Copy only the selected object(s); without a selected object the image without annotations"));
     a.copyResult = make(tr("Copy Re&sult"), QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_C), "edit-copy",
                         [this] { copyResult(); });
     a.copyResult->setToolTip(tr("Copy the whole resulting image (Ctrl+Alt+C)"));
@@ -551,7 +558,7 @@ void MainWindow::createMenusAndToolbars()
     QMenu *edit = menuBar()->addMenu(tr("&Edit"));
     edit->addActions({a.undo, a.redo});
     edit->addSeparator();
-    edit->addActions({a.cut, a.cutAll, a.copy, a.copyAll, a.copyResult, a.paste, a.del});
+    edit->addActions({a.cutAll, a.cut, a.copyAll, a.copy, a.copyResult, a.paste, a.del});
     edit->addSeparator();
     edit->addAction(a.selectAll);
     edit->addAction(a.duplicate);
@@ -1119,7 +1126,9 @@ bool MainWindow::openFile(const QString &path)
 
 void MainWindow::openImage(const QImage &img, const QString &originPath, const QStringList &notes)
 {
-    m_canvas->setTool(ToolId::Pointer);
+    // User wish 2026-11-18: an opened or pasted image can be cropped right away:
+    // drag a rectangle, Enter (or double-click inside) crops.
+    m_canvas->setTool(ToolId::Select);
     m_doc->reset(img, originPath);
     showNotes(notes);
     updateTitle();
@@ -1357,23 +1366,29 @@ void MainWindow::copy(bool all)
     if (m_doc->isEmpty())
         return;
     Toast *toast = m_canvas->toast();
+    const QRect sel = m_canvas->areaSelection();
+    if (all) {
+        // Ctrl+C: everything as seen, whatever object happens to be selected.
+        if (!sel.isEmpty()) {
+            setClipboard(docops::copySelection(m_doc->state(), sel, docops::CopyMode::All));
+            toast->showMessage(tr("Copied selection with annotations"));
+        } else {
+            copyResult();
+        }
+        return;
+    }
+    // Ctrl+Shift+C: just the selected object(s)…
     const ObjectList objs = m_canvas->toolId() == ToolId::Pointer ? m_canvas->selectedObjectList() : ObjectList();
     if (!objs.isEmpty()) {
         setClipboard(docops::renderObjects(objs), objs);
         toast->showMessage(tr("Copied %n object(s)", nullptr, objs.size()));
         return;
     }
-    const QRect sel = m_canvas->areaSelection();
-    if (!sel.isEmpty()) {
-        const QImage img = docops::copySelection(m_doc->state(), sel,
-                                                 all ? docops::CopyMode::All : docops::CopyMode::BaseOnly);
-        setClipboard(img);
-        toast->showMessage(all ? tr("Copied selection with annotations")
-                               : tr("Copied selection — image only, without annotations"));
-        return;
-    }
-    // Nothing selected: the whole result, annotations included (spec B3 note).
-    copyResult();
+    // …or the image without annotations.
+    const QRect area = sel.isEmpty() ? QRect(QPoint(0, 0), m_doc->size()) : sel;
+    setClipboard(docops::copySelection(m_doc->state(), area, docops::CopyMode::BaseOnly));
+    toast->showMessage(sel.isEmpty() ? tr("Copied the image without annotations")
+                                     : tr("Copied selection — image only, without annotations"));
 }
 
 void MainWindow::cut(bool all)
@@ -1381,15 +1396,17 @@ void MainWindow::cut(bool all)
     if (m_doc->isEmpty())
         return;
     const ObjectList objs = m_canvas->toolId() == ToolId::Pointer ? m_canvas->selectedObjectList() : ObjectList();
-    if (!objs.isEmpty()) {
+    const QRect sel = m_canvas->areaSelection();
+    // Ctrl+X with an area: everything in it. Otherwise (and Ctrl+Shift+X) selected objects first.
+    if (!objs.isEmpty() && !(all && !sel.isEmpty())) {
         setClipboard(docops::renderObjects(objs), objs);
         QSet<quint64> ids;
         for (const auto &o : objs)
             ids.insert(o->id);
         m_doc->commit(docops::removeObjects(m_doc->state(), ids), tr("Cut"));
+        m_canvas->toast()->showMessage(tr("Cut %n object(s)", nullptr, objs.size()));
         return;
     }
-    const QRect sel = m_canvas->areaSelection();
     if (sel.isEmpty()) {
         m_canvas->toast()->showMessage(tr("Nothing is selected"));
         return;
@@ -1398,7 +1415,7 @@ void MainWindow::cut(bool all)
     setClipboard(docops::copySelection(m_doc->state(), sel, mode));
     m_doc->commit(docops::cutSelection(m_doc->state(), sel, mode), tr("Cut"));
     m_canvas->toast()->showMessage(all ? tr("Cut selection with annotations")
-                                       : tr("Cut selection — image only, annotations kept"));
+                                       : tr("Cut selection — image only, annotations stay"));
 }
 
 void MainWindow::copyResult()
@@ -1441,9 +1458,7 @@ void MainWindow::cropToSelection()
     const QRect sel = m_canvas->areaSelection();
     if (sel.isEmpty())
         return;
-    m_canvas->cancelInteraction();
-    m_canvas->setAreaSelection({});
-    m_doc->commit(docops::crop(m_doc->state(), sel), tr("Crop"));
+    SelectTool::cropToArea(m_canvas);
 }
 
 // ================================================================ saving (spec F)
@@ -1764,6 +1779,7 @@ void MainWindow::showAbout()
     QMessageBox::about(this, tr("About Rolidan"),
                        tr("<b>Rolidan %1</b><p>Fast image editor: paste, annotate, save.</p>")
                                .arg(QApplication::applicationVersion())
+                           + tr("<p>Author: %1</p>").arg(QStringLiteral("Martin Vorel"))
                            + tr("<p>Free software under the GNU General Public License version 3 "
                                 "(GPL-3.0). It comes with ABSOLUTELY NO WARRANTY.</p>"
                                 "<p>Built with Qt %1 (LGPL-3.0), libjpeg-turbo and libwebp (BSD).</p>")

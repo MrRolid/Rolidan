@@ -823,22 +823,6 @@ nebo sem přetáhněte soubor</translation>
         <translation>Znovu</translation>
     </message>
     <message>
-        <source>Cu&amp;t Image Only</source>
-        <translation>&amp;Vyjmout jen obrázek</translation>
-    </message>
-    <message>
-        <source>Cut with Annotations</source>
-        <translation>Vyjmout i s anotacemi</translation>
-    </message>
-    <message>
-        <source>&amp;Copy Image Only</source>
-        <translation>&amp;Kopírovat jen obrázek</translation>
-    </message>
-    <message>
-        <source>Copy with Annotations</source>
-        <translation>Kopírovat i s anotacemi</translation>
-    </message>
-    <message>
         <source>Copy the whole resulting image (Ctrl+Alt+C)</source>
         <translation>Zkopírovat celý výsledný obrázek (Ctrl+Alt+C)</translation>
     </message>
@@ -1061,10 +1045,6 @@ nebo sem přetáhněte soubor</translation>
     <message>
         <source>Cut selection with annotations</source>
         <translation>Výběr vyjmut i s anotacemi</translation>
-    </message>
-    <message>
-        <source>Cut selection — image only, annotations kept</source>
-        <translation>Výběr vyjmut — jen obrázek, anotace zůstaly</translation>
     </message>
     <message>
         <source>Copied the whole image (%1 × %2)</source>
@@ -1792,6 +1772,54 @@ nebo sem přetáhněte soubor</translation>
         <source>Change resolution</source>
         <translation>Změna rozlišení</translation>
     </message>
+    <message>
+        <source>&amp;Copy</source>
+        <translation>&amp;Kopírovat</translation>
+    </message>
+    <message>
+        <source>Copy the image with annotations (inside the area selection, if any)</source>
+        <translation>Zkopírovat obrázek i s anotacemi (při výběru oblasti jen ten výběr)</translation>
+    </message>
+    <message>
+        <source>Copy Selected &amp;Object or Image Only</source>
+        <translation>Kopírovat vybraný &amp;objekt nebo jen obrázek</translation>
+    </message>
+    <message>
+        <source>Copy only the selected object(s); without a selected object the image without annotations</source>
+        <translation>Zkopíruje jen vybrané objekty; bez vybraného objektu obrázek bez anotací</translation>
+    </message>
+    <message>
+        <source>Copied the image without annotations</source>
+        <translation>Zkopírován obrázek bez anotací</translation>
+    </message>
+    <message>
+        <source>Cu&amp;t</source>
+        <translation>&amp;Vyjmout</translation>
+    </message>
+    <message>
+        <source>Cut the area selection with annotations, or the selected object(s)</source>
+        <translation>Vyjmout výběr oblasti i s anotacemi, nebo vybrané objekty</translation>
+    </message>
+    <message>
+        <source>Cut Selected Object or Image Only</source>
+        <translation>Vyjmout vybraný objekt nebo jen obrázek</translation>
+    </message>
+    <message>
+        <source>Cut only the selected object(s); in an area selection only the image, annotations stay</source>
+        <translation>Vyjme jen vybrané objekty; ve výběru oblasti jen obrázek, anotace zůstanou</translation>
+    </message>
+    <message numerus="yes">
+        <source>Cut %n object(s)</source>
+        <translation><numerusform>Vyjmut %n objekt</numerusform><numerusform>Vyjmuty %n objekty</numerusform><numerusform>Vyjmuto %n objektů</numerusform></translation>
+    </message>
+    <message>
+        <source>Cut selection — image only, annotations stay</source>
+        <translation>Výběr vyjmut — jen obrázek, anotace zůstaly</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Author: %1&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Autor: %1&lt;/p&gt;</translation>
+    </message>
 </context>
 <context>
     <name>NotesPanel</name>
@@ -2357,6 +2385,17 @@ Vypnuto: vyplní každý pixel podobné barvy.</translation>
     <message>
         <source>The screen could not be captured.</source>
         <translation>Obrazovku se nepodařilo zachytit.</translation>
+    </message>
+</context>
+<context>
+    <name>SelectTool</name>
+    <message>
+        <source>Enter or double-click crops to the selection</source>
+        <translation>Enter nebo dvojklik ořízne na výběr</translation>
+    </message>
+    <message>
+        <source>Crop</source>
+        <translation>Oříznout</translation>
     </message>
 </context>
 <context>

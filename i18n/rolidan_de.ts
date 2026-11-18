@@ -823,22 +823,6 @@ oder ziehen Sie eine Datei hierher</translation>
         <translation>Wiederholen</translation>
     </message>
     <message>
-        <source>Cu&amp;t Image Only</source>
-        <translation>&amp;Nur Bild ausschneiden</translation>
-    </message>
-    <message>
-        <source>Cut with Annotations</source>
-        <translation>Mit Anmerkungen ausschneiden</translation>
-    </message>
-    <message>
-        <source>&amp;Copy Image Only</source>
-        <translation>Nur Bild &amp;kopieren</translation>
-    </message>
-    <message>
-        <source>Copy with Annotations</source>
-        <translation>Mit Anmerkungen kopieren</translation>
-    </message>
-    <message>
         <source>Copy the whole resulting image (Ctrl+Alt+C)</source>
         <translation>Das gesamte Ergebnisbild kopieren (Strg+Alt+C)</translation>
     </message>
@@ -1061,10 +1045,6 @@ oder ziehen Sie eine Datei hierher</translation>
     <message>
         <source>Cut selection with annotations</source>
         <translation>Auswahl mit Anmerkungen ausgeschnitten</translation>
-    </message>
-    <message>
-        <source>Cut selection — image only, annotations kept</source>
-        <translation>Auswahl ausgeschnitten – nur Bild, Anmerkungen bleiben</translation>
     </message>
     <message>
         <source>Copied the whole image (%1 × %2)</source>
@@ -1792,6 +1772,54 @@ oder ziehen Sie eine Datei hierher</translation>
         <source>Change resolution</source>
         <translation>Auflösung ändern</translation>
     </message>
+    <message>
+        <source>&amp;Copy</source>
+        <translation>&amp;Kopieren</translation>
+    </message>
+    <message>
+        <source>Copy the image with annotations (inside the area selection, if any)</source>
+        <translation>Bild mit Anmerkungen kopieren (bei einer Bereichsauswahl nur diese)</translation>
+    </message>
+    <message>
+        <source>Copy Selected &amp;Object or Image Only</source>
+        <translation>Ausgewähltes &amp;Objekt oder nur Bild kopieren</translation>
+    </message>
+    <message>
+        <source>Copy only the selected object(s); without a selected object the image without annotations</source>
+        <translation>Nur die ausgewählten Objekte kopieren; ohne Auswahl das Bild ohne Anmerkungen</translation>
+    </message>
+    <message>
+        <source>Copied the image without annotations</source>
+        <translation>Bild ohne Anmerkungen kopiert</translation>
+    </message>
+    <message>
+        <source>Cu&amp;t</source>
+        <translation>Aus&amp;schneiden</translation>
+    </message>
+    <message>
+        <source>Cut the area selection with annotations, or the selected object(s)</source>
+        <translation>Bereichsauswahl mit Anmerkungen oder die ausgewählten Objekte ausschneiden</translation>
+    </message>
+    <message>
+        <source>Cut Selected Object or Image Only</source>
+        <translation>Ausgewähltes Objekt oder nur Bild ausschneiden</translation>
+    </message>
+    <message>
+        <source>Cut only the selected object(s); in an area selection only the image, annotations stay</source>
+        <translation>Nur die ausgewählten Objekte ausschneiden; in einer Bereichsauswahl nur das Bild, Anmerkungen bleiben</translation>
+    </message>
+    <message numerus="yes">
+        <source>Cut %n object(s)</source>
+        <translation><numerusform>%n Objekt ausgeschnitten</numerusform><numerusform>%n Objekte ausgeschnitten</numerusform></translation>
+    </message>
+    <message>
+        <source>Cut selection — image only, annotations stay</source>
+        <translation>Auswahl ausgeschnitten – nur Bild, Anmerkungen bleiben</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Author: %1&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Autor: %1&lt;/p&gt;</translation>
+    </message>
 </context>
 <context>
     <name>NotesPanel</name>
@@ -2357,6 +2385,17 @@ Aus: füllt jedes Pixel ähnlicher Farbe.</translation>
     <message>
         <source>The screen could not be captured.</source>
         <translation>Der Bildschirm konnte nicht aufgenommen werden.</translation>
+    </message>
+</context>
+<context>
+    <name>SelectTool</name>
+    <message>
+        <source>Enter or double-click crops to the selection</source>
+        <translation>Eingabetaste oder Doppelklick schneidet auf die Auswahl zu</translation>
+    </message>
+    <message>
+        <source>Crop</source>
+        <translation>Zuschneiden</translation>
     </message>
 </context>
 <context>

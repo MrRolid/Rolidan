@@ -3,6 +3,7 @@
 #include "filters.h"
 
 #include <QPainter>
+#include <QPainterPath>
 
 namespace docops {
 
@@ -82,9 +83,46 @@ DocState crop(const DocState &s, const QRect &r)
     DocState out = transformed(s, s.base.copy(rr), QTransform::fromTranslate(-rr.x(), -rr.y()),
                                DocTransformKind::Translate);
     // Objects entirely outside the new canvas are deleted; partially
-    // overlapping ones stay whole and are clipped at render time (spec C4).
+    // overlapping annotations stay whole and are clipped at render time (spec C4).
     const QRectF canvas(QPointF(0, 0), QSizeF(rr.size()));
     out.objects.removeIf([&](const ObjectPtr &o) { return !o->visualRect().intersects(canvas); });
+    // User decision 2026-11-18: pasted images are cut to the new canvas as well.
+    for (auto &o : out.objects) {
+        if (o->type() != Annotation::Type::Image)
+            continue;
+        if (o->boundingRect().adjusted(0.01, 0.01, -0.01, -0.01).intersected(canvas)
+            == o->boundingRect().adjusted(0.01, 0.01, -0.01, -0.01))
+            continue; // entirely inside
+        auto img = std::static_pointer_cast<ImageObject>(o->clone());
+        bool invertible = false;
+        const QTransform inv = img->transform.inverted(&invertible);
+        if (!invertible)
+            continue;
+        const QPolygonF localCanvas = inv.map(QPolygonF(canvas));
+        const QRect keep = localCanvas.boundingRect().toAlignedRect().intersected(img->image.rect());
+        if (keep.isEmpty())
+            continue;
+        QImage cut(keep.size(), QImage::Format_ARGB32_Premultiplied);
+        cut.fill(Qt::transparent);
+        {
+            QPainter p(&cut);
+            p.translate(-keep.topLeft());
+            if (!img->transform.isScaling() && !img->transform.isRotating()) {
+                p.drawImage(keep.topLeft(), img->image, keep);
+            } else {
+                // Scaled or rotated: keep exactly what lies on the canvas.
+                QPainterPath clip;
+                clip.addPolygon(localCanvas);
+                p.setClipPath(clip);
+                p.drawImage(QPointF(0, 0), img->image);
+            }
+        }
+        cut.setDotsPerMeterX(img->image.dotsPerMeterX());
+        cut.setDotsPerMeterY(img->image.dotsPerMeterY());
+        img->image = cut;
+        img->transform = QTransform::fromTranslate(keep.x(), keep.y()) * img->transform;
+        o = img;
+    }
     return out;
 }
 

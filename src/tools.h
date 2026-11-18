@@ -165,6 +165,9 @@ public:
     void abort() override { m_editor.stop(); }
     bool isBusy() const override { return m_editor.dragging(); }
     void selectAll() override;
+    void mouseDoubleClick(QMouseEvent *, const QPointF &img) override;
+    // Crop the image to the area selection (Enter, double-click, toast button).
+    static bool cropToArea(Canvas *canvas);
 
 private:
     RectEditor m_editor;

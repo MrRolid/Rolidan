@@ -823,22 +823,6 @@ or drop a file here</source>
         <translation>やり直し</translation>
     </message>
     <message>
-        <source>Cu&amp;t Image Only</source>
-        <translation>画像のみ切り取り(&amp;T)</translation>
-    </message>
-    <message>
-        <source>Cut with Annotations</source>
-        <translation>注釈ごと切り取り</translation>
-    </message>
-    <message>
-        <source>&amp;Copy Image Only</source>
-        <translation>画像のみコピー(&amp;C)</translation>
-    </message>
-    <message>
-        <source>Copy with Annotations</source>
-        <translation>注釈ごとコピー</translation>
-    </message>
-    <message>
         <source>Copy the whole resulting image (Ctrl+Alt+C)</source>
         <translation>結果の画像全体をコピー (Ctrl+Alt+C)</translation>
     </message>
@@ -1061,10 +1045,6 @@ or drop a file here</source>
     <message>
         <source>Cut selection with annotations</source>
         <translation>選択範囲を注釈ごと切り取りました</translation>
-    </message>
-    <message>
-        <source>Cut selection — image only, annotations kept</source>
-        <translation>選択範囲を切り取りました（画像のみ、注釈は残ります）</translation>
     </message>
     <message>
         <source>Copied the whole image (%1 × %2)</source>
@@ -1792,6 +1772,54 @@ or drop a file here</source>
         <source>Change resolution</source>
         <translation>解像度の変更</translation>
     </message>
+    <message>
+        <source>&amp;Copy</source>
+        <translation>コピー(&amp;C)</translation>
+    </message>
+    <message>
+        <source>Copy the image with annotations (inside the area selection, if any)</source>
+        <translation>注釈を含めて画像をコピー（範囲選択があればその範囲）</translation>
+    </message>
+    <message>
+        <source>Copy Selected &amp;Object or Image Only</source>
+        <translation>選択オブジェクトまたは画像のみコピー(&amp;O)</translation>
+    </message>
+    <message>
+        <source>Copy only the selected object(s); without a selected object the image without annotations</source>
+        <translation>選択したオブジェクトだけをコピー。選択がなければ注釈なしの画像</translation>
+    </message>
+    <message>
+        <source>Copied the image without annotations</source>
+        <translation>注釈なしの画像をコピーしました</translation>
+    </message>
+    <message>
+        <source>Cu&amp;t</source>
+        <translation>切り取り(&amp;T)</translation>
+    </message>
+    <message>
+        <source>Cut the area selection with annotations, or the selected object(s)</source>
+        <translation>範囲選択を注釈ごと、または選択オブジェクトを切り取り</translation>
+    </message>
+    <message>
+        <source>Cut Selected Object or Image Only</source>
+        <translation>選択オブジェクトまたは画像のみ切り取り</translation>
+    </message>
+    <message>
+        <source>Cut only the selected object(s); in an area selection only the image, annotations stay</source>
+        <translation>選択オブジェクトだけを切り取り。範囲選択では画像のみ（注釈は残ります）</translation>
+    </message>
+    <message numerus="yes">
+        <source>Cut %n object(s)</source>
+        <translation><numerusform>%n 個のオブジェクトを切り取りました</numerusform></translation>
+    </message>
+    <message>
+        <source>Cut selection — image only, annotations stay</source>
+        <translation>選択範囲を切り取り — 画像のみ、注釈は残ります</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Author: %1&lt;/p&gt;</source>
+        <translation>&lt;p&gt;作者: %1&lt;/p&gt;</translation>
+    </message>
 </context>
 <context>
     <name>NotesPanel</name>
@@ -2357,6 +2385,17 @@ Off: fills every pixel of a similar color.</source>
     <message>
         <source>The screen could not be captured.</source>
         <translation>画面をキャプチャできませんでした。</translation>
+    </message>
+</context>
+<context>
+    <name>SelectTool</name>
+    <message>
+        <source>Enter or double-click crops to the selection</source>
+        <translation>Enter またはダブルクリックで選択範囲に切り抜き</translation>
+    </message>
+    <message>
+        <source>Crop</source>
+        <translation>切り抜き</translation>
     </message>
 </context>
 <context>

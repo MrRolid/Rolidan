@@ -41,9 +41,6 @@ and fix it, and saves it or copies it back to the clipboard. It is written in C+
 - **Batch conversion** – convert, shrink and adjust many files at once.
 - **Languages** – English, Czech, German, Spanish and Japanese built in.
 
-- <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/d50ca789-aad1-4249-aa7b-fb9d19eda421" />
-
-
 ## Install
 
 Download a file from [Releases](../../releases). All of them include Qt and run on
@@ -74,7 +71,8 @@ The AppImage needs FUSE, which most desktops have. If it does not start, run it 
 | Shortcut | Action |
 |---|---|
 | Ctrl+V / Ctrl+Shift+V | Paste / New window from clipboard |
-| Ctrl+C / Ctrl+Shift+C | Copy image / Copy image with annotations |
+| Ctrl+C / Ctrl+Shift+C | Copy everything with annotations / Copy only the selected object (or the image without annotations) |
+| Ctrl+X / Ctrl+Shift+X | Cut everything (area with annotations, or the selected object) / Cut only the selected object (or the image only) |
 | Ctrl+Alt+C | Copy the whole result |
 | Ctrl+O, Ctrl+S, Ctrl+Shift+S | Open, Save, Save As |
 | Ctrl+P | Print |
@@ -86,7 +84,7 @@ The AppImage needs FUSE, which most desktops have. If it does not start, run it 
 | R or > / L or < | Rotate right / left |
 | H / V | Flip horizontally / vertically |
 | Ctrl+Alt+R | Rotate by angle |
-| Ctrl+Shift+K | Crop to selection |
+| Ctrl+Shift+K, Enter | Crop to selection (Enter or a double-click inside the selection; right after opening or pasting, just drag a rectangle) |
 | Ctrl+R / Ctrl+Alt+Shift+I | Resize image / Canvas size |
 | Ctrl+Shift+E / B / U / L | Enhance colors / Brightness-contrast / Hue-saturation / Levels |
 | Ctrl+H | Hide / show annotations |
@@ -136,6 +134,10 @@ Run the tests with `cd build && QT_QPA_PLATFORM=offscreen ctest --output-on-fail
 Source strings are in English; translations live in `i18n/*.ts`. After changing texts run
 `cmake --build build --target update_translations`. An extra language can be added without
 rebuilding: put `rolidan_<code>.qm` into `~/.local/share/rolidan/translations/`.
+
+## Author
+
+Martin Vorel
 
 ## License
 

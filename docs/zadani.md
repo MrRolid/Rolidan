@@ -59,16 +59,16 @@ Rozměry: vždy se použijí **pixelové rozměry** obrázku. `devicePixelRatio`
 
 ### B3. Kopírování a vyjímání — co se zkopíruje
 
-Pravidlo (J5): **bez Shiftu = jen podklad, se Shiftem = vše** (podklad + anotace). Platí stejně pro kopírování i vyjímání.
+**Změna 2026-11-04 (přání uživatele):** **Ctrl+C kopíruje vždy vše, jak to vypadá** (podklad + anotace; s výběrem oblasti jen ten výběr) bez ohledu na vybraný objekt. **Ctrl+Shift+C kopíruje jen vybrané objekty**; bez vybraného objektu podklad bez anotací (ve výběru oblasti nebo celý). Důvod: po vložení zůstane vložený obrázek vybraný a Ctrl+C pak nečekaně kopírovalo jen jeho. **Změna 2026-11-07:** vyjímání je sjednocené s kopírováním: **Ctrl+X vyjme vše** (ve výběru oblasti podklad i objekty celé uvnitř; jinak vybrané objekty), **Ctrl+Shift+X jen vybrané objekty**, bez nich jen podklad ve výběru oblasti (anotace zůstanou).
 
 | Stav | Ctrl+C | Ctrl+Shift+C | Ctrl+X | Ctrl+Shift+X |
 |---|---|---|---|---|
 | Editace textu | označený text | jako Ctrl+C | označený text | jako Ctrl+X |
-| Aktivní výběr oblasti | **jen podklad**: pixely podkladu ve výběru bez poznámek | **vše**: kompozit ve výběru | **jen podklad**: zkopíruje jako Ctrl+C a vymaže podklad ve výběru do průhlednosti; anotace zůstanou na místě | **vše**: zkopíruje kompozit ve výběru, vymaže podklad a smaže objekty ležící **celé** uvnitř výběru. Objekty zasahující do výběru jen částečně zůstanou. |
-| Vybrané objekty | objekty jako sloučený obrázek s průhledností (interně zároveň jako objekty pro vložení zpět do Rolidanu) | jako Ctrl+C | totéž a objekty smaže | jako Ctrl+X |
-| Nic není vybráno | **celý výsledný obrázek** (kompozit) — viz poznámka | celý výsledný obrázek | — | — |
+| Aktivní výběr oblasti | **vše**: kompozit ve výběru | **jen podklad**: pixely podkladu ve výběru bez anotací | **vše**: zkopíruje kompozit ve výběru, vymaže podklad a smaže objekty ležící **celé** uvnitř výběru. Objekty zasahující do výběru jen částečně zůstanou. | **jen podklad**: zkopíruje jako Ctrl+Shift+C a vymaže podklad ve výběru do průhlednosti; anotace zůstanou na místě |
+| Vybrané objekty | **celý výsledný obrázek** (nebo kompozit ve výběru oblasti) | objekty jako sloučený obrázek s průhledností (interně zároveň jako objekty pro vložení zpět do Rolidanu) | objekty zkopíruje a smaže (s výběrem oblasti vyjme vše ve výběru) | jen vybrané objekty zkopíruje a smaže |
+| Nic není vybráno | **celý výsledný obrázek** (kompozit) — viz poznámka | celý podklad bez anotací | — | — |
 
-Poznámka k řádku „Nic není vybráno“: Ctrl+C tu záměrně kopíruje i anotace. Nejčastější koncový krok workflow je „vložit → anotovat → Ctrl+C → vložit jinam“. Kdyby Ctrl+C bez výběru vynechalo anotace, uživatel by tiše přišel o všechny šipky a texty. Kdo chce celý podklad bez anotací, přepne na Výběr oblasti (M), stiskne Ctrl+A (výběr přes celé plátno) a Ctrl+C.
+Poznámka k řádku „Nic není vybráno“: Ctrl+C tu záměrně kopíruje i anotace. Nejčastější koncový krok workflow je „vložit → anotovat → Ctrl+C → vložit jinam“. Kdyby Ctrl+C bez výběru vynechalo anotace, uživatel by tiše přišel o všechny šipky a texty. Celý podklad bez anotací zkopíruje Ctrl+Shift+C, když není vybraný žádný objekt.
 
 **Ctrl+Alt+C** („Kopírovat výsledek“, také tlačítko v panelu nástrojů) zkopíruje vždy celý výsledný obrázek bez ohledu na výběr. Koncový krok tak nezávisí na tom, co je zrovna vybrané.
 
@@ -148,14 +148,14 @@ Všechny souřadnice a rozměry jsou v **pixelech obrázku**: poloha, tloušťka
 
 | Operace | Podklad | Objekty |
 |---|---|---|
-| Ořez | ořízne | posunou se. Objekty **celé mimo** nový rozsah se smažou (ve stejném kroku Zpět). Částečně zasahující zůstanou celé, ořízne je až vykreslení a export. |
+| Ořez | ořízne | posunou se. Objekty **celé mimo** nový rozsah se smažou (ve stejném kroku Zpět). Částečně zasahující zůstanou celé, ořízne je až vykreslení a export. **Změna 2026-11-18 (přání uživatele): vložené obrázky se ořežou spolu s podkladem**; ostatní anotace (šipky, texty, tvary) zůstávají celé. |
 | Rotace 90° / 180° | otočí | otočí se poloha i obsah: text se otočí spolu s obrázkem a zůstane u věci, kterou popisuje |
 | Libovolná rotace (Etapa 4) | otočí s převzorkováním | jako 90° |
 | Zrcadlení | zrcadlí | zrcadlí se poloha a geometrie (šipky, tvary, tahy, vložené obrázky). **Text se nezrcadlí**, zrcadlí se jen jeho poloha, aby zůstal čitelný (J2). |
 | Změna rozlišení | převzorkuje | geometrie se škáluje stejně jako podklad. Písmo a tloušťky čar se škálují také. Při nestejném poměru stran se použije menší z obou koeficientů. |
 | Změna plátna | posune podle kotvy, doplní barvou / průhledností | posunou se o stejný vektor |
 
-Z toho plyne požadavek na model: **každý objekt musí mít obecnou afinní transformaci** (posun, rotace o násobky 90°, později libovolná), i když UI zatím nedovoluje objekty volně otáčet.
+Z toho plyne požadavek na model: **každý objekt musí mít obecnou afinní transformaci** (posun, rotace o násobky 90° i libovolná). Volné otáčení objektů myší je hotové od Etapy 6 (D1).
 
 ### C5. Vykreslení
 
@@ -223,6 +223,7 @@ Doplněk: přepínač pohledu **„Skrýt anotace“** (Ctrl+H). Usnadňuje retu
 - Hrany výběru se vždy přichytávají k celým pixelům.
 - Výřez: ztmavení okolí, osm úchytů, posun, číselné zadání X/Y/Š/V, volný nebo pevný poměr (1:1, 4:3, 16:9, vlastní). Shift při tažení dočasně zamkne poměr. Enter potvrdí, Esc zruší.
 - Výběr oblasti: stejné úchyty bez ztmavení. Slouží pro kopírování / vyjímání / Delete / zakrytí / rozmazání / mozaiku.
+- **Změna 2026-11-18 (přání uživatele):** po otevření souboru i po vložení obrázku do prázdného okna je aktivní **Výběr oblasti** (dřív Ukazatel). Tažením se rovnou označí obdélník a **Enter nebo dvojklik do výběru ořízne** (jako Ctrl+Shift+K „Oříznout na výběr“); toast to připomene a nabídne tlačítko „Oříznout“. Dvojklik mimo výběr přepíná celou obrazovku jako dřív. Vložení do rozpracovaného obrázku dál přepne na Ukazatel s vybraným objektem.
 
 ### D7. Zobrazení
 
@@ -316,7 +317,7 @@ Výchozí zkratky jdou změnit v Soubor › Klávesové zkratky (Etapa 5): pro k
 |---|---|
 | Ctrl+V / Ctrl+Shift+V | Vložit / Nový ze schránky |
 | Ctrl+C / Ctrl+Shift+C | Kopírovat jen podklad / Kopírovat vše (B3) |
-| Ctrl+X / Ctrl+Shift+X | Vyjmout jen podklad / Vyjmout vše (B3) |
+| Ctrl+X / Ctrl+Shift+X | Vyjmout vše / Vyjmout vybraný objekt nebo jen podklad (B3) |
 | Ctrl+Alt+C | Kopírovat celý výsledný obrázek |
 | Ctrl+O, Ctrl+S, Ctrl+Shift+S | Otevřít, Uložit, Uložit jako |
 | Ctrl+Z, Ctrl+Shift+Z **a Ctrl+Y** | Zpět, Znovu |
@@ -342,7 +343,7 @@ Výchozí zkratky jdou změnit v Soubor › Klávesové zkratky (Etapa 5): pro k
 | Z / Ctrl+T | Zvětšovat malé obrázky na celé obrazovce / Náhledy (D11) |
 | Ctrl+P | Tisk (D12) |
 | C | Zachytit obrazovku (D13) |
-| F, Enter, F11 / F5 | Celá obrazovka / Prezentace (D11). Enter jen tehdy, když nástroj nemá co potvrdit (ořez, lomená čára) a není výběr oblasti. |
+| F, Enter, F11 / F5 | Celá obrazovka / Prezentace (D11). Enter jen tehdy, když nástroj nemá co potvrdit (ořez, lomená čára) a není výběr oblasti. **S výběrem oblasti Enter ořízne na výběr** (D6). |
 | Ctrl+I, Alt+Enter | Informace o obrázku |
 | F2 / F7 / F8 / Ctrl+Delete | Přejmenovat / Přesunout do složky / Kopírovat do složky / Do koše |
 | Shift+V Ukazatel · M Výběr oblasti · Y Výřez · T Text · A Šipka · Shift+L Čára · Shift+R Obdélník · O Elipsa · B Štětec · Shift+H Zvýrazňovač · S Razítko · E Guma · U Rozmazávací štětec · I Kapátko · K Zakrytí · N Číslovaná značka · P Lomená čára · G Mnohoúhelník · Q Bublina · J Pixelizační štětec · Shift+F Plechovka · W Narovnat | Nástroje (vypnuté při editaci textu). **Shift + písmeno vybere nástroj vždy**; samotné písmeno tam, kde ho nepoužívá prohlížeč (R, L, H, V, F). |
@@ -465,7 +466,7 @@ Akceptace:
 - [ ] Soubor zkopírovaný ve správci souborů (Nautilus, Dolphin) se vloží přes `text/uri-list`.
 - [ ] PNG s průhledností z GIMPu projde vložením i zkopírováním zpět bez ztráty alfy.
 - [ ] Výsledek zkopírovaný přes Ctrl+Alt+C (i přes Ctrl+C bez výběru) jde vložit do LibreOffice a do prohlížeče i **po zavření** Rolidanu, když je zapnutá volba J4. S vypnutou volbou se aplikace ukončí hned a zobrazí se oznámení.
-- [ ] Ve výběru přes vložený objekt: Ctrl+C / Ctrl+X pracují jen s podkladem a objekt nechají; Ctrl+Shift+C / Ctrl+Shift+X pracují se vším podle B3.
+- [ ] Ve výběru přes vložený objekt: Ctrl+C / Ctrl+X pracují se vším podle B3; Ctrl+Shift+C / Ctrl+Shift+X jen s podkladem a objekt nechají.
 - [ ] Ctrl+O nad rozpracovaným dokumentem otevře nové okno.
 - [ ] Druhé Ctrl+V vloží objekt. Ořez, rotace a zrcadlení s ním zacházejí podle C4.
 - [ ] Export PNG → znovu otevřít → pixelově totožné s kompozitem.
@@ -548,7 +549,7 @@ Stav (2026-11-03): hotovo, automaticky otestováno zpracování odpovědi portá
 | J2 | Zrcadlení textu při zrcadlení dokumentu | Nezrcadlí se, mění se jen poloha. |
 | J3 | „100 %“ na HiDPI | 1 pixel obrázku = 1 fyzický pixel. |
 | J4 | Obsah schránky po zavření okna | **Volba v Nastavení**, výchozí zapnuto: proces běží na pozadí, dokud schránku nepřevezme jiná aplikace (B4). |
-| J5 | Kopírování a vyjmutí výběru oblasti | **Ctrl+C / Ctrl+X** = jen podklad bez poznámek. **Ctrl+Shift+C / Ctrl+Shift+X** = vše (Shift+X smaže objekty celé uvnitř). Bez výběru Ctrl+C kopíruje celý výsledek. Ctrl+Alt+C = vždy celý výsledek. Viz B3. |
+| J5 | Kopírování a vyjmutí výběru oblasti | **Ctrl+C / Ctrl+X** = jen podklad bez poznámek. **Ctrl+Shift+C / Ctrl+Shift+X** = vše (Shift+X smaže objekty celé uvnitř). Bez výběru Ctrl+C kopíruje celý výsledek. Ctrl+Alt+C = vždy celý výsledek. Viz B3. *Nahrazeno 2026-11-04/07: Ctrl+C / Ctrl+X = vše, s Shiftem = vybrané objekty nebo jen podklad (B3).* |
 | J6 | Jazyk UI | Výchozí **angličtina**. Vestavěné v binárce: čeština, němčina, španělština, japonština. Další jazyky jako externí jazykové soubory. Viz L. |
 | J7 | Distribuce | Nativní build pro Debian 13 (Qt 6.8) + AppImage. Flatpak později. |
 | J8 | Název aplikace | Rolidan. |

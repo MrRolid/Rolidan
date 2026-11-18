@@ -317,22 +317,22 @@ private slots:
         QCOMPARE(w->canvas()->areaSelection(), QRect(70, 70, 60, 60));
         shot(QStringLiteral("05-selection"));
 
-        key(QKeySequence(Qt::CTRL | Qt::Key_C));
+        key(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_C));
         QImage img = clipboardImage();
         QCOMPARE(img.size(), QSize(60, 60));
         QCOMPARE(px(img, 30, 30), qRgba(255, 255, 255, 255)); // image only
 
-        key(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_C));
+        key(QKeySequence(Qt::CTRL | Qt::Key_C));
         QCOMPARE(px(clipboardImage(), 30, 30), qRgba(255, 0, 0, 255)); // with annotations
 
         key(QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_C));
         QCOMPARE(clipboardImage().size(), QSize(200, 200)); // whole result
 
-        key(QKeySequence(Qt::CTRL | Qt::Key_X)); // base only, object kept
+        key(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_X)); // image only, object kept
         QCOMPARE(w->document()->state().objects.size(), 1);
         QCOMPARE(qAlpha(px(w->document()->state().base, 100, 100)), 0);
         key(QKeySequence(Qt::CTRL | Qt::Key_Z));
-        key(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_X)); // all: object inside removed
+        key(QKeySequence(Qt::CTRL | Qt::Key_X)); // everything: object inside removed
         QCOMPARE(w->document()->state().objects.size(), 0);
 
         // Esc clears the selection; Ctrl+C then copies the whole result.
@@ -352,10 +352,24 @@ private slots:
         key(QKeySequence(Qt::CTRL | Qt::Key_V));
         putImage(solid(20, 20, Qt::red));
         key(QKeySequence(Qt::CTRL | Qt::Key_V));
-        key(QKeySequence(Qt::CTRL | Qt::Key_C)); // pointer tool, object selected
+        // Ctrl+C with the pasted object still selected copies everything (decision 2026-11-04).
+        key(QKeySequence(Qt::CTRL | Qt::Key_C));
+        QCOMPARE(clipboardImage().size(), QSize(200, 200));
+        QVERIFY(!QApplication::clipboard()->mimeData()->formats().contains(QLatin1String(clip::kObjectsMime)));
+        // Ctrl+Shift+C copies just the object, which pastes back editable.
+        key(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_C)); // pointer tool, object selected
         QVERIFY(QApplication::clipboard()->mimeData()->formats().contains(QLatin1String(clip::kObjectsMime)));
         key(QKeySequence(Qt::CTRL | Qt::Key_V));
         QCOMPARE(w->document()->state().objects.size(), 2);
+        // Without a selected object, Ctrl+Shift+C copies the image without annotations.
+        w->canvas()->setSelectedObjects({});
+        key(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_C));
+        QCOMPARE(clipboardImage().size(), QSize(200, 200));
+        QCOMPARE(px(clipboardImage(), 100, 100), qRgba(255, 255, 255, 255));
+        // Ctrl+X with a selected object (no area) cuts the object.
+        w->canvas()->setSelectedObjects({w->document()->state().objects.first()->id});
+        key(QKeySequence(Qt::CTRL | Qt::Key_X));
+        QCOMPARE(w->document()->state().objects.size(), 1);
     }
 
     void cropToolWithEnter()
@@ -385,6 +399,43 @@ private slots:
         QTest::keyClick(w->canvas(), Qt::Key_Escape);
         QTest::keyClick(w->canvas(), Qt::Key_Return);
         QCOMPARE(w->document()->size(), QSize(300, 200));
+    }
+
+    void dragAndEnterCropsRightAfterPaste()
+    {
+        // User wish 2026-11-18: no need to pick the crop tool first.
+        putImage(solid(300, 200, Qt::white));
+        key(QKeySequence(Qt::CTRL | Qt::Key_V));
+        QCOMPARE(w->canvas()->toolId(), ToolId::Select);
+        drag(QPointF(100, 50), QPointF(250, 150));
+        QCOMPARE(w->canvas()->areaSelection(), QRect(100, 50, 150, 100));
+        QTest::keyClick(w->canvas(), Qt::Key_Return);
+        QCOMPARE(w->document()->size(), QSize(150, 100));
+        QVERIFY(w->canvas()->areaSelection().isEmpty());
+        // Double-click inside a selection crops as well.
+        drag(QPointF(10, 10), QPointF(60, 40));
+        QTest::mouseDClick(w->canvas(), Qt::LeftButton, {}, widgetPos(QPointF(30, 20)));
+        QCoreApplication::processEvents();
+        QCOMPARE(w->document()->size(), QSize(50, 30));
+        key(QKeySequence(Qt::CTRL | Qt::Key_Z));
+        QCOMPARE(w->document()->size(), QSize(150, 100));
+
+        // A second paste is an object: crop cuts pasted images too (user decision 2026-11-18).
+        putImage(solid(140, 90, Qt::red));
+        key(QKeySequence(Qt::CTRL | Qt::Key_V));
+        QCOMPARE(w->canvas()->toolId(), ToolId::Pointer);
+        w->canvas()->setTool(ToolId::Select);
+        drag(QPointF(0, 0), QPointF(50, 50));
+        QTest::keyClick(w->canvas(), Qt::Key_Return);
+        QCOMPARE(w->document()->size(), QSize(50, 50));
+        QCOMPARE(w->document()->state().objects.size(), 1);
+        const QRectF b = w->document()->state().objects.first()->boundingRect();
+        QVERIFY2(QRectF(0, 0, 50, 50).contains(b), qPrintable(QStringLiteral("%1 %2 %3 %4")
+                                                               .arg(b.x()).arg(b.y()).arg(b.width()).arg(b.height())));
+        QVERIFY(b.width() > 30 && b.height() > 30);
+        // Undo brings the whole pasted image back.
+        key(QKeySequence(Qt::CTRL | Qt::Key_Z));
+        QCOMPARE(w->document()->state().objects.first()->boundingRect().size(), QSizeF(140, 90));
     }
 
     void rotateAndFlipKeepObjectsAttached()

@@ -327,6 +327,13 @@ void MainWindow::keyPressEvent(QKeyEvent *e)
         default: break;
         }
     }
+    // Enter with an area selection that no tool used: crop to it (spec D6).
+    if ((e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter) && e->modifiers() == Qt::NoModifier
+        && !m_doc->isEmpty() && !m_canvas->areaSelection().isEmpty() && !m_canvas->tool()->isBusy()
+        && !isSlideshowRunning()) {
+        cropToSelection();
+        return;
+    }
     // Enter that no tool used (nothing to confirm): full screen, like IrfanView.
     if ((e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter) && e->modifiers() == Qt::NoModifier
         && !m_doc->isEmpty() && m_canvas->areaSelection().isEmpty() && !m_canvas->tool()->isBusy()
